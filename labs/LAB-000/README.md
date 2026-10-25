@@ -14,4 +14,16 @@ Recepción e inspección del equipo, verificación de firmware, inventario de ha
 | Verificación del material del cable | ⏳ Pendiente |
 | Inventario completo | 🔄 En curso |
 
-La memoria actualizada (v0.3) se publicará al cerrar LAB-001, con los datos ya confirmados de los tres equipos de red.
+## Memoria técnica
+
+| Versión | Fecha | Release |
+|---|---|---|
+| 0.3 | 25/10/2026 | [lab-000-v0.3](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-000-v0.3) |
+
+La v0.3 incorpora los datos ya confirmados de los tres equipos de red de LAB-001. La siguiente versión se publicará al cerrar la etapa (servidores, cableado e inventario completo).
+
+## Carpetas
+
+```
+EICL-LAB-000-preparacion-inventario-y-linea-base.tex   fuente de la memoria técnica
+```

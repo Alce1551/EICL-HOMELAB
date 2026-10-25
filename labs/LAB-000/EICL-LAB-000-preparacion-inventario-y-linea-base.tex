@@ -1,0 +1,528 @@
+% EICL - Documento de preparación y línea base | LAB-000
+% Revisión 0.3 (25/10/2026): actualizada con los resultados de LAB-001 y saneada
+% para publicación según la norma de protección de la información (revisión 2, D-021).
+% Compila con pdfLaTeX o XeLaTeX | Idioma: español
+% Base: Documento Maestro de Transferencia de Conocimientos (v1.0, 18/10/2026),
+%       LAB-000 v0.2 (23/10/2026) y memorias de LAB-001 (FortiGate, Huawei, Omada).
+% ChkTeX: las advertencias 1, 8 y 13 generan falsos positivos con
+% comandos válidos, códigos de activos, fechas y nombres como TP-Link.
+% chktex-file 1
+% chktex-file 8
+% chktex-file 13
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+\else
+  \usepackage{fontspec}
+\fi
+% Español: con babel-spanish instalado se usan las opciones de siempre;
+% si falta, babel carga el idioma desde sus archivos .ini.
+\IfFileExists{spanish.ldf}
+  {\usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}}
+  {\usepackage{babel}\babelprovide[import,main]{spanish}}
+\usepackage[margin=2.3cm,headheight=18pt]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage{listings}
+\ifPDFTeX\IfFileExists{lmodern.sty}{\usepackage{microtype}}{\usepackage[expansion=false]{microtype}}\else\usepackage{microtype}\fi
+\usepackage{ragged2e}
+
+\definecolor{navy}{HTML}{14283F}
+\definecolor{blue}{HTML}{16608B}
+\definecolor{muted}{HTML}{5D6977}
+\definecolor{light}{HTML}{EAF0F4}
+\definecolor{accent}{HTML}{16A3A1}
+\definecolor{okgreen}{HTML}{2E7D32}
+\definecolor{amber}{HTML}{B26A00}
+\definecolor{alertred}{HTML}{B3261E}
+\definecolor{violet}{HTML}{6A4C93}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=navy,
+  urlcolor=blue,
+  pdftitle={EICL -- LAB-000 Preparación, inventario y línea base},
+  pdfauthor={Carlos Eduardo Abundis Lira}
+}
+
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{blue}}{\thesubsection}{0.8em}{}
+\setlist[itemize]{leftmargin=1.6em,itemsep=2pt,topsep=4pt}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=2pt,topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.25}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  frame=single,
+  rulecolor=\color{light},
+  backgroundcolor=\color{light!40},
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=4pt,
+  xrightmargin=4pt
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\textcolor{muted}{EICL | LAB-000}}
+\fancyhead[R]{\footnotesize\textcolor{muted}{Preparación y línea base del homelab}}
+\fancyfoot[L]{\footnotesize\textcolor{muted}{Rev.\ 0.3 | Etapa 00 | Información saneada}}
+\fancyfoot[R]{\footnotesize\textcolor{muted}{Pág.\ \thepage\ de \pageref{LastPage}}}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% --- Marcadores ---
+\newcommand{\pc}{\textcolor{muted}{\textit{[POR CONFIRMAR]}}}
+% --- Estados normalizados (Documento maestro, sección 2.1 y 5.1) ---
+\newcommand{\estadobase}[2]{\textcolor{#1}{\textbf{\footnotesize #2}}}
+\newcommand{\disp}{\estadobase{okgreen}{DISPONIBLE}}
+\newcommand{\adq}{\estadobase{blue}{ADQUIRIDO}}
+\newcommand{\porval}{\estadobase{amber}{POR VALIDAR}}
+\newcommand{\prop}{\estadobase{violet}{PROPUESTO}}
+\newcommand{\ant}{\estadobase{muted}{INSTALADO ANTERIORMENTE}}
+\newcommand{\usant}{\estadobase{muted}{UTILIZADO ANTERIORMENTE}}
+\newcommand{\pend}{\estadobase{alertred}{PENDIENTE}}
+\newcommand{\curso}{\estadobase{amber}{EN CURSO}}
+\newcommand{\compl}{\estadobase{okgreen}{COMPLETADA}}
+\newcommand{\histo}{\estadobase{muted}{HISTÓRICO}}
+
+% --- Columnas ---
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{Z}{>{\RaggedRight\arraybackslash}X}
+
+% --- Recuadros ---
+\newcommand{\notebox}[2]{%
+  \par\noindent\fcolorbox{blue}{light}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      {\small\bfseries\color{blue}\MakeUppercase{#1}}\\[2pt]\small #2}}\par}
+\newcommand{\alertbox}[2]{%
+  \par\noindent\fcolorbox{alertred}{alertred!6}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      {\small\bfseries\color{alertred}\MakeUppercase{#1}}\\[2pt]\small #2}}\par}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+
+\begin{titlepage}
+  \thispagestyle{empty}
+  \vspace*{2.0cm}
+  {\color{accent}\rule{2cm}{5pt}}\\[1.0cm]
+  {\sffamily\Large\bfseries\color{blue}
+    ENTERPRISE INFRASTRUCTURE \& CYBERSECURITY}\\[0.08cm]
+  {\sffamily\Large\bfseries\color{blue}
+    LABORATORY}\\[0.55cm]
+  {\sffamily\fontsize{29}{34}\selectfont\bfseries\color{navy}
+    LAB-000\\ Preparación, inventario\\ y línea base}\\[0.7cm]
+  {\Large\color{muted}Etapa 00 | Recepción, validación y reconstrucción}\\[1.5cm]
+
+  \renewcommand{\arraystretch}{1.6}
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{3.4cm}X}
+    Código & EICL-LAB-000 \\
+    Versión & 0.3 -- Línea base actualizada con LAB-001 y saneada \\
+    Fecha & 25 de octubre de 2026 \\
+    Responsable & Carlos Eduardo Abundis Lira \\
+    Proyecto & EICL-LAB | Horizonte inicial de 90 días \\
+    Estado & Etapa 00 en curso; en pausa hasta cerrar LAB-001 (D-012) \\
+    Clasificación & Portafolio técnico | Información saneada \\
+  \end{tabularx}
+
+  \vfill
+  {\color{navy}\rule{\textwidth}{1pt}}\\[0.25cm]
+  \centering {\small\color{muted}
+    Redes \quad / \quad Virtualización \quad / \quad Seguridad \quad / \quad Observabilidad}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{Control documental}
+\begin{tabularx}{\textwidth}{L{1.7cm} L{2.2cm} Z}
+  \toprule
+  \rowcolor{light}\textbf{Revisión} & \textbf{Fecha} & \textbf{Cambio}\\
+  \midrule
+  0.1 & 2026-10-14 & Alta del formato como LAB-001 (levantamiento AS-IS); datos iniciales sujetos a comprobación.\\
+  0.2 & 2026-10-23 & Reetiquetado como LAB-000 (Etapa 00). Alineado al documento maestro v1.0: tres nodos OptiPlex, FortiGate y Huawei como equipos adquiridos, rack y cableado, condición de reconstrucción desde cero, plan VLAN propuesto, riesgos y criterios de cierre.\\
+  0.3 & 2026-10-25 & Incorpora los resultados de LAB-001: FortiGate 50E, Huawei S5735 y Omada ES208G recibidos, levantados y configurados; versiones de software comprobadas (actividades 6 y 7, VAL-004 y VAL-005); red doméstica documentada (VAL-007); plan VLAN/IP implementado; matriz de enlaces con los puertos reales. Corrige el papel de los routers domésticos (el Archer C3200 es el router del cuarto). Saneada para publicación (D-021): sin nombre ni modelo del equipo del proveedor de internet, versiones de firmware generalizadas y tabla «Protección de la información».\\
+  1.0 & Pendiente & Etapa 00 cerrada con inventario físico validado y arquitectura inicial aprobada.\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Documentos de referencia}
+\begin{itemize}
+  \item Documento Maestro de Transferencia de Conocimientos del proyecto EICL-LAB, versión 1.0 del 18/10/2026. Línea base del proyecto.
+  \item EICL-LAB-001 Levantamiento y arquitectura de infraestructura, v0.1 (14/10/2026). Sustituido por este documento para la Etapa 00.
+  \item Memorias técnicas de LAB-001, evidencia de los datos de red de esta revisión:
+  \begin{itemize}
+    \item Componente A: \texttt{\small EICL-LAB-001-fortigate-levantamiento.pdf}
+    \item Componente B: \texttt{\small EICL-LAB-001-huawei-levantamiento.pdf}
+    \item Componente C: \texttt{\small EICL-LAB-001-omada-levantamiento.pdf}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Estados utilizados}
+\begin{tabularx}{\textwidth}{L{4.6cm} Z}
+  \toprule
+  \rowcolor{light}\textbf{Estado} & \textbf{Significado}\\
+  \midrule
+  \disp & Se cuenta físicamente con el equipo.\\
+  \adq & Compra realizada; entrega o recepción pendiente de verificar.\\
+  \porval & Existe registro del equipo; falta verificar funcionamiento o especificaciones.\\
+  \prop & Contemplado como posible adquisición o implementación.\\
+  \ant & Tecnología utilizada antes de la reconstrucción.\\
+  \pend & Todavía no implementado en el nuevo laboratorio.\\
+  \curso & Hay actividades realizadas, pero faltan criterios de cierre.\\
+  \compl & Actividad o validación cerrada con evidencia.\\
+  \bottomrule
+\end{tabularx}
+
+% =====================================================================
+\section{Resumen ejecutivo y alcance}
+\textbf{Objetivo de LAB-000.} Recibir, inspeccionar e inventariar el equipo del laboratorio, documentar riesgos y dejar lista la arquitectura inicial para implementar LAB-001. Es la Etapa 00 del roadmap de 90 días.
+
+\textbf{Condición de inicio.} El laboratorio se reconstruye desde cero: se eliminan configuraciones experimentales, se reinstalan plataformas, se rediseñan direccionamiento y VLAN, y se documenta cada componente desde su instalación. Los servicios usados antes (Proxmox VE, OPNsense, Wazuh, Tailscale) \textbf{no} cuentan como implementados hasta reinstalarse y validarse.
+
+\notebox{Situación al 25/10/2026}{La parte de red de la Etapa 00 avanzó junto con LAB-001: el firewall, el switch principal y el switch de acceso secundario están recibidos, levantados, configurados y validados de punta a punta. LAB-000 queda en pausa hasta cerrar LAB-001 (D-012); siguen pendientes los nodos OptiPlex, el material del cable y el montaje definitivo en rack.}
+
+\newpage
+\textbf{Alcance.}
+\begin{itemize}
+  \item Tres nodos Dell OptiPlex 5070 Micro y componente de reparación (placa base).
+  \item FortiGate 50E, Huawei S5735-L8P4S-A1, TP-Link Omada ES208G y TP-Link TL-SG108.
+  \item Equipos de la red doméstica que delimitan el laboratorio (módem del proveedor de internet, router del cuarto y AP adicionales).
+  \item Rack de 12U, charolas, cableado, conectores y protección eléctrica.
+  \item Respaldo selectivo previo al borrado, roles de nodos y plan de direccionamiento.
+\end{itemize}
+
+\textbf{Fuera de alcance.} Configuración de VLAN, políticas de firewall y despliegue de hipervisores (corresponden a LAB-001 y LAB-002); producción empresarial externa; configuraciones o secretos de terceros; cambios no evaluados en la red doméstica.
+
+% =====================================================================
+\section{Inventario de infraestructura física}
+\subsection{Equipo de cómputo}
+{\small
+\begin{longtable}{L{1.5cm} L{3.0cm} L{3.9cm} L{2.8cm} L{3.0cm}}
+  \toprule
+  \rowcolor{light}\textbf{ID} & \textbf{Equipo} & \textbf{Especificaciones registradas} & \textbf{Estado} & \textbf{Rol previsto}\\
+  \midrule
+  \endhead
+  SRV-01 & Dell OptiPlex 5070 Micro & Core i5 9.ª gen., 16\,GB RAM, SSD 256\,GB & \disp; funcionamiento \pc & Nodo 01 -- Proxmox VE\\
+  SRV-02 & Dell OptiPlex 5070 Micro & Core i5 9.ª gen., 16\,GB RAM, SSD 256\,GB & \disp; funcionamiento \pc & Nodo 02 -- VMware ESXi\\
+  SRV-03 & Dell OptiPlex 5070 Micro & i5 9.ª gen., 16\,GB RAM, SSD 256\,GB según configuración prevista & \adq; recepción y especificaciones reales \pc & Nodo 03 -- flexible\\
+  REP-01 & Placa base compatible OptiPlex 5070 Micro & Referencia P01GV & \adq; recepción e instalación \pc & Reparación de hardware\\
+  \bottomrule
+\end{longtable}
+}
+
+Dimensiones de referencia de cada OptiPlex Micro: 182 $\times$ 178 $\times$ 36\,mm.
+
+\textbf{Observaciones.}
+\begin{itemize}
+  \item Existe antecedente de falla de una placa base; no está registrado cuál de los nodos la presentó.
+  \item Verificar cuántos nodos están realmente operativos. No asumir que los tres están listos.
+  \item Inventariar físicamente: procesador exacto, módulos de RAM, SSD, NIC, capacidad de expansión y versión de BIOS.
+  \item Los puertos GE0/0/2 a GE0/0/4 del switch principal están reservados y apagados para SRV-01 a SRV-03 hasta LAB-002. Los servidores quedan fuera del rack hasta revisar su POST.
+\end{itemize}
+
+\newpage
+\subsection{Networking}
+{\small
+\begin{longtable}{L{1.5cm} L{3.0cm} L{3.9cm} L{2.8cm} L{3.0cm}}
+  \toprule
+  \rowcolor{light}\textbf{ID} & \textbf{Equipo} & \textbf{Especificaciones registradas} & \textbf{Estado} & \textbf{Función}\\
+  \midrule
+  \endhead
+  FW-01 & Fortinet FortiGate 50E & FortiOS 6.x comprobado tras reset de fábrica (memoria LAB-001-A); sin FortiGuard; licencia y registro \pc & \disp; configurado y validado (FGT-LAB-01) & Firewall perimetral del laboratorio y gateway de las VLAN\\
+  SW-01 & Huawei S5735-L8P4S-A1 & 8 GE PoE+ y 4 SFP; 300 $\times$ 220 $\times$ 43.6\,mm; VRP V200R020 comprobado (memoria LAB-001-B); PoE+ confirmado & \disp; configurado y validado (SW-LAB-01) & Switch principal administrable\\
+  SW-02 & TP-Link Omada ES208G & Easy Managed, 8 puertos Gigabit; hardware v1.6 (equivale a V1.0), firmware 1.0.x (memoria LAB-001-C) & \disp; configurado y validado (SW-LAB-02) & Switch de acceso secundario\\
+  SW-03 & TP-Link TL-SG108 & 8 puertos Gigabit, no administrable; modelo exacto \pc & \disp; fuera de LAB-001 por ahora & Switching simple\\
+  RTR-01 & TP-Link Archer C3200 & Router/AP Wi-Fi; red del cuarto 192.168.1.0/24 & \disp; en uso & Router del cuarto; su LAN2 conecta la WAN del FortiGate\\
+  RTR-02 & TP-Link Archer GE800 & Router/AP Wi-Fi & \disp & Red doméstica; papel actual \pc\\
+  AP-01 & TP-Link Archer C5200 & Usado antes como router/AP & \disp & WLAN\\
+  ISP-01 & Equipo del proveedor de internet & Modelo omitido en la publicación & \disp & WAN / acceso a internet (192.168.0.0/24)\\
+  \bottomrule
+\end{longtable}
+}
+
+\notebox{Resultado de las validaciones de networking}{\textbf{FortiGate:} versión de FortiOS comprobada; sin FortiGuard, así que los laboratorios no dependen de servicios UTM con licencia. Registro en FortiCare \pc. \textbf{Huawei:} versión VRP comprobada; llegó sin configuración guardada y sin daños físicos (reportado). \textbf{Omada:} la etiqueta confirma el modelo ES208G (la denominación DS108GE del inventario anterior queda descartada); soporta 802.1Q, Management VLAN, LAG, Port Mirroring, Cable Test y Loop Prevention, pero no STP, SNMP, syslog ni CLI.}
+
+\subsection{Rack, cableado y energía}
+{\small
+\begin{longtable}{L{3.0cm} L{5.2cm} L{2.8cm} L{3.7cm}}
+  \toprule
+  \rowcolor{light}\textbf{Elemento} & \textbf{Especificaciones} & \textbf{Estado} & \textbf{Función}\\
+  \midrule
+  \endhead
+  Rack genérico & Rack abierto 12U, blanco & \porval; en uso en el componente D de LAB-001 (reportado) & Alojamiento de equipos\\
+  Charolas & 4 charolas para rack & \adq; recepción \pc & Montaje de equipos compactos\\
+  Cable Ethernet plano & Cable UTP; material \pc & \adq & Cableado físico; no usado en enlaces del laboratorio hasta verificar el material\\
+  Patch cords de fábrica & Existencias \pc & \disp & Troncales del laboratorio (FortiGate--Huawei--Omada)\\
+  Conectores RJ45 & Cantidad y tipo \pc & \porval & Terminación de cables\\
+  Regulador / UPS & Modelo y disponibilidad \pc & \porval & Protección eléctrica\\
+  PDU / multicontactos & Disponibilidad y capacidad 12 puertos / 15A & \adq & Distribución eléctrica\\
+  \bottomrule
+\end{longtable}
+}
+
+\alertbox{Cableado y PoE}{Al utilizar cableado de tipo CCA (aluminio revestido de cobre), no se usará en enlaces PoE. PoE queda apagado en todos los puertos del switch Huawei (D-009); si algún día se necesita, se activa puerto por puerto y con cable verificado.}
+
+\textbf{Restricciones físicas:} confirmar medidas internas útiles del rack; validar ventilación sin bloquear entradas de aire; verificar peso y tamaño soportados por las charolas; identificar con etiqueta cada equipo y cable.
+
+% =====================================================================
+\section{Plataformas y servicios: estado de reconstrucción}
+{\small
+\begin{longtable}{L{3.2cm} L{4.3cm} L{3.8cm} L{3.4cm}}
+  \toprule
+  \rowcolor{light}\textbf{Software} & \textbf{Uso} & \textbf{Estado} & \textbf{Requisito}\\
+  \midrule
+  \endhead
+  Proxmox VE & Hipervisor principal (Nodo 01) & \ant & Reinstalación pendiente (LAB-002)\\
+  Proxmox VE 9.2.2 & Versión de la configuración anterior & \histo & Versión final \pc\\
+  VMware ESXi & Segundo hipervisor (Nodo 02) & \prop & Compatibilidad y licencia \pc\\
+  Wazuh & SIEM / monitoreo de seguridad & \usant & Recursos suficientes (LAB-006)\\
+  Tailscale & Acceso remoto seguro & \usant & Escenario por definir (LAB-010)\\
+  Debian Linux & Servidores y servicios & \prop & Obtener e instalar\\
+  Red Hat Enterprise Linux & Administración Linux empresarial & \prop & Suscripción Developer \pc\\
+  Docker & Contenedores & \prop & Definir host\\
+  Proxmox Backup Server & Respaldos & \prop & Destino de respaldo \pc\\
+  \bottomrule
+\end{longtable}
+}
+
+No dar por habilitados respaldos, alta disponibilidad ni registros centralizados hasta comprobarlos en el nuevo laboratorio.
+\newpage
+% =====================================================================
+\section{Arquitectura física objetivo (TO-BE)}
+La siguiente topología combina lo ya implementado en LAB-001 (red) con lo previsto (nodos). Los nodos \textbf{no} están instalados.
+
+\begin{lstlisting}
+Internet
+   |
+Equipo del ISP (ISP-01) .......... red de casa 192.168.0.0/24
+   |
+Archer C3200 (RTR-01) ............ red del cuarto 192.168.1.0/24
+   |  LAN2
+[wan1] FortiGate 50E (FW-01) ...... implementado
+   |  lan5: trunk 802.1Q
+[GE0/0/1] Huawei S5735 (SW-01) .... implementado
+   |-- GE0/0/2  Nodo 01: Proxmox VE (SRV-01) ....... previsto (LAB-002)
+   |-- GE0/0/3  Nodo 02: VMware ESXi (SRV-02) ...... previsto (LAB-002)
+   |-- GE0/0/4  Nodo 03: plataforma flexible ....... previsto (LAB-002)
+   |-- GE0/0/5  Omada ES208G (SW-02), puerto 1 .... implementado
+   |               `-- puertos 2-5: acceso MGMT, SRV y LAB
+   `-- GE0/0/6-8  acceso MGMT, SRV y LAB
+\end{lstlisting}
+
+\begin{itemize}
+  \item \textbf{FortiGate:} gateway de todas las VLAN y punto de control entre segmentos (router-on-a-stick, D-002).
+  \item \textbf{Huawei:} switch principal administrable, en capa 2 (D-006).
+  \item \textbf{Omada:} switch de acceso secundario en modo standalone (D-013).
+\end{itemize}
+
+\subsection{Distribución lógica de nodos}
+\begin{tabularx}{\textwidth}{L{2.4cm} L{3.4cm} Z}
+  \toprule
+  \rowcolor{light}\textbf{Nodo} & \textbf{Plataforma} & \textbf{Uso y condiciones}\\
+  \midrule
+  Nodo 01 & Proxmox VE & Servicios virtualizados, VMs Linux, infraestructura de red y aplicaciones.\\
+  Nodo 02 & VMware ESXi & VMs de práctica y redes virtuales. Sujeto a compatibilidad de CPU, NIC y almacenamiento, y a licencia. Sin vCenter, vMotion, DRS ni HA empresarial.\\
+  Nodo 03 & Sin asignación definitiva & Opciones: Debian, RHEL, Docker, servidor de respaldos, servicios de infraestructura o segundo nodo Proxmox para clúster y HA.\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Matriz de enlaces}
+\begin{tabularx}{\textwidth}{L{1.9cm} Z Z Z}
+  \toprule
+  \rowcolor{light}\textbf{ID} & \textbf{Origen / puerto} & \textbf{Destino / puerto} & \textbf{Observación}\\
+  \midrule
+  LINK-001 & RTR-01 Archer C3200 / LAN2 & FW-01 / wan1 & WAN del laboratorio hacia la red del cuarto (cable C-02)\\
+  LINK-002 & FW-01 / lan5 & SW-01 / GE0/0/1 & Trunk 802.1Q, VLAN 10--50, nativa 999; 1000 Mbps full (cable C-03)\\
+  LINK-003 & SW-01 / GE0/0/2 & SRV-01 / NIC & Reservado y apagado hasta LAB-002; velocidad \pc\\
+  LINK-004 & SW-01 / GE0/0/3 & SRV-02 / NIC & Reservado y apagado hasta LAB-002; velocidad \pc\\
+  LINK-005 & SW-01 / GE0/0/4 & SRV-03 / NIC & Reservado y apagado hasta LAB-002; velocidad \pc\\
+  LINK-006 & SW-01 / GE0/0/5 & SW-02 / puerto 1 & Trunk 802.1Q, VLAN 10, 20 y 50, nativa 999 (cable C-04); velocidad \pc\\
+  \bottomrule
+\end{tabularx}
+
+Los puertos se trazaron físicamente durante LAB-001.\\
+Tabla completa: \texttt{docs/port-mapping.md} del repositorio.
+
+% =====================================================================
+\section{Arquitectura lógica}
+\subsection{Red doméstica actual}
+\begin{tabularx}{\textwidth}{L{3.0cm} L{3.0cm} L{2.0cm} Z}
+  \toprule
+  \rowcolor{light}\textbf{Segmento} & \textbf{CIDR} & \textbf{VLAN} & \textbf{Gateway / estado}\\
+  \midrule
+  Red de casa & 192.168.0.0/24 & No aplica & Equipo del ISP en 192.168.0.1 (VAL-007)\\
+  Red del cuarto & 192.168.1.0/24 & No aplica & Archer C3200 en 192.168.1.1; DHCP .100--.199; WAN del FortiGate fija en 192.168.1.2 (VAL-007)\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Plan de VLAN (implementado en LAB-001)}
+\begin{tabularx}{\textwidth}{L{1.4cm} Z L{2.6cm} L{2.2cm} L{2.6cm}}
+  \toprule
+  \rowcolor{light}\textbf{VLAN} & \textbf{Uso} & \textbf{Subred} & \textbf{Gateway} & \textbf{DHCP}\\
+  \midrule
+  10 & Administración (MGMT) & 10.10.10.0/24 & 10.10.10.1 & .100--.120\\
+  20 & Servidores (SRV) & 10.10.20.0/24 & 10.10.20.1 & .100--.199\\
+  30 & Monitoreo / SOC (MON) & 10.10.30.0/24 & 10.10.30.1 & Sin DHCP\\
+  40 & DMZ & 10.10.40.0/24 & 10.10.40.1 & Sin DHCP\\
+  50 & Laboratorio y clientes (LAB) & 10.10.50.0/24 & 10.10.50.1 & .100--.199\\
+  999 & Nativa de trunks y puertos sin uso & Sin IP & No aplica & No aplica\\
+  60 / 70 & Respaldos (LAB-008) / clúster Proxmox (LAB-012) & Reservadas & -- & --\\
+  \bottomrule
+\end{tabularx}
+
+\notebox{Estado del plan}{Implementado y validado de punta a punta en LAB-001 (V1 a V8). Rango 10.10.0.0/16 con el tercer octeto igual al ID de VLAN (D-001); dentro de cada /24: .1 gateway, .2--.9 equipos de red, .10--.49 servidores e hipervisores, .100--.199 DHCP. Dominio interno \texttt{eicl.internal}. Pendiente para esta etapa: roles definitivos de los nodos.}
+
+% =====================================================================
+\section{Actividades de la Etapa 00}
+{\small
+\begin{longtable}{L{0.7cm} L{6.4cm} L{2.7cm} L{4.7cm}}
+  \toprule
+  \rowcolor{light}\textbf{\#} & \textbf{Actividad} & \textbf{Estado} & \textbf{Evidencia}\\
+  \midrule
+  \endhead
+  1 & Recibir equipos pendientes (SRV-03, REP-01, FW-01, SW-01, rack y charolas) & \curso & FW-01 y SW-01 recibidos; el resto \pc\\
+  2 & Inspeccionar hardware (daños, puertos, accesorios, fuentes) & \curso & FW-01 y SW-01 inspeccionados (reportado); nodos pendientes\\
+  3 & Verificar arranque y POST de cada OptiPlex & \pend & Sin registrar\\
+  4 & Revisar la reparación de la placa base & \pend & Sin registrar\\
+  5 & Identificar CPU, RAM, SSD, NIC y BIOS por nodo & \pend & Sin registrar\\
+  6 & Comprobar firmware del FortiGate & \compl & Memoria LAB-001-A, E-01\\
+  7 & Comprobar versión VRP del Huawei & \compl & Memoria LAB-001-B, EVID-002\\
+  8 & Verificar material del cable y conectores & \pend & Se usan patch cords de fábrica (RSK-005)\\
+  9 & Organizar montaje y ventilación en el rack & \pend & Componente D de LAB-001 en curso\\
+  10 & Crear inventario (este documento como base) & \curso & LAB-000 v0.3\\
+  11 & Guardar respaldos selectivos de datos relevantes & \pend & La configuración previa del FortiGate se descartó a propósito (era de terceros)\\
+  12 & Preparar la eliminación de configuraciones anteriores & \curso & FortiGate: reset hecho; Huawei y Omada llegaron sin configuración; nodos y TL-SG108 pendientes\\
+  13 & Definir direccionamiento y roles & \curso & Plan VLAN/IP implementado; roles de nodos pendientes\\
+  14 & Crear estructura inicial de documentación & \curso & Plantilla EICL, memorias de LAB-001 y repositorio público\\
+  \bottomrule
+\end{longtable}
+}
+
+\subsection{Respaldo previo al borrado}
+Antes de eliminar configuraciones experimentales, revisar y conservar lo que tenga valor:
+\begin{itemize}
+  \item Exportar inventario de VM/CT y configuración de red de Proxmox anterior, si los discos siguen accesibles.
+  \item Exportar configuración de OPNsense (XML) y de los switches TP-Link, solo como referencia.
+  \item Rescatar notas, diagramas y capturas del laboratorio anterior.
+  \item Guardar todo fuera de los nodos que se reinstalarán; nunca publicar secretos contenidos en esos archivos.
+\end{itemize}
+
+\alertbox{Acción destructiva}{La reinstalación borra los discos de los nodos. Confirmar que el respaldo selectivo está completo y legible antes de iniciar cualquier borrado.}
+
+\newpage
+% =====================================================================
+\section{Plan de validación}
+{\small
+\begin{longtable}{L{1.6cm} L{4.2cm} L{5.6cm} L{3.3cm}}
+  \toprule
+  \rowcolor{light}\textbf{Prueba} & \textbf{Objetivo} & \textbf{Evidencia esperada u obtenida} & \textbf{Estado}\\
+  \midrule
+  \endhead
+  VAL-001 & Arranque de SRV-01, 02 y 03 & Foto o captura del POST y pantalla de BIOS con fecha & \pend\\
+  VAL-002 & Especificaciones por nodo & CPU, RAM, SSD, NIC y versión de BIOS registradas en \texttt{INVENTORY.md} & \pend\\
+  VAL-003 & Placa base reparada & Nodo afectado arranca y reconoce RAM, SSD y NIC & \pend\\
+  VAL-004 & Versión FortiOS y registro & \texttt{get system status} saneada (memoria LAB-001-A) & \compl{} (versión); registro \pc\\
+  VAL-005 & Versión VRP del Huawei & \texttt{display version} saneada (memoria LAB-001-B) & \compl\\
+  VAL-006 & Material del cable & Prueba o especificación que distinga cobre de CCA & \pend\\
+  VAL-007 & Red doméstica & CIDR, gateway y DHCP de las dos redes domésticas (sección 6.1) & \compl\\
+  \bottomrule
+\end{longtable}
+}
+
+Las pruebas de conectividad, DNS y segmentación pasaron a LAB-001 y están cerradas allí (V1 a V8).
+
+% =====================================================================
+\section{Riesgos y bloqueos identificados}
+{\small
+\begin{longtable}{L{1.5cm} L{2.3cm} L{5.4cm} L{5.5cm}}
+  \toprule
+  \rowcolor{light}\textbf{ID} & \textbf{Tipo} & \textbf{Riesgo} & \textbf{Mitigación}\\
+  \midrule
+  \endhead
+  RSK-001 & Hardware & Falla previa de placa base; no está confirmado cuántos nodos operan & Ejecutar VAL-001 y VAL-003 antes de asignar roles\\
+  RSK-002 & Licencia & ESXi puede no ser compatible o licenciable en el Nodo 02 & Validar CPU, NIC y licencia; alternativa: Nodo 02 como segundo Proxmox\\
+  RSK-003 & Firmware & Funciones UTM sin licencia (sin FortiGuard) & Mitigado: versión FortiOS confirmada; se planea solo con funciones base\\
+  RSK-004 & Firmware & Versión VRP del Huawei desconocida & Cerrado: versión confirmada (VAL-005)\\
+  RSK-005 & Hardware & Cable plano posiblemente CCA, inadecuado para PoE & Ejecutar VAL-006; PoE apagado (D-009); patch cords de fábrica en los troncales\\
+  RSK-006 & Seguridad & Interferencia del laboratorio con la red doméstica & Mitigado: FortiGate como frontera y política 1 que bloquea las redes domésticas, validada (V2)\\
+  RSK-007 & Configuración & Pérdida de datos útiles al reconstruir & Respaldo selectivo verificado antes del borrado\\
+  RSK-008 & Recursos & 16\,GB por nodo limitan servicios pesados (Wazuh, Zabbix) & Medir consumo antes de LAB-005 y LAB-006\\
+  RSK-009 & Tiempo / presupuesto & Horas semanales y presupuesto mensual sin definir & Confirmar con el propietario \pc\\
+  \bottomrule
+\end{longtable}
+}
+
+\newpage
+% =====================================================================
+\section{Criterios de cierre de LAB-000}
+LAB-000 pasa a COMPLETADA solo cuando exista evidencia de:
+\begin{enumerate}
+  \item Todos los equipos recibidos e inspeccionados, con estado actualizado en el inventario.
+  \item Número de nodos operativos confirmado y especificaciones reales registradas.
+  \item Versiones de FortiOS y VRP documentadas. \textit{(Cumplido.)}
+  \item Material del cableado identificado y decisión sobre PoE registrada. \textit{(Decisión sobre PoE registrada: D-009; material pendiente.)}
+  \item Respaldo selectivo completado antes de cualquier borrado.
+  \item Roles de nodos y plan de VLAN/IP aprobados. \textit{(Plan VLAN/IP implementado; roles pendientes.)}
+  \item Riesgos documentados y arquitectura inicial lista para LAB-001. \textit{(Cumplido.)}
+\end{enumerate}
+
+\subsection{Estado de seguimiento}
+\begin{tabularx}{\textwidth}{L{4.2cm} Z}
+  \toprule
+  \rowcolor{light}\textbf{Campo} & \textbf{Contenido}\\
+  \midrule
+  Proyecto actual & LAB-000 -- Etapa 00 (en pausa hasta cerrar LAB-001, D-012)\\
+  Estado & \curso\\
+  Avance conseguido & Firewall, switch principal y switch de acceso recibidos, levantados, configurados y validados (LAB-001); red doméstica documentada; plan VLAN/IP implementado\\
+  Evidencia obtenida & Memorias de LAB-001 (componentes A, B y C)\\
+  Pendientes & Actividades 1--5, 8, 9, 11 y 13 (roles); VAL-001, VAL-002, VAL-003 y VAL-006\\
+  Bloqueos & Ninguno confirmado; ver riesgos RSK-001, RSK-002, RSK-005, RSK-007 a RSK-009\\
+  Siguiente paso concreto & Al cerrar LAB-001: arrancar cada OptiPlex fuera del rack, registrar POST y BIOS (VAL-001) y sus especificaciones reales (VAL-002)\\
+  Criterio de éxito & Número de nodos operativos y especificaciones registradas en \texttt{INVENTORY.md} con fecha y evidencia saneada\\
+  \bottomrule
+\end{tabularx}
+
+% =====================================================================
+\section{Protección de la información}
+Este documento es la línea base de la Etapa 00. Los datos marcados como \pc{} no deben presentarse como implementación validada. Se trata de un laboratorio personal, no de una implementación empresarial.
+
+Criterio del proyecto: se censura cualquier dato que no sea de dominio público o que pueda representar una vulnerabilidad, aunque sea mínima. \textbf{Canales revisados en esta revisión (0.3):} texto general (incluidas tablas y metadatos del PDF) y bloques de texto tipo consola; el documento no contiene capturas.
+
+{\small
+\begin{longtable}{L{3.4cm} L{6.0cm} L{5.6cm}}
+  \toprule
+  \rowcolor{light}\textbf{Dato} & \textbf{Tratamiento} & \textbf{Motivo de protección}\\
+  \midrule
+  \endhead
+  Nombre comercial del proveedor de internet y modelo de su equipo & Omitidos (presentes en la v0.2, que no se publica); se usa «equipo del proveedor de internet». & Ubican la red doméstica y orientan ataques a un equipo concreto.\\
+  Versiones exactas de firmware de los equipos de red & Generalizadas («FortiOS 6.x», «VRP V200R020», «firmware 1.0.x»). & Junto con la topología, orientan la búsqueda de vulnerabilidades públicas (regla D-022 de la norma de protección).\\
+  Contraseñas, tokens, llaves, números de serie y respaldos & No se incluyen. & Acceso directo o identificación de los equipos.\\
+  IP de la PC de administración & No aparece. & Es el origen autorizado para administrar el laboratorio.\\
+  Configuraciones de terceros & No se incluyen (la configuración previa del FortiGate se descartó sin respaldar). & No son propias.\\
+  \midrule
+  \multicolumn{3}{l}{\textbf{Visible a propósito}}\\
+  \midrule
+  Plan de direccionamiento y redes domésticas genéricas (192.168.0.0/24, 192.168.1.0/24) & Secciones 5 y 6. & Diseño documentado y rangos privados de fábrica.\\
+  Modelos de los equipos propios (OptiPlex, FortiGate, Huawei, Omada, Archer) & Inventario. & Inventario técnico del laboratorio; ninguno se expone a internet.\\
+  Herramientas usadas antes (Proxmox VE 9.2.2, Tailscale, Wazuh, OPNsense) & Sección 4. & Historial de habilidades; ninguna está instalada en el laboratorio actual.\\
+  Nombre del autor & Portada. & Autoría del portafolio.\\
+  \bottomrule
+\end{longtable}
+}
+
+\end{document}
