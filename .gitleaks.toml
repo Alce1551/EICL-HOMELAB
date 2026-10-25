@@ -1,4 +1,6 @@
 # Configuración de gitleaks para EICL: reglas por defecto + reglas de equipos de red.
+# En las reglas con valor, el grupo 1 es el secreto; si el valor es un marcador
+# de saneamiento (<REDACTADO> o [REDACTADO]), la lista de excepciones lo ignora.
 title = "EICL gitleaks"
 
 [extend]
@@ -7,19 +9,28 @@ useDefault = true
 [[rules]]
 id = "fortios-enc-password"
 description = "Contraseña cifrada de FortiOS (set password ENC ...)"
-regex = '''\bENC\s+[A-Za-z0-9+/=]{16,}'''
+regex = '''\bENC\s+([A-Za-z0-9+/=]{16,})'''
+secretGroup = 1
 tags = ["fortinet", "password"]
 
 [[rules]]
 id = "huawei-cipher-password"
 description = "Contraseña cifrada de Huawei VRP"
-regex = '''(irreversible-cipher|password\s+cipher)\s+\S+|%\^%#.{8,}%\^%#|%@%@.{8,}%@%@'''
+regex = '''(?:irreversible-cipher|password\s+cipher)\s+(\S+)'''
+secretGroup = 1
+tags = ["huawei", "password"]
+
+[[rules]]
+id = "huawei-cipher-marker"
+description = "Valor cifrado de Huawei VRP con marcadores %^%# o %@%@"
+regex = '''%\^%#.{8,}%\^%#|%@%@.{8,}%@%@'''
 tags = ["huawei", "password"]
 
 [[rules]]
 id = "network-psk-or-community"
 description = "PSK, secreto o comunidad SNMP en configuración de red"
-regex = '''\bset\s+(psksecret|secret|passwd|community)\s+\S+|\bsnmp-agent\s+community\s+\S+'''
+regex = '''(?:\bset\s+(?:psksecret|secret|passwd|community)|\bsnmp-agent\s+community(?:\s+cipher)?)\s+(\S+)'''
+secretGroup = 1
 tags = ["network", "secret"]
 
 [allowlist]
