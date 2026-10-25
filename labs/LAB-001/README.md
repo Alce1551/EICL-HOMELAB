@@ -8,9 +8,9 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 
 | Componente | Equipo / alcance | Estado | Memoria técnica |
 |---|---|---|---|
-| A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · memoria v1.2 en preparación |
+| A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · [lab-001-fortigate-v1.2](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-fortigate-v1.2) |
 | B | Huawei S5735 (SW-LAB-01) | ✅ Completado | `huawei/` · [lab-001-huawei-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-huawei-v1.1) |
-| C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · memoria en preparación |
+| C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · [lab-001-omada-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-omada-v1.1) |
 | D | Rack, cableado y etiquetado | 🔄 En curso | — |
 | E | Topología y tabla de puertos | 🔄 En curso | [`docs/port-mapping.md`](../../docs/port-mapping.md) |
 | F | Validación de punta a punta | ✅ Completado | [`docs/validacion.md`](../../docs/validacion.md) |
@@ -18,7 +18,7 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 
 ## Lo más relevante de cada componente
 
-**A — Firewall.** Recuperación de acceso y reset de fábrica de un equipo usado, subinterfaces VLAN sobre un puerto dedicado, DHCP por segmento, cinco políticas con registro, administración restringida por trusted hosts, red OOB de emergencia y NTP interno.
+**A — Firewall.** Recuperación de acceso y reset de fábrica de un equipo usado, subinterfaces VLAN sobre un puerto dedicado, DHCP por segmento, políticas de mínimo privilegio con registro, administración restringida por trusted hosts, red OOB de emergencia y NTP interno. La memoria cubre la configuración base (23/10/2026); los cambios posteriores del firewall se documentan en las memorias del switch principal y del switch de acceso.
 
 **B — Switch principal.** Endurecimiento desde cero: usuario local con AAA, SSH con llave RSA 3072 y Telnet deshabilitado, ACL de administración también aplicada al servidor SSH (SFTP incluido), STP con raíz definida y protección BPDU, puertos sin uso en VLAN 999 y apagados, respaldo por SFTP.
 
@@ -27,12 +27,16 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 ## Carpetas
 
 ```
-fortigate/   componente A (memoria en preparación)
+fortigate/   componente A
+├── EICL-LAB-001-fortigate-levantamiento.tex
+└── evidencias/LAB-001-fortigate/          capturas E-01 a E-28, saneadas
 huawei/      componente B
-├── EICL-LAB-001-huawei-levantamiento.tex   fuente de la memoria técnica
+├── EICL-LAB-001-huawei-levantamiento.tex
 ├── evidence/                              capturas EVID-nnn y salidas de consola, saneadas
 └── configs/                               comandos aplicados (reconstruidos y saneados)
-omada/       componente C (memoria en preparación)
+omada/       componente C
+├── EICL-LAB-001-omada-levantamiento.tex
+└── evidence/                              capturas EVID-nnn, saneadas
 ```
 
 Cada memoria se compila automáticamente y se publica como PDF en [Releases](https://github.com/Alce1551/EICL-HOMELAB/releases).
