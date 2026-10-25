@@ -1,0 +1,25 @@
+# Verificaciones antes de cada commit.
+# Instalación (una sola vez):  pip install pre-commit && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: eicl-sanitization
+        name: Saneamiento EICL (norma de protección de datos)
+        entry: scripts/check-sanitization.sh
+        language: script
+        pass_filenames: true
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=5000"]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: '\.tex$'

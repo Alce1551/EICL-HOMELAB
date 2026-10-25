@@ -1,0 +1,21 @@
+# Copia este archivo como .sanitize-private (sin .example) y escribe tus datos reales.
+# .sanitize-private está en .gitignore: nunca se sube al repositorio.
+# Un dato por línea; se busca como texto literal, sin distinguir mayúsculas.
+# Lo que va después de # es comentario.
+
+# IP de la PC de administración y de cualquier host en ACL o trusted hosts
+# 192.168.x.x
+
+# Usuario y hostname de tus equipos personales (aparecen en prompts y rutas)
+# mi-usuario
+# MI-LAPTOP
+
+# Números de serie, ESN y MAC completos de tus equipos (si los conoces)
+# FGT50E...
+# 2102...
+
+# IP pública, dominios o DDNS propios
+# ...
+
+# Correo personal (si no quieres que aparezca en los documentos)
+# ...

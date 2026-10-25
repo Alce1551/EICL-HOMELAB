@@ -1,0 +1,27 @@
+# Segunda barrera: aunque un commit salte la verificación local,
+# GitHub vuelve a revisar todo el repositorio y su historial en cada push.
+name: Saneamiento
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar herramientas de inspección
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils libimage-exiftool-perl
+
+      - name: Verificador EICL (archivos actuales)
+        run: bash scripts/check-sanitization.sh --all
+
+      - name: gitleaks (historial completo)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml

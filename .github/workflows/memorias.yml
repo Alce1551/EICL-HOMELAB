@@ -1,0 +1,69 @@
+# Compila las memorias técnicas.
+#  - En cada push que cambie un .tex: compila para verificar que no haya errores.
+#  - Al crear una etiqueta lab-NNN-componente-vX.Y (por ejemplo lab-001-huawei-v1.0):
+#    compila la memoria de labs/LAB-NNN/componente/ y la publica como Release.
+name: Memorias
+
+on:
+  push:
+    branches: [main]
+    paths: ["labs/**/*.tex", "plantilla/**"]
+    tags: ["lab-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Elegir qué compilar
+        id: sel
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/lab-* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"                       # lab-001-huawei-v1.0
+            NUM="$(echo "$TAG" | cut -d- -f2)"                    # 001
+            COMP="$(echo "$TAG" | sed -E 's/^lab-[0-9]+-(.*)-v[0-9.]+$/\1/')"   # huawei
+            DIR="labs/LAB-${NUM}/${COMP}"
+            [[ -d "$DIR" ]] || DIR="labs/LAB-${NUM}"
+            FILES="$(grep -l '\\documentclass' "$DIR"/*.tex 2>/dev/null || true)"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            FILES="$(grep -rl --include='*.tex' '\\documentclass' labs/ 2>/dev/null || true)"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ -z "$FILES" ]]; then echo "No hay memorias .tex que compilar."; fi
+          printf '%s\n' "$FILES" > memorias.txt
+          cat memorias.txt
+
+      - name: Compilar con TeX Live
+        uses: xu-cheng/texlive-action@v2
+        with:
+          scheme: full
+          run: |
+            set -e
+            mkdir -p salida
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              d="$(dirname "$f")"; b="$(basename "$f")"
+              # xelatex si la memoria usa fontspec; pdflatex en otro caso
+              if grep -q 'fontspec' "$f"; then ENG="-xelatex"; else ENG="-pdf"; fi
+              (cd "$d" && TEXINPUTS=".:$(pwd | sed 's|labs/.*||')plantilla//:" latexmk $ENG -interaction=nonstopmode -halt-on-error "$b")
+              cp "$d/${b%.tex}.pdf" salida/
+            done < memorias.txt
+
+      - name: Revisar el PDF antes de publicarlo
+        if: steps.sel.outputs.release == 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install -y poppler-utils libimage-exiftool-perl
+          bash scripts/check-sanitization.sh salida/*.pdf
+
+      - name: Publicar Release
+        if: steps.sel.outputs.release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: salida/*.pdf
+          generate_release_notes: true

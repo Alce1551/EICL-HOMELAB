@@ -1,0 +1,70 @@
+# ==========================================================
+# EICL — archivos que NUNCA deben entrar al repositorio
+# ==========================================================
+
+# --- Respaldos y configuraciones completas de equipos ---
+*.conf
+*.cfg
+*.bak
+*.backup
+vrpcfg.*
+*base-LAB-*
+*_running-config*
+*_startup-config*
+
+# --- Paquetes de cierre y archivos comprimidos ---
+# (los paquetes EICL-PKG contienen evidencias de trabajo; se publican
+#  solo las evidencias ya saneadas, sueltas y revisadas)
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+EICL-PKG-*
+
+# --- Originales sin sanear ---
+**/originales/
+**/sin-sanear/
+**/privado/
+*_ORIGINAL.*
+*_raw.*
+
+# --- Llaves, credenciales y exportaciones de gestores ---
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+*.ovpn
+id_rsa*
+id_ed25519*
+.env
+.env.*
+
+# --- Patrones personales del verificador (contienen tu IP, hostname, etc.) ---
+.sanitize-private
+
+# --- Compilación LaTeX (los PDF se publican en Releases) ---
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xdv
+*.bbl
+*.blg
+labs/**/*.pdf
+
+# --- Sistema y editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
