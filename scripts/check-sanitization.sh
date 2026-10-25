@@ -13,7 +13,8 @@
 # Patrones personales: crea un archivo .sanitize-private en la raíz del repo
 # (está en .gitignore, nunca se sube) con un dato por línea: la IP de tu PC
 # de administración, tu usuario y hostname, números de serie completos, etc.
-# Se buscan como texto literal, sin distinguir mayúsculas.
+# Se buscan como texto literal, sin distinguir mayúsculas; se ignoran los
+# espacios al inicio y al final de cada línea.
 #
 # Código de salida: 0 = limpio · 1 = hallazgos · 2 = error de uso
 # ==========================================================================
@@ -30,7 +31,7 @@ green()  { printf '\033[32m%s\033[0m\n' "$*"; }
 # --- Archivos excluidos del análisis (contienen los propios patrones) ---
 is_excluded() {
   case "$1" in
-    scripts/check-sanitization.sh|.gitleaks.toml|.pre-commit-config.yaml) return 0 ;;
+    scripts/check-sanitization.sh|.gitleaks.toml|.pre-commit-config.yaml|.sanitize-private) return 0 ;;
   esac
   return 1
 }
@@ -41,12 +42,12 @@ PATTERNS=(
   "Dirección MAC formato Huawei (xxxx-xxxx-xxxx)|||(?<![0-9A-Fa-f-])[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?![0-9A-Fa-f-])"
   "Interfaz con MAC en el nombre (wlx/enx)|||\b(wlx|enx)[0-9A-Fa-f]{12}\b"
   "Contraseña cifrada de FortiOS (ENC)|||\bENC\s+[A-Za-z0-9+/=]{16,}"
-  "Contraseña cifrada de Huawei (cipher / %^%#)|||(irreversible-cipher|password\s+cipher|%\^%#|%@%@)"
+  "Contraseña cifrada de Huawei (cipher / %^%#)|||(irreversible-cipher|password\s+cipher)(?!\s+[<\[]REDACTADO)|%\^%#|%@%@"
   "Hash de contraseña Unix (\$1\$ \$5\$ \$6\$ \$y\$)|||\\\$(1|5|6|y|2[aby])\\\$[A-Za-z0-9./]{4,}"
   "Llave privada|||-----BEGIN [A-Z ]*PRIVATE KEY-----"
   "Número de serie completo de FortiGate|||\bFG(?![0-9A-Z]*XXXXXX)[0-9A-Z]{12,16}\b"
   "UUID (objetos o políticas)|||\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b"
-  "PSK, secreto o comunidad SNMP en configuración|||\bset\s+(psksecret|secret|passwd|password|community)\s+\S+|\bsnmp-agent\s+community\s+\S+"
+  "PSK, secreto o comunidad SNMP en configuración|||\bset\s+(psksecret|secret|passwd|password|community)\s+(?!(ENC\s+)?[<\[]REDACTADO)\S+|\bsnmp-agent\s+community\s+(?!(cipher\s+)?[<\[]REDACTADO)\S+"
   "Ruta personal de Windows|||[A-Za-z]:\\\\Users\\\\[^\\\\\s]+"
   "Ruta personal de Linux/macOS|||(/home|/Users)/[a-z_][a-z0-9_.-]+/"
   "IPv6 de enlace local (equipos personales)|||\bfe80:(:[0-9a-fA-F]{0,4}){1,7}"
@@ -55,6 +56,12 @@ PATTERNS=(
 
 # --- Nombres de archivo que nunca deben publicarse ---
 FORBIDDEN_NAMES='(\.conf|\.cfg|\.bak|\.zip|\.7z|\.rar|\.pem|\.key|\.p12|\.pfx|\.kdbx|\.ovpn)$|vrpcfg|base-LAB-|EICL-PKG-|_ORIGINAL\.|/originales/|/sin-sanear/|/privado/'
+
+WARNED=""
+warn_once() { # clave, mensaje: avisa una sola vez por ejecución
+  case " $WARNED " in *" $1 "*) return ;; esac
+  WARNED="$WARNED $1"; yellow "$2"
+}
 
 report() { # archivo, motivo, líneas
   red "✗ $1 — $2"
@@ -76,7 +83,7 @@ check_text() { # archivo (o "-" para stdin con etiqueta en $2)
   if [[ -s "$PRIVATE_FILE" ]]; then
     local pat
     while IFS= read -r pat || [[ -n "$pat" ]]; do
-      pat="${pat%%#*}"; pat="$(printf '%s' "$pat" | sed 's/[[:space:]]*$//')"
+      pat="${pat%%#*}"; pat="$(printf '%s' "$pat" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
       [[ -z "$pat" ]] && continue
       hits="$(printf '%s' "$content" | grep -niF -- "$pat" 2>/dev/null | cut -c1-120 || true)"
       [[ -n "$hits" ]] && report "$label" "Dato personal de .sanitize-private" "$hits"
@@ -99,7 +106,7 @@ check_file() {
       if command -v pdftotext >/dev/null; then
         pdftotext -q "$f" - 2>/dev/null | check_text - "$f (texto del PDF)"
       else
-        yellow "! $f — pdftotext no instalado: el texto del PDF no se revisó"
+        warn_once pdf "! pdftotext no está instalado: no se revisa el texto de los PDF. GitHub sí lo revisa."
       fi
       if command -v exiftool >/dev/null; then
         local meta; meta="$(exiftool -s -Author -Creator -Producer -Title "$f" 2>/dev/null)"
@@ -113,7 +120,7 @@ check_file() {
         local cam; cam="$(exiftool -s -SerialNumber -OwnerName -Artist "$f" 2>/dev/null)"
         [[ -n "$cam" ]] && report "$f" "Imagen con número de serie o dueño de la cámara en los metadatos" "$cam"
       else
-        yellow "! $f — exiftool no instalado: no se revisaron los metadatos de la imagen"
+        warn_once exif "! exiftool no está instalado: no se revisan los metadatos de las imágenes (GPS, serie de la cámara). GitHub sí los revisa."
       fi
       ;;
     *)
@@ -122,6 +129,13 @@ check_file() {
       ;;
   esac
 }
+
+# --- Autocomprobación: sin soporte de regex Perl (grep -P) el script no podría
+#     detectar nada y daría un falso «correcto». En ese caso se detiene. ---
+if ! printf 'ENC abc\n' | grep -qP 'ENC(?=\s)' 2>/dev/null; then
+  red "Error: este grep no soporta expresiones Perl (grep -P); el verificador no puede funcionar."
+  exit 2
+fi
 
 # --- Selección de archivos ---
 cd "$ROOT" || exit 2
