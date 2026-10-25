@@ -1,0 +1,16 @@
+EVID-083 - Registro SSH_FAIL del switch causado por el explorador SFTP de MobaXterm
+Fecha: 2026-10-24, 09:40 (UTC-6). Fuente: salida de consola pegada por el operador en el chat de trabajo.
+Saneado: IP de la PC de administracion sustituida por <IP-PC-ADMIN>.
+Contexto: al abrir una sesion SSH desde la PC de administracion, MobaXterm intenta ademas un canal
+SFTP para su explorador lateral. En ese momento SFTP estaba deshabilitado en el switch.
+La sesion de consola remota (Stelnet) si entro; el fallo corresponde solo al canal SFTP.
+Se resolvio en B9 al habilitar SFTP limitado por la ACL 2000 (ver EVID-081, decision D-010).
+--------------------------------------------------------------------------
+<SW-LAB-01>
+Oct 24 2026 09:40:05-06:00 SW-LAB-01 %%01SSH/4/SSH_FAIL(s)[0]:Failed to login through SSH. (IP=<IP-PC-ADMIN>, VpnInstanceName= , UserName=eicladmin, Times=1, FailedReason=The SFTP server was disable)
+<SW-LAB-01>undo terminal monitor
+Info: Current terminal monitor is off.
+<SW-LAB-01>display clock
+2026-10-24 09:40:25-06:00
+Saturday
+Time Zone(CST) : UTC-06:00

@@ -1,0 +1,28 @@
+# FGT-LAB-01 (FortiGate 50E, FortiOS 6.x)
+# Cambios aplicados el 2026-10-24, posteriores a la memoria LAB-001 del FortiGate (componente A).
+# Reconstruidos de las evidencias; sirven de insumo para la memoria del FortiGate v1.1.
+# El respaldo real vive en la carpeta privada: FGT-LAB-01_2026-10-24_base-LAB-001.conf (reportado).
+
+# --- NTP en modo servidor solo en la VLAN de gestion, decision D-007 (EVID-049, EVID-058) ---
+config system ntp
+    set server-mode enable
+    set interface "VLAN10-MGMT"
+end
+
+# --- Registros en memoria: el filtro venia en 'warning' y descartaba el trafico (EVID-076, EVID-079) ---
+config log memory setting
+    set status enable                      # ya estaba en enable; el comando no cambio nada
+end
+config log memory filter
+    set severity information               # cambio real
+end
+
+# --- Solo lectura, para validaciones ---
+show full-configuration firewall policy 1  # V6: muestra set action deny (EVID-037)
+get system interface physical              # lan5 up, 1000 Mbps full (EVID-036)
+diagnose sys ntp status                    # synchronized: yes, server-mode: enabled (EVID-058)
+
+# --- Copia en texto del respaldo (opcional, [POR CONFIRMAR] si se aplico) ---
+# config system console
+#     set output standard
+# end

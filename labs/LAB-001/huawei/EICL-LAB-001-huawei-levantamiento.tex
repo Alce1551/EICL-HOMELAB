@@ -1,0 +1,1149 @@
+% EICL - Memoria técnica | LAB-001 componente B (switch principal Huawei S5735)
+% Fuente: paquete de cierre EICL-PKG-E01-001 (24/10/2026).
+% Compila con pdfLaTeX o XeLaTeX (LaTeX Workshop: receta latexmk por defecto).
+% Estructura del proyecto:
+%   EICL-LAB-001-huawei-levantamiento.tex
+%   evidence/  (capturas EVID-nnn y salidas de consola)
+%   configs/   (configuración reconstruida del switch y cambios del FortiGate)
+% ChkTeX: las advertencias 1, 8, 13 y 36 generan falsos positivos con
+% comandos válidos, códigos de activos, fechas y rutas.
+% chktex-file 1
+% chktex-file 8
+% chktex-file 13
+% chktex-file 36
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{iftex}
+\newif\ifexpansion \expansiontrue
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  % Sin lmodern (ni cm-super) las fuentes T1 son de mapa de bits y microtype
+  % no puede expandirlas; en ese caso se desactiva solo la expansión.
+  \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{\expansionfalse}
+\else
+  \usepackage{fontspec}
+\fi
+% Español: con babel-spanish instalado se usan las mismas opciones que LAB-000;
+% si falta, babel carga el idioma desde sus archivos .ini.
+\IfFileExists{spanish.ldf}
+  {\usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}}
+  {\usepackage{babel}\babelprovide[import,main]{spanish}}
+\usepackage[margin=2.3cm,headheight=28pt,includehead,includefoot]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{lastpage}
+\usepackage{listings}
+\ifexpansion\usepackage{microtype}\else\usepackage[expansion=false]{microtype}\fi
+\usepackage{ragged2e}
+\usepackage{etoolbox}
+\usepackage{needspace}
+\usepackage{hyperref}
+
+% --- Colores (mismos valores que LAB-000 v0.2) ---
+\definecolor{navy}{HTML}{14283F}
+\definecolor{blue}{HTML}{16608B}
+\definecolor{muted}{HTML}{5D6977}
+\definecolor{light}{HTML}{EAF0F4}
+\definecolor{accent}{HTML}{16A3A1}
+\definecolor{okgreen}{HTML}{2E7D32}
+\definecolor{amber}{HTML}{B26A00}
+\definecolor{alertred}{HTML}{B3261E}
+\definecolor{violet}{HTML}{6A4C93}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=navy,
+  urlcolor=blue,
+  pdftitle={EICL -- LAB-001 Levantamiento y configuración base del switch principal Huawei S5735},
+  pdfauthor={Carlos Eduardo Abundis Lira}
+}
+
+\graphicspath{{evidence/}}
+
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{blue}}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{navy}}{\thesubsubsection}{0.8em}{}
+\setlist[itemize]{leftmargin=1.6em,itemsep=2pt,topsep=4pt}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=2pt,topsep=4pt}
+\setlist[description]{leftmargin=1.2em,itemsep=3pt,topsep=4pt,font=\color{navy}\bfseries}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.25}
+\setcounter{tocdepth}{2}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single,
+  rulecolor=\color{light},
+  backgroundcolor=\color{light!40},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  breakatwhitespace=false,
+  postbreak=\mbox{\textcolor{muted}{$\hookrightarrow$}\space},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=6pt,
+  belowskip=6pt
+}
+
+% --- Cabecera y pie ---
+\newcommand{\docid}{EICL | LAB-001 | Huawei S5735}
+\newcommand{\docver}{Versión 1.1 | 25/10/2026}
+\fancypagestyle{eicl}{%
+  \fancyhf{}
+  \fancyhead[L]{\footnotesize\textcolor{muted}{\docid}}
+  \fancyhead[R]{\footnotesize\textcolor{muted}{\docver}}
+  \fancyfoot[L]{\footnotesize\textcolor{muted}{Portafolio técnico | Información saneada}}
+  \fancyfoot[R]{\footnotesize\textcolor{muted}{Página \thepage\ de \pageref{LastPage}}}
+  \renewcommand{\headrulewidth}{0.3pt}
+  \renewcommand{\footrulewidth}{0pt}}
+\fancypagestyle{preliminar}{%
+  \fancyhf{}
+  \fancyhead[L]{\footnotesize\textcolor{muted}{\docid}}
+  \fancyhead[R]{\footnotesize\textcolor{muted}{\docver}}
+  \fancyfoot[L]{\footnotesize\textcolor{muted}{Portafolio técnico | Información saneada}}
+  \fancyfoot[R]{\footnotesize\textcolor{muted}{Página \thepage\ de \pageref{FinPreliminares}}}
+  \renewcommand{\headrulewidth}{0.3pt}
+  \renewcommand{\footrulewidth}{0pt}}
+
+% --- Marcadores y estados ---
+\newcommand{\pc}{\textcolor{muted}{\textit{[POR CONFIRMAR]}}}
+\newcommand{\estado}[1]{%
+  \ifstrequal{#1}{COMPLETADA}{\textcolor{okgreen}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{OPERATIVO VALIDADO}{\textcolor{okgreen}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{OK}{\textcolor{okgreen}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{RESUELTO}{\textcolor{okgreen}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{EN CURSO}{\textcolor{amber}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{REPORTADO}{\textcolor{amber}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{NO EJECUTADA}{\textcolor{muted}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{PROPUESTO}{\textcolor{violet}{\textbf{\footnotesize #1}}}{%
+  \ifstrequal{#1}{PENDIENTE}{\textcolor{alertred}{\textbf{\footnotesize #1}}}{%
+  \textbf{\footnotesize #1}}}}}}}}}}}
+
+% --- Columnas ---
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{Z}{>{\RaggedRight\arraybackslash}X}
+\newcommand{\cab}{\rowcolor{light}}
+% \fn{texto}: \texttt que admite salto de línea después de - / y _
+\newcommand{\fn}[1]{\texttt{\fnbreaks#1\fnend}}
+\def\fnbreaks#1\fnend{\begingroup\fnactive\scantokens{#1\noexpand}\endgroup}
+\begingroup\catcode`\-=\active\catcode`\/=\active
+\gdef\fnactive{\catcode`\-=\active\catcode`\/=\active
+  \def-{\char`\-\allowbreak}\def/{\char`\/\allowbreak}\let\_\fnus}
+\endgroup
+\newcommand{\fnus}{\textunderscore\allowbreak}
+\setlength{\emergencystretch}{3em}
+
+% --- Recuadros ---
+\newcommand{\notebox}[2]{%
+  \par\smallskip\noindent\fcolorbox{blue}{light}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      {\small\bfseries\color{blue}\MakeUppercase{#1}}\\[2pt]\small #2}}\par\smallskip}
+\newcommand{\alertbox}[2]{%
+  \par\smallskip\noindent\fcolorbox{alertred}{alertred!6}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      {\small\bfseries\color{alertred}\MakeUppercase{#1}}\\[2pt]\small #2}}\par\smallskip}
+
+% --- Evidencia con imagen: \evid{ancho}{archivo}{pie} ---
+\newcommand{\evid}[3]{%
+  \par\needspace{6\baselineskip}\noindent
+  \begin{minipage}{\linewidth}\centering
+    \includegraphics[width=#1\linewidth,height=0.80\textheight,keepaspectratio]{#2}\\[3pt]
+    {\small\color{muted}#3}
+  \end{minipage}\par\bigskip}
+
+\begin{document}
+
+% =====================================================================
+% PORTADA
+% =====================================================================
+\pagenumbering{gobble}
+\begin{titlepage}
+  \vspace*{1.2cm}
+  {\color{accent}\rule{2cm}{5pt}}\\[1.0cm]
+  {\sffamily\Large\bfseries\color{blue}
+    ENTERPRISE INFRASTRUCTURE \& CYBERSECURITY LAB}\\[0.55cm]
+  {\sffamily\fontsize{29}{34}\selectfont\bfseries\color{navy}
+    LAB-001\\[4pt] Levantamiento y configuración\\ base del switch principal\\ Huawei S5735}\\[0.7cm]
+  {\Large\color{muted}Memoria técnica | Levantamiento, configuración base\\ y validación de punta a punta}\\[1.2cm]
+
+  {\renewcommand{\arraystretch}{1.5}
+  \begin{tabularx}{\textwidth}{>{\bfseries}L{3.4cm}Z}
+    Identificador & EICL-LAB-001 (componente switch) \\
+    Versión & 1.1 \\
+    Fecha & 25 de octubre de 2026 \\
+    Responsable & Carlos Eduardo Abundis Lira \\
+    Equipo & Huawei S5735-L8P4S-A1 (SW-LAB-01), VRP V200R020 \\
+    Estado & Componente B completado; LAB-001 sigue en curso \\
+    Clasificación & Portafolio técnico | Información saneada \\
+  \end{tabularx}}
+
+  \vspace{0.8cm}
+  \notebox{Finalidad del documento}{Registrar el levantamiento del switch principal, las decisiones de diseño, la configuración aplicada paso a paso (B0 a B9) y la evidencia de validación de punta a punta con el FortiGate 50E, desde un equipo recibido sin configuración hasta dejarlo operativo, respaldado y validado en las cinco VLAN del laboratorio.}
+
+  \vfill
+  {\color{navy}\rule{\textwidth}{1pt}}\\[0.25cm]
+  {\small\color{muted}Referencia de control: EICL-LAB-001 | Paquete de origen: EICL-PKG-E01-001 | Documento vivo, sujeto a actualización}
+\end{titlepage}
+
+% =====================================================================
+% PRELIMINARES
+% =====================================================================
+\pagenumbering{roman}
+\pagestyle{preliminar}
+\hypersetup{pageanchor=true}
+
+\section*{Control del documento}
+\addcontentsline{toc}{section}{Control del documento}
+
+\begin{tabularx}{\textwidth}{L{4.0cm} Z}
+  \toprule
+  \cab\textbf{Campo} & \textbf{Contenido}\\
+  \midrule
+  Nombre & LAB-001 -- Levantamiento y configuración base del switch principal Huawei S5735\\
+  Proyecto & EICL -- Enterprise Infrastructure \& Cybersecurity Lab\\
+  Componente & LAB-001-B: switch principal (SW-LAB-01)\\
+  Alcance & Inspección, levantamiento, identidad y hora, acceso seguro, VLAN, trunk hacia el FortiGate, gestión en banda, NTP, plan de puertos, STP, PoE, SFTP, respaldo y validación de punta a punta\\
+  Versión & 1.1\\
+  Fecha & 25/10/2026 (versión 1.1, re-saneamiento). Trabajo realizado del 23/10/2026 23:46 al 24/10/2026 11:31, UTC-6, en dos sesiones)\\
+  Estado & Componente B \estado{COMPLETADA}; LAB-001 \estado{EN CURSO} (faltan los componentes C, D, E y G)\\
+  Paquete de origen & EICL-PKG-E01-001 (24/10/2026)\\
+  Documento relacionado & \fn{EICL-LAB-001-fortigate-levantamiento.pdf} (componente A, firewall). Los cambios aplicados al FortiGate el 24/10/2026 se documentan en la sección~\ref{sec:fgt}\\
+  \bottomrule
+\end{tabularx}
+
+\subsection*{Historial de versiones}
+\begin{tabularx}{\textwidth}{L{1.6cm} L{2.2cm} Z}
+  \toprule
+  \cab\textbf{Versión} & \textbf{Fecha} & \textbf{Cambio}\\
+  \midrule
+  1.0 & 24/10/2026 & Versión inicial: levantamiento, pasos B0 a B9, validaciones V1 a V8 de LAB-001 y evidencias EVID-001 a EVID-083.\\
+  1.1 & 25/10/2026 & Re-saneamiento para publicación (D-021) en los tres canales: texto, comandos y salidas de consola, e imágenes. Se generalizan las versiones exactas de firmware de los equipos de red (texto, EVID-001, EVID-002, EVID-007 y EVID-009), se sustituye la sección de datos sensibles por la tabla «Protección de la información» de tres columnas y se actualizan las referencias a la memoria del FortiGate. Sin cambios técnicos.\\
+  \bottomrule
+\end{tabularx}
+
+\subsection*{Criterios de evidencia}
+\begin{description}
+  \item[Confirmado:] observado en consola o en la interfaz, con captura (identificador EVID-nnn).
+  \item[Reportado por el operador:] actividad realizada y comunicada, sin captura adjunta.
+  \item[{[POR CONFIRMAR]}:] dato desconocido o pendiente de verificación.
+\end{description}
+
+\notebox{Convención de identificadores}{En el chat de trabajo las evidencias se nombraron E-B01 a E-B39 (switch) y E-29 a E-34 (FortiGate). En este documento todas se renumeran como EVID-001 a EVID-083; el apéndice~\ref{ap:evid} trae la correspondencia. Los identificadores de decisiones D-006 a D-010 coinciden con los del estado del proyecto.}
+
+\clearpage
+\tableofcontents
+\label{FinPreliminares}
+\clearpage
+
+% =====================================================================
+% CUERPO
+% =====================================================================
+\pagenumbering{arabic}
+\pagestyle{eicl}
+
+\section{Objetivo}
+Este documento registra el levantamiento y la configuración base del switch principal Huawei S5735-L8P4S-A1 del laboratorio, que llegó sin configuración guardada, hasta dejarlo conectado por trunk al FortiGate 50E, administrable de forma segura, sincronizado, respaldado y validado de punta a punta en las cinco VLAN. Forma parte del proyecto LAB-001 y completa su componente B.
+
+\subsection*{Ficha del proyecto LAB-001 --- Infraestructura física y red empresarial base}
+\begin{tabularx}{\textwidth}{L{3.6cm} Z}
+  \toprule
+  \cab\textbf{Campo} & \textbf{Contenido}\\
+  \midrule
+  Objetivo & Construir desde cero una red de laboratorio físicamente organizada, segmentada y administrable.\\
+  Tecnologías & Ethernet, Huawei VRP, FortiOS, VLAN, trunking, routing, NAT, DHCP y direccionamiento IPv4.\\
+  Equipo existente & FortiGate 50E, Huawei S5735-L8P4S-A1, Omada, rack, cableado y router doméstico.\\
+  Por conseguir & No se ha identificado hardware adicional obligatorio, sujeto a revisión física.\\
+  Dificultad & Intermedia.\\
+  Dependencias & Recepción y validación de firewall, switch y cableado.\\
+  Resultado esperado & Rack organizado, tabla de puertos, topología física y lógica, segmentación por VLAN, routing configurado, acceso a internet desde VLAN autorizadas, aislamiento de tráfico y configuraciones respaldadas.\\
+  Entregables & LAB-001-Architecture.md, LAB-001-VLAN-Plan.md, LAB-001-Port-Mapping.md, LAB-001-Implementation.md y LAB-001-Validation.md. Este documento cubre la parte del switch principal.\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Alcance de este documento}
+\textbf{Incluye.} Inspección física, levantamiento del hardware y del software, identidad y hora, usuario local y acceso AAA por consola y SSH, ACL de gestión, VLAN, trunk 802.1Q hacia \texttt{lan5} del FortiGate, gestión en banda por \texttt{Vlanif10}, NTP interno, plan de puertos, STP, PoE, SFTP, respaldo de la configuración y validación de punta a punta con una laptop en las cinco VLAN. También registra los cambios aplicados al FortiGate durante este punto.
+
+\textbf{No incluye.} Configuración del Omada y del TL-SG108 (componente C), rack y cableado definitivo (componente D), topología final (componente E), entregables \texttt{.md} (componente G) ni la conexión de los nodos SRV-01 a SRV-03 (LAB-002).
+
+\subsection{Estado del componente}
+\begin{tabularx}{\textwidth}{L{1.2cm} Z L{3.1cm} L{2.3cm}}
+  \toprule
+  \cab\textbf{Paso} & \textbf{Actividad} & \textbf{Estado} & \textbf{Evidencia}\\
+  \midrule
+  B0 & Inspección física del switch & \estado{COMPLETADA} & Sin captura\\
+  B1 & Levantamiento inicial (versión, hardware, puertos, VLAN, configuración) & \estado{COMPLETADA} & EVID-001 a 009\\
+  B2 & Identidad y hora & \estado{COMPLETADA} & EVID-010, 011\\
+  B3 & Acceso seguro: usuario AAA, SSH, ACL 2000, consola & \estado{COMPLETADA} & EVID-012 a 026\\
+  B4 & VLAN 10--50 y 999 & \estado{COMPLETADA} & EVID-027 a 030\\
+  B5 & Trunk GE0/0/1 hacia \texttt{lan5} del FortiGate & \estado{COMPLETADA} & EVID-031 a 037\\
+  B6 & Gestión en banda (\texttt{Vlanif10}), SSH desde la PC y NTP & \estado{COMPLETADA} & EVID-038 a 050, 058, 059\\
+  B7 & Plan de puertos, STP y PoE & \estado{COMPLETADA} & EVID-051 a 057, 060\\
+  B8 & Validación de punta a punta con laptop en las cinco VLAN & \estado{COMPLETADA} & EVID-061 a 080\\
+  B9 & SFTP y respaldo de la configuración & \estado{COMPLETADA} & EVID-081 a 083\\
+  \bottomrule
+\end{tabularx}
+
+% =====================================================================
+\needspace{32\baselineskip}
+\section{Arquitectura}
+\subsection{Topología}
+El switch queda detrás del FortiGate, conectado por un solo trunk. El FortiGate es el gateway de cada VLAN y rutea entre ellas (router-on-a-stick, D-002); el switch se queda en capa 2.
+
+\begin{lstlisting}
+Internet
+   |
+Modem ISP 192.168.0.1  (red de casa 192.168.0.0/24)
+   |
+Archer C3200 192.168.1.1  (red del cuarto 192.168.1.0/24)
+   |-- PC de administracion <IP-PC-ADMIN>
+   |
+[wan1] FGT-LAB-01 192.168.1.2 --[lan1-lan4]-- OOB 10.10.254.0/24
+   |
+[lan5] trunk 802.1Q, VLAN 10-50 etiquetadas, PVID 999
+   |   1000 Mbps full, patch cord de fabrica (LINK-002)
+   |
+[GE0/0/1] SW-LAB-01  (Huawei S5735-L8P4S-A1, raiz STP)
+   |-- GE0/0/2  RESERVADO-SRV-01      access 999, apagado
+   |-- GE0/0/3  RESERVADO-SRV-02      access 999, apagado
+   |-- GE0/0/4  RESERVADO-SRV-03      access 999, apagado
+   |-- GE0/0/5  RESERVADO-OMADA-SW-02 access 999, apagado
+   |-- GE0/0/6  ACCESO-MGMT-VLAN10    access 10, edge
+   |-- GE0/0/7  PRUEBAS-SRV-VLAN20    access 20, edge
+   |-- GE0/0/8  CLIENTES-LAB-VLAN50   access 50, edge
+   `-- GE0/0/9-12 (SFP) SIN-USO       access 999, apagados
+\end{lstlisting}
+
+\subsection{Plan de VLAN en el switch}
+Las VLAN del switch usan los mismos nombres que las subinterfaces del FortiGate. Rango del laboratorio: 10.10.0.0/16, con el tercer octeto igual al ID de VLAN.
+
+{\small
+\begin{longtable}{L{1.2cm} L{2.45cm} L{2.35cm} L{2.4cm} L{2.55cm} L{2.85cm}}
+  \toprule
+  \cab\textbf{VLAN} & \textbf{Nombre} & \textbf{Subred} & \textbf{Gateway} & \textbf{DHCP} & \textbf{Estado}\\
+  \midrule
+  \endhead
+  10 & VLAN10-MGMT & 10.10.10.0/24 & 10.10.10.1 & FortiGate .100--.120 & \estado{OPERATIVO VALIDADO}\\
+  20 & VLAN20-SRV & 10.10.20.0/24 & 10.10.20.1 & FortiGate .100--.199 & \estado{OPERATIVO VALIDADO}\\
+  30 & VLAN30-MON & 10.10.30.0/24 & 10.10.30.1 & Sin DHCP (IP fija) & \estado{OPERATIVO VALIDADO}\\
+  40 & VLAN40-DMZ & 10.10.40.0/24 & 10.10.40.1 & Sin DHCP (IP fija) & \estado{OPERATIVO VALIDADO}\\
+  50 & VLAN50-LAB & 10.10.50.0/24 & 10.10.50.1 & FortiGate .100--.199 & \estado{OPERATIVO VALIDADO}\\
+  999 & NATIVA-SIN-USO & Sin IP & No aplica & No aplica & \estado{OPERATIVO VALIDADO}\\
+  60 & Respaldos & \pc & \pc & \pc & \estado{PROPUESTO} (LAB-008)\\
+  70 & Clúster Proxmox & \pc & \pc & \pc & \estado{PROPUESTO} (LAB-012)\\
+  \bottomrule
+\end{longtable}
+}
+
+La VLAN 999 es la nativa del trunk y la de los puertos sin uso. Como \texttt{lan5} del FortiGate no tiene IP, el tráfico sin etiqueta se descarta. La VLAN 1 queda fuera del trunk y \texttt{Vlanif1} está apagada.
+
+\subsection{Asignación de puertos del switch}
+{\small
+\begin{longtable}{L{2.2cm} L{4.4cm} L{3.8cm} L{4.3cm}}
+  \toprule
+  \cab\textbf{Puerto} & \textbf{Descripción} & \textbf{Modo y VLAN} & \textbf{Observaciones}\\
+  \midrule
+  \endhead
+  GE0/0/1 & TRUNK-A-FGT-LAB-01-lan5 & Trunk; 10, 20, 30, 40, 50 y 999; PVID 999 & Hacia \texttt{lan5} del FortiGate (LINK-002)\\
+  GE0/0/2 & RESERVADO-SRV-01 & Access 999, apagado & SRV-01 en LAB-002 (LINK-003)\\
+  GE0/0/3 & RESERVADO-SRV-02 & Access 999, apagado & SRV-02 en LAB-002 (LINK-004)\\
+  GE0/0/4 & RESERVADO-SRV-03 & Access 999, apagado & SRV-03 en LAB-002 (LINK-005)\\
+  GE0/0/5 & RESERVADO-OMADA-SW-02 & Access 999, apagado & Pasa a trunk en el componente C (LINK-006)\\
+  GE0/0/6 & ACCESO-MGMT-VLAN10 & Access 10, edge & Acceso de gestión\\
+  GE0/0/7 & PRUEBAS-SRV-VLAN20 & Access 20, edge & Pruebas; se movió temporalmente a VLAN 30 y 40 en B8, sin guardar\\
+  GE0/0/8 & CLIENTES-LAB-VLAN50 & Access 50, edge & Clientes de laboratorio\\
+  GE0/0/9--12 & SIN-USO (SFP) & Access 999, apagados & Sin uso\\
+  \bottomrule
+\end{longtable}
+}
+
+PoE apagado en GE0/0/1--8 (D-009). STP: el switch es la raíz primaria y tiene la protección BPDU activa; los puertos access 6 a 8 son \emph{edge}.
+
+\newpage
+\subsection{Matriz de enlaces}
+{\small
+\begin{longtable}{L{1.5cm} L{2.5cm} L{2.6cm} L{2.4cm} L{3.1cm} L{1.75cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Origen / puerto} & \textbf{Destino / puerto} & \textbf{Velocidad} & \textbf{Observación} & \textbf{Evidencia}\\
+  \midrule
+  \endhead
+  LINK-002 & FW-01 / lan5 & SW-01 / GE0/0/1 & 1000 Mbps full & Trunk 802.1Q; VLAN 10--50 etiquetadas; PVID 999; VLAN 1 fuera; patch cord de fábrica; 0 errores CRC & EVID-034\\
+  LINK-003 & SW-01 / GE0/0/2 & SRV-01 / NIC \pc & \pc & Planeado: puerto reservado y apagado (VLAN 999) hasta LAB-002; sin cable & EVID-056\\
+  LINK-004 & SW-01 / GE0/0/3 & SRV-02 / NIC \pc & \pc & Planeado: puerto reservado y apagado (VLAN 999) hasta LAB-002; sin cable & EVID-056\\
+  LINK-005 & SW-01 / GE0/0/4 & SRV-03 / NIC \pc & \pc & Planeado: puerto reservado y apagado (VLAN 999) hasta LAB-002; sin cable & EVID-056\\
+  LINK-006 & SW-01 / GE0/0/5 & SW-02 (Omada) / \pc & \pc & Planeado: puerto reservado y apagado; pasa a trunk en el componente C & EVID-056\\
+  LINK-007 & SW-01 / GE0/0/6 a GE0/0/8 & Laptop de pruebas / adaptador USB-Ethernet & \pc & Temporal, solo durante B8; GE0/0/7 se movió a VLAN 30 y 40 sin guardar y volvió a VLAN 20 & EVID-072\\
+  \bottomrule
+\end{longtable}
+}
+
+El cable plano verde no se usó: su material sigue sin verificar (RSK-005).
+
+\newpage
+\subsection{Matriz de políticas comprobada}
+Comportamiento observado en las pruebas de B8 con las políticas 1 a 4 del FortiGate (memoria del FortiGate v1.0, sección 2.5).
+
+\begin{tabularx}{\textwidth}{Z L{3.4cm} L{3.2cm}}
+  \toprule
+  \cab\textbf{Comprobación} & \textbf{Resultado} & \textbf{Prueba}\\
+  \midrule
+  MGMT llega a SRV & Permitido (política 3) & TEST-019\\
+  SRV no llega a MGMT & Bloqueado & TEST-018\\
+  MON, DMZ y LAB no llegan a MGMT & Bloqueado (regla implícita) & TEST-020\\
+  Ninguna VLAN llega a la red de casa ni a la del cuarto & Bloqueado (política 1) & TEST-006, TEST-017\\
+  Las cinco VLAN salen a internet & Permitido (política 2) & TEST-005, TEST-012 a 016\\
+  La PC de administración llega al switch por SSH & Permitido (política 4 y ACL 2000) & TEST-007\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Decisiones de diseño}
+\begin{description}
+  \item[D-006 Switch principal, no core (23/10/2026).] El switch no rutea; el ruteo entre VLAN lo hace el FortiGate (D-002). Se reevalúa si en un LAB futuro asume el ruteo entre VLAN.
+  \item[D-007 NTP interno desde el FortiGate (24/10/2026).] El FortiGate sirve NTP solo en VLAN10-MGMT y el switch es su cliente: una sola fuente de hora interna, sin depender de la política 2 con servicio ALL. Implica un cambio en el FortiGate, aprobado por el operador. Cadena: pool.ntp.org \textrightarrow{} FGT-LAB-01 (stratum 2) \textrightarrow{} SW-LAB-01 (stratum 3).
+  \item[D-008 ACL de gestión en el switch (24/10/2026).] La administración se limita con la ACL 2000, espejo de los trusted hosts del FortiGate (mínimo privilegio). Solo la PC de administración y la VLAN 10 pueden abrir SSH. Se ampliará en LAB-005 para SNMP.
+  \item[D-009 PoE apagado (24/10/2026).] No se planea usar PoE y el material del cable verde está sin verificar (RSK-005). Si algún día se necesita, se activa puerto por puerto y con cable verificado.
+  \item[D-010 SFTP habilitado y limitado por ACL (24/10/2026).] Permite descargar el respaldo \texttt{vrpcfg.zip}. La ACL de las vty no cubre SFTP, por eso se aplica \texttt{ssh server acl 2000}. Con SFTP activo desaparece el \texttt{SSH\_FAIL} del explorador de MobaXterm.
+\end{description}
+
+No hay cambios de arquitectura pendientes de aprobación: el plan de VLAN, el direccionamiento y el router-on-a-stick se mantienen como en la memoria del FortiGate v1.0. El plan de puertos del switch fue aprobado por el operador.
+
+\subsection{Limitaciones conocidas}
+\begin{itemize}
+  \item \textbf{Intercambio de llaves post-cuántico:} VRP V200R020 no lo soporta y OpenSSH reciente muestra un aviso (EVID-061). Aceptable en laboratorio; solo se resuelve con firmware nuevo.
+  \item \textbf{Llave de host SSH:} el switch presenta al cliente su llave ECDSA de fábrica, no la RSA de 3072 bits generada en B3; las dos existen (EVID-047).
+  \item \textbf{Caducidad de la contraseña:} la de \texttt{eicladmin} no caduca (\texttt{password expire 0}, valor de fábrica). Revisar en LAB-004.
+  \item \textbf{Reloj:} marcaba septiembre de 2021 al recibir el equipo (EVID-010). No se sabe si conserva la hora tras un apagado (PEND-005); NTP lo mitiga.
+  \item \textbf{Registros del FortiGate:} viven en memoria y se pierden al reiniciar; la regla implícita no registra lo que bloquea (valor de fábrica). Ambos se atienden con syslog externo en LAB-006.
+  \item \textbf{Servidor NTP del switch:} apagado a propósito (avisos de EVID-050).
+\end{itemize}
+
+% =====================================================================
+\section{Prerrequisitos y levantamiento inicial}
+\subsection{Entorno}
+\begin{tabularx}{\textwidth}{L{3.8cm} Z}
+  \toprule
+  \cab\textbf{Campo} & \textbf{Contenido}\\
+  \midrule
+  Firewall & FGT-LAB-01 (FortiGate 50E, FortiOS 6.x) con \texttt{lan5} como trunk 802.1Q y las subinterfaces VLAN 10--50 ya configuradas (componente A).\\
+  PC de administración & Windows, IP fija reservada en el Archer C3200 (redactada en este documento), con MobaXterm para consola, SSH y SFTP.\\
+  Laptop de pruebas & Arch Linux con adaptador USB-Ethernet, usada en B8. Sin ID de inventario.\\
+  Acceso de consola & Cable de consola desde la PC de administración (MobaXterm).\\
+  Cableado & Patch cord de fábrica para el trunk; el cable plano verde no se usó (RSK-005).\\
+  \bottomrule
+\end{tabularx}
+
+\newpage
+\subsection{Levantamiento del equipo (B0 y B1)}
+\textbf{B0, inspección física:} sin daños (reportado por el operador, sin captura). La foto de la etiqueta queda pendiente (PEND-001).
+
+\textbf{B1, levantamiento:} datos tomados de \texttt{display version} y \texttt{display device} al recibir el equipo (EVID-001 a EVID-003).
+
+\begin{tabularx}{\textwidth}{L{4.2cm} Z}
+  \toprule
+  \cab\textbf{Campo} & \textbf{Contenido}\\
+  \midrule
+  Modelo & Huawei S5735-L8P4S-A1, estado \texttt{Normal}, rol \texttt{Master}\\
+  Software & VRP (R) 5.170, V200R020 (versión de parche omitida en la publicación), sin parches instalados\\
+  Memoria & 512 MB de DDR; 512 MB de flash (253 MB libres al recibirlo)\\
+  Puertos & 8 GE RJ45 PoE+ (GE0/0/1--8) y 4 SFP (GE0/0/9--12)\\
+  Versiones de firmware & PCB VER.A; BootROM, BootLoad, CPLD y MCU: \texttt{<REDACTADO>} (constan en el inventario privado)\\
+  Hostname de fábrica & \texttt{HUAWEI}\\
+  Número de serie & \pc{} (se consulta con \texttt{display esn}; se guarda solo en el inventario privado, PEND-001)\\
+  Reloj al recibirlo & Septiembre de 2021 (EVID-010)\\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Configuración de fábrica observada}
+\begin{itemize}
+  \item Sin configuración guardada: \fn{display saved-configuration} no muestra nada y \fn{display startup} indica \fn{startup saved-configuration NULL} (EVID-008, EVID-009). No hizo falta reset de fábrica (TEST-001).
+  \item Solo la VLAN 1, con los 12 puertos sin etiqueta y todos \texttt{down} por no tener cables (EVID-005, EVID-006).
+  \item Consola con \texttt{authentication-mode password} y contraseña de fábrica (hash redactado); vty sin configurar; usuario \texttt{admin} eliminado (\texttt{undo local-user admin}) (EVID-007).
+  \item SSH con cifrados \texttt{aes256\_ctr} y \texttt{aes128\_ctr}, HMAC \texttt{sha2\_256} e intercambio de llaves \texttt{dh\_group16\_sha512} y similares, con \fn{dh-exchange min-len 2048}.
+  \item Política de contraseñas de administrador con \fn{password history record number 0} y \texttt{password expire 0}.
+\end{itemize}
+
+\textbf{Discrepancias encontradas.}
+\begin{itemize}
+  \item El documento maestro registra el switch como PoE+; queda confirmado porque VRP aceptó \texttt{undo poe enable} en GE0/0/1--8 (EVID-055).
+  \item \texttt{display elabel brief} no existe en esta versión de VRP (EVID-004).
+\end{itemize}
+
+\newpage
+% =====================================================================
+\section{Implementación}
+\subsection{Cronología}
+Horas locales (UTC-6) tomadas de las evidencias y del paquete de cierre.
+
+\begin{tabularx}{\textwidth}{L{3.6cm} Z}
+  \toprule
+  \cab\textbf{Fecha y hora} & \textbf{Evento}\\
+  \midrule
+  23/10/2026 23:46 & Inicio de la primera sesión.\\
+  23/10/2026 23:50 aprox. & Levantamiento B1 por consola (EVID-001).\\
+  23/10/2026 23:57 & Hora ajustada a mano y primer \texttt{save} (B2).\\
+  24/10/2026 00:47 & GE0/0/1 sube a 1000 Mbps full al conectar el trunk (B5, EVID-034).\\
+  24/10/2026 09:40 & \texttt{SSH\_FAIL} del explorador SFTP de MobaXterm (EVID-083).\\
+  24/10/2026 10:07 & SSH al switch desde la laptop en VLAN 10 (B8, EVID-061).\\
+  24/10/2026 11:13 & Registros \emph{deny} de la política 1 en el FortiGate (EVID-080).\\
+  24/10/2026 11:21 y 11:24 & Respaldos \texttt{.zip} y \texttt{.txt} del switch (B9, EVID-082).\\
+  24/10/2026 11:31 & Cierre del componente B.\\
+  \bottomrule
+\end{tabularx}
+
+\notebox{Convención de VRP}{La configuración se aplica en la vista de sistema (prompt \texttt{[SW-LAB-01]}) y se guarda con \texttt{save} en la vista de usuario (prompt \texttt{<SW-LAB-01>}). Las contraseñas se capturan de forma interactiva y no aparecen en este documento. Los bloques de comandos de esta sección son una reconstrucción a partir de las evidencias, no una exportación del equipo.}
+
+\subsection{B2: identidad y hora}
+El hostname identifica al equipo en el prompt, los registros y el monitoreo. La zona horaria es CST UTC-6. La hora se ajustó a mano porque el reloj marcaba 2021; después queda sincronizada por NTP (B6).
+
+\begin{lstlisting}
+system-view
+ sysname SW-LAB-01
+ clock timezone CST minus 06:00:00
+ quit
+clock datetime 23:57:30 2026-10-23
+save
+\end{lstlisting}
+
+\newpage
+\subsection{B3: acceso seguro}
+Se creó el usuario local \texttt{eicladmin} con nivel 15 y acceso por consola y SSH; se generó una llave RSA de 3072 bits, se activó Stelnet y se apagó Telnet. La ACL 2000 limita el acceso de gestión a la PC de administración y a la VLAN 10, y se aplicó a las vty 0--4 y 16--20. Por último, la consola pasó a autenticación AAA.
+
+\begin{lstlisting}
+system-view
+ aaa
+  local-user eicladmin password            # contrasena interactiva
+  local-user eicladmin privilege level 15
+  local-user eicladmin service-type terminal ssh
+  quit
+ rsa local-key-pair create                 # 3072 bits
+ stelnet server enable
+ ssh user eicladmin authentication-type password
+ ssh user eicladmin service-type stelnet   # cambiado a 'all' en B9
+ undo telnet server enable
+ acl number 2000
+  description GESTION-SSH-SW
+  rule 5 permit source <IP-PC-ADMIN> 0
+  rule 10 permit source 10.10.10.0 0.0.0.255
+  rule 100 deny
+  quit
+ user-interface vty 0 4
+  authentication-mode aaa
+  acl 2000 inbound
+  quit
+ user-interface vty 16 20
+  authentication-mode aaa
+  acl 2000 inbound
+  quit
+ user-interface con 0
+  authentication-mode aaa
+  idle-timeout 10 0
+  return
+save
+\end{lstlisting}
+
+\alertbox{Cambio de la consola a AAA}{Al pasar la consola a \texttt{authentication-mode aaa}, VRP pide verificar la contraseña de consola anterior y no aplica nada si falla (BLK-004). El \texttt{save} se hizo solo después de comprobar el login con \texttt{eicladmin} en una sesión nueva (TEST-002), para no perder el acceso.}
+
+Tras este paso, \texttt{display ssh server status} mostraba SSH sin interfaz de escucha (EVID-021): se resolvió en B6 con \texttt{ssh server-source} (BLK-002).
+\newpage
+\subsection{B4: VLAN}
+\begin{lstlisting}
+system-view
+ vlan batch 10 20 30 40 50 999
+ vlan 10
+  description VLAN10-MGMT
+ vlan 20
+  description VLAN20-SRV
+ vlan 30
+  description VLAN30-MON
+ vlan 40
+  description VLAN40-DMZ
+ vlan 50
+  description VLAN50-LAB
+ vlan 999
+  description NATIVA-SIN-USO
+  return
+save
+\end{lstlisting}
+
+\texttt{save} en la vista de sistema devuelve \texttt{Incomplete command} (BLK-003, EVID-029); se guarda desde la vista de usuario (EVID-030).
+
+\subsection{B5: trunk hacia FGT-LAB-01 lan5}
+\begin{lstlisting}
+system-view
+ interface GigabitEthernet0/0/1
+  description TRUNK-A-FGT-LAB-01-lan5
+  port link-type trunk
+  port trunk pvid vlan 999
+  undo port trunk allow-pass vlan 1
+  port trunk allow-pass vlan 10 20 30 40 50 999
+  return
+save
+\end{lstlisting}
+
+Al conectar el cable, el enlace negoció 1000 Mbps full en ambos lados, sin errores, y STP lo puso en \emph{forwarding} como puerto designado (EVID-032 a EVID-036).
+
+\subsection{B6: gestión en banda y NTP}
+La gestión del switch usa \texttt{Vlanif10} con 10.10.10.2/24 (rango .2--.9 reservado para equipos de red), con ruta por defecto hacia el FortiGate. El servidor SSH escucha solo en \texttt{Vlanif10} y \texttt{Vlanif1} queda apagada.
+
+\begin{lstlisting}
+system-view
+ interface Vlanif10
+  description GESTION-SW-LAB-01
+  ip address 10.10.10.2 255.255.255.0
+  quit
+ ip route-static 0.0.0.0 0.0.0.0 10.10.10.1
+ ssh server-source -i Vlanif10
+ interface Vlanif1
+  shutdown
+  return
+save
+\end{lstlisting}
+
+Para administrar desde la PC se agregó en Windows la ruta persistente hacia el laboratorio (EVID-046):
+
+\begin{lstlisting}
+route -p add 10.10.0.0 mask 255.255.0.0 192.168.1.2
+\end{lstlisting}
+
+NTP con el FortiGate como servidor interno (D-007; el lado del FortiGate está en la sección~\ref{sec:fgt}):
+
+\begin{lstlisting}
+system-view
+ ntp-service unicast-server 10.10.10.1
+ return
+save
+\end{lstlisting}
+
+\subsection{B7: plan de puertos, STP y PoE}
+\begin{lstlisting}
+system-view
+ stp root primary
+ stp bpdu-protection
+ interface GigabitEthernet0/0/2
+  description RESERVADO-SRV-01
+ interface GigabitEthernet0/0/3
+  description RESERVADO-SRV-02
+ interface GigabitEthernet0/0/4
+  description RESERVADO-SRV-03
+ interface GigabitEthernet0/0/5
+  description RESERVADO-OMADA-SW-02
+ interface GigabitEthernet0/0/9
+  description SIN-USO
+ interface GigabitEthernet0/0/10
+  description SIN-USO
+ interface GigabitEthernet0/0/11
+  description SIN-USO
+ interface GigabitEthernet0/0/12
+  description SIN-USO
+  quit
+ port-group group-member GigabitEthernet0/0/2 to GigabitEthernet0/0/5 GigabitEthernet0/0/9 to GigabitEthernet0/0/12
+  port link-type access
+  port default vlan 999
+  shutdown
+  quit
+ interface GigabitEthernet0/0/6
+  description ACCESO-MGMT-VLAN10
+  port link-type access
+  port default vlan 10
+  stp edged-port enable
+ interface GigabitEthernet0/0/7
+  description PRUEBAS-SRV-VLAN20
+  port link-type access
+  port default vlan 20
+  stp edged-port enable
+ interface GigabitEthernet0/0/8
+  description CLIENTES-LAB-VLAN50
+  port link-type access
+  port default vlan 50
+  stp edged-port enable
+  quit
+ port-group group-member GigabitEthernet0/0/1 to GigabitEthernet0/0/8
+  undo poe enable
+  return
+save
+\end{lstlisting}
+
+\subsection{B8: validación de punta a punta}
+Con una laptop conectada sucesivamente a GE0/0/6 (VLAN 10), GE0/0/7 (VLAN 20) y GE0/0/8 (VLAN 50) se comprobaron DHCP, gateway, DNS, dominio, salida a internet y bloqueos. Para VLAN 30 y 40, que no tienen DHCP, GE0/0/7 se movió temporalmente a cada una y la laptop usó IP fija (10.10.30.10/24 y 10.10.40.10/24). Esos cambios \textbf{no se guardaron}: GE0/0/7 volvió a la VLAN 20 y los perfiles temporales de la laptop se borraron (EVID-068 a EVID-073). Los resultados están en la sección~\ref{sec:validacion}.
+
+Comandos usados en la laptop:
+\begin{lstlisting}
+nmcli device show enp0s20f0u1c2 | grep -E 'IP4\.(GATEWAY|DNS|DOMAIN)'
+getent hosts google.com
+ping -c 3 192.168.1.1                    ! debe fallar
+ping -c 3 192.168.0.1                    ! debe fallar
+\end{lstlisting}
+
+\subsection{B9: SFTP y respaldo}
+\begin{lstlisting}
+system-view
+ sftp server enable                        # el equipo respondio que ya estaba iniciado
+ ssh server acl 2000                       # la ACL de las vty no protege SFTP
+ ssh user eicladmin service-type all
+ ssh user eicladmin sftp-directory flash:
+ return
+save
+\end{lstlisting}
+
+Con SFTP limitado por la ACL 2000 se descargó \texttt{flash:/vrpcfg.zip} y se guardó una copia en texto de \fn{display current-configuration} en la carpeta privada (sección~\ref{sec:backup}).
+
+\subsection{Cambios aplicados al FortiGate}\label{sec:fgt}
+Cambios posteriores a la memoria del FortiGate v1.0. Deben incorporarse a su v1.1 (apéndice~\ref{ap:fgt}).
+
+\begin{itemize}
+  \item \textbf{NTP en modo servidor} solo en VLAN10-MGMT (D-007; EVID-049, EVID-058).
+  \item \textbf{Filtro de registros en memoria:} \texttt{severity} de \texttt{warning} a \texttt{information}. Sin este cambio no se guardaba ningún registro de tráfico (BLK-001; EVID-076, EVID-079).
+  \item \textbf{V5 y V6 cerradas:} contadores por política, registro de la política 1 y \texttt{set action deny} confirmado (EVID-037, EVID-074, EVID-080).
+  \item \textbf{Respaldo de la configuración} actualizado el 24/10/2026: reportado por el operador, sin captura (PEND-003).
+\end{itemize}
+
+\begin{lstlisting}
+config system ntp
+    set server-mode enable
+    set interface "VLAN10-MGMT"
+end
+config log memory filter
+    set severity information
+end
+\end{lstlisting}
+
+% =====================================================================
+\section{Validación}\label{sec:validacion}
+\subsection{Pruebas realizadas}
+24 pruebas \estado{OK} y 2 \estado{NO EJECUTADA}; no hubo pruebas fallidas.
+
+\small Fecha de ejecución: 23/10/2026 para TEST-001 y 24/10/2026 para el resto.
+
+{\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{1.35cm} L{2.7cm} L{3.15cm} L{3.6cm} L{1.4cm} L{2.4cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Objetivo} & \textbf{Método} & \textbf{Resultado obtenido} & \textbf{Evid.} & \textbf{Estado}\\
+  \midrule
+  \endhead
+  TEST-001 & Saber si el switch traía configuración previa & \fn{display saved-configuration} y \fn{display startup} & saved-configuration vacía; startup saved-configuration NULL; no requirió reset & EVID-009 & \estado{OK}\\
+  TEST-002 & Login de consola con usuario AAA & quit y login con eicladmin; \fn{display users} & Login correcto con cambio obligatorio de contraseña; CON 0 pass & EVID-025 & \estado{OK}\\
+  TEST-003 & Enlace físico del trunk (V7) & \fn{display interface GE0/0/1} y \fn{get system interface physical} en el FortiGate & 1000 Mbps full en ambos lados; 0 errores; STP forwarding & EVID-034 & \estado{OK}\\
+  TEST-004 & Tráfico etiquetado por el trunk (V7) & \fn{ping 10.10.10.1} y \fn{display arp} en el switch & 5/5 TTL 255; MAC del FortiGate aprendida por GE0/0/1 en VLAN 10 & EVID-039 & \estado{OK}\\
+  TEST-005 & Salida a internet desde MGMT & \fn{ping 1.1.1.1} desde el switch & 5/5, unos 9 ms & EVID-039 & \estado{OK}\\
+  TEST-006 & Bloqueo MGMT hacia la red del cuarto (V2) & \fn{ping 192.168.1.1} desde el switch & 0/5 & EVID-039 & \estado{OK}\\
+  TEST-007 & Administración desde la PC (V4) & route -p add 10.10.0.0/16 via 192.168.1.2; ssh eicladmin@10.10.10.2 & Login correcto; \fn{display users} muestra VTY 0 SSH desde la PC & EVID-048 & \estado{OK}\\
+  TEST-008 & Política 1 en deny (V6) & \fn{show full-configuration firewall policy 1} & \fn{set action deny}, status enable, logtraffic all & EVID-037 & \estado{OK}\\
+  TEST-009 & Cadena NTP interna (D-007) & \fn{diagnose sys ntp status} en FortiGate; \fn{display ntp-service status} en switch & FortiGate synchronized yes; switch stratum 3, referencia 10.10.10.1, desfase 0.0165 ms & EVID-059 & \estado{OK}\\
+  TEST-010 & Switch como raíz de STP & \fn{display stp | include CIST} & Prioridad 0; This bridge is the root; Primary root & EVID-057 & \estado{OK}\\
+  TEST-011 & Puertos sin uso apagados en VLAN 999 & \fn{display port vlan} y \fn{display interface brief} & Coincide con el plan; GE0/0/6-8 en VLAN 10, 20 y 50 & EVID-056 & \estado{OK}\\
+  TEST-012 & DHCP, gateway, DNS e internet en VLAN 10 (V1) & Laptop en GE0/0/6: ip address, nmcli, getent, ping & 10.10.10.100; gateway, DNS 1.1.1.1 y 8.8.8.8, eicl.internal; internet OK; SSH al switch OK & EVID-067 & \estado{OK}\\
+  TEST-013 & DHCP, gateway, DNS e internet en VLAN 20 (V1) & Laptop en GE0/0/7 & 10.10.20.100; todo correcto & EVID-065 & \estado{OK}\\
+  TEST-014 & DHCP, gateway, DNS e internet en VLAN 50 (V1) & Laptop en GE0/0/8 & 10.10.50.100; todo correcto & EVID-064 & \estado{OK}\\
+  TEST-015 & Conectividad en VLAN 30 con IP fija & GE0/0/7 temporal en VLAN 30; perfil nmcli 10.10.30.10/24 & Gateway 3/3, internet 3/3, DNS resuelve & EVID-069 & \estado{OK}\\
+  TEST-016 & Conectividad en VLAN 40 con IP fija & GE0/0/7 temporal en VLAN 40; perfil nmcli 10.10.40.10/24 & Gateway 3/3, internet 3/3, DNS resuelve & EVID-071 & \estado{OK}\\
+  TEST-017 & Bloqueo de las 5 VLAN hacia casa y cuarto (V2) & \fn{ping 192.168.1.1} y 192.168.0.1 desde cada VLAN & 0 respuestas desde VLAN 10, 20, 30, 40 y 50 & EVID-065 & \estado{OK}\\
+  TEST-018 & SRV no alcanza MGMT (V3) & \fn{ping 10.10.10.2} desde la laptop en VLAN 20 & 0/4 & EVID-062 & \estado{OK}\\
+  TEST-019 & MGMT sí alcanza SRV (V3) & \fn{ping 10.10.20.100} desde el switch & 5/5, TTL 63 (paso por el FortiGate) & EVID-066 & \estado{OK}\\
+  TEST-020 & MON, DMZ y LAB no alcanzan MGMT & \fn{ping 10.10.10.2} desde VLAN 30, 40 y 50 & 0 respuestas en las tres & EVID-069 & \estado{OK}\\
+  TEST-021 & Contadores por política (V5) & Policy \& Objects \textrightarrow{} IPv4 Policy, columna Bytes & Política 1: 2.94 kB (35 pings x 84 B); política 3: 840 B (10 x 84 B); política 2: 70.74 MB; política 4: 159.10 kB & EVID-074 & \estado{OK}\\
+  TEST-022 & Registro de bloqueos de la política 1 (V5) & Log \& Report \textrightarrow{} Forward Traffic, filtro Policy 1, tras ping desde el switch & 5 entradas Deny: policy violation, DENY-LAB-A-CASA (1) & EVID-080 & \estado{OK}\\
+  TEST-023 & SFTP limitado por ACL & \fn{display ssh server status} & SFTP IPv4 Enable; ACL4 2000; source Vlanif10 & EVID-081 & \estado{OK}\\
+  TEST-024 & Respaldo del switch (V8) & Descarga de \fn{flash:/vrpcfg.zip} por SFTP y copia de \fn{display current-configuration} & SW-LAB-01\_2026-10-24\_base-LAB-001.zip (11:21) y .txt (11:24) & EVID-082 & \estado{OK}\\
+  TEST-025 & Prueba negativa de la ACL 2000 & SSH a 10.10.10.2 desde un origen que el FortiGate deje pasar pero la ACL no & Hoy no existe ese origen: el FortiGate ya bloquea todo salvo MGMT y la PC & -- & \estado{NO EJECUTADA}\\
+  TEST-026 & El switch conserva la hora tras un apagado & Apagar, encender y \fn{display clock} antes de que sincronice NTP & El switch no se ha apagado desde B2 & -- & \estado{NO EJECUTADA}\\
+  \bottomrule
+\end{longtable}
+}
+
+\subsection{Trazabilidad con las validaciones de LAB-001}
+\begin{tabularx}{\textwidth}{L{1.0cm} Z L{3.2cm} L{2.6cm} L{1.4cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Validación} & \textbf{Pruebas} & \textbf{Evidencia} & \textbf{Estado}\\
+  \midrule
+  V1 & Un equipo en cada VLAN recibe IP, alcanza su gateway y sale a internet & TEST-012 a TEST-016 & EVID-061 a 071 & \estado{OK}\\
+  V2 & Desde las VLAN no se alcanza la red de casa ni la del cuarto & TEST-006, TEST-017 & EVID-039, 064, 065, 067 & \estado{OK}\\
+  V3 & SRV no alcanza MGMT y MGMT sí alcanza SRV & TEST-018, TEST-019 & EVID-062, 066 & \estado{OK}\\
+  V4 & La PC alcanza MGMT con la ruta estática & TEST-007 & EVID-046 a 048 & \estado{OK}\\
+  V5 & Contadores y registros por política & TEST-021, TEST-022 & EVID-074, 080 & \estado{OK}\\
+  V6 & La política 1 está en \emph{deny} & TEST-008 & EVID-037 & \estado{OK}\\
+  V7 & Trunk físico y etiquetado & TEST-003, TEST-004 & EVID-034, 039, 042 & \estado{OK}\\
+  V8 & Respaldo del switch & TEST-024 & EVID-082 & \estado{OK}\\
+  \bottomrule
+\end{tabularx}
+
+\newpage
+\subsection{Contadores por política}
+Los bytes de la política 1 cuadran con las pruebas: 2.94 kB = 35 pings $\times$ 84 bytes (30 de la laptop y 5 del switch). Política 3: 840 B = 10 $\times$ 84 bytes (ping del switch a la laptop en VLAN 20). Política 2: 70.74 MB; política 4: 159.10 kB (EVID-074).
+
+Comandos de verificación en el switch:
+\begin{lstlisting}
+display startup                          ! saved-configuration NULL al recibirlo
+display port vlan                        ! asignacion de VLAN por puerto
+display stp | include CIST               ! prioridad 0, Primary root
+display ntp-service status               ! synchronized, referencia 10.10.10.1
+display ssh server status                ! source Vlanif10, ACL4 2000, SFTP Enable
+ping 10.10.20.100                        ! MGMT -> SRV, TTL 63
+\end{lstlisting}
+
+\subsection{Pruebas no ejecutadas}
+\begin{description}
+  \item[TEST-025 Prueba negativa de la ACL 2000.] Requiere un origen que el FortiGate deje pasar y la ACL no. Hoy no existe: el FortiGate ya bloquea todo salvo MGMT y la PC.
+  \item[TEST-026 El switch conserva la hora tras un apagado.] El switch no se ha apagado desde B2 (PEND-005).
+\end{description}
+
+\newpage
+% =====================================================================
+\section{Troubleshooting}
+{\small
+\begin{longtable}{L{1.5cm} L{3.8cm} L{4.4cm} L{5.0cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Síntoma} & \textbf{Causa} & \textbf{Solución}\\
+  \midrule
+  \endhead
+  BLK-001 & Forward Traffic del FortiGate sin registros, aunque la política 1 tiene \texttt{logtraffic all} y la memoria está activa (EVID-075, EVID-078) & El filtro de memoria en \texttt{severity warning} descarta el tráfico, que se registra con nivel \emph{notice} (EVID-076) & \texttt{set severity information} en \texttt{config log memory filter}. Validado con 5 registros \emph{deny} (EVID-079, EVID-080)\\
+  BLK-002 & \texttt{stelnet server enable} no abre el puerto SSH; \texttt{SSH server source 0.0.0.0} (EVID-021) & Falta definir la interfaz de escucha del servidor SSH & \texttt{ssh server-source -i Vlanif10} en B6 (EVID-038, EVID-043)\\
+  BLK-003 & \texttt{save} devuelve \texttt{Incomplete command} (EVID-029) & Se ejecutó en la vista de sistema & Guardar con \texttt{save} en la vista de usuario (EVID-030)\\
+  BLK-004 & El primer \texttt{authentication-mode aaa} en la consola falló (EVID-024) & VRP pide verificar la contraseña de consola anterior y no aplica nada si falla & Repetir con la contraseña anterior correcta y comprobar el login antes de guardar\\
+  -- & \texttt{SSH\_FAIL ... The SFTP server was disable} al abrir SSH desde MobaXterm (EVID-083) & MobaXterm abre además un canal SFTP para su explorador lateral; la sesión Stelnet sí entraba & Habilitar SFTP limitado por la ACL 2000 en B9 (D-010, EVID-081)\\
+  -- & Aviso de OpenSSH: \emph{connection is not using a post-quantum key exchange algorithm} (EVID-061) & VRP V200R020 no soporta intercambio de llaves post-cuántico & Aceptado en laboratorio; solo se resuelve con firmware nuevo\\
+  -- & \texttt{display elabel brief} da \texttt{Too many parameters} (EVID-004) & El parámetro no existe en esta versión de VRP & Consultar el número de serie con \texttt{display esn}\\
+  \bottomrule
+\end{longtable}
+}
+
+Todos los bloqueos quedaron \estado{RESUELTO}; no hay bloqueos activos.
+
+\newpage
+% =====================================================================
+\section{Backup y recuperación}\label{sec:backup}
+\subsection{Respaldo de la configuración}
+\begin{enumerate}
+  \item Descarga por SFTP (desde la PC de administración, permitida por la ACL 2000) de \texttt{flash:/vrpcfg.zip}, guardado como \fn{SW-LAB-01\_2026-10-24\_base-LAB-001.zip} (11:21).
+  \item Copia en texto de \fn{display current-configuration}, guardada como \fn{SW-LAB-01\_2026-10-24\_base-LAB-001.txt} (11:24).
+\end{enumerate}
+Los dos archivos están en la carpeta privada del operador, fuera del repositorio (EVID-082, TEST-024). La copia saneada del \texttt{.txt} para este documento está pendiente (PEND-006); mientras tanto, el apéndice~\ref{ap:config} trae la configuración reconstruida.
+
+
+\subsection{Rutas de acceso}
+\begin{description}
+  \item[SSH en banda.] Por \texttt{Vlanif10} (10.10.10.2) desde la PC de administración o desde la VLAN 10, según la ACL 2000.
+  \item[Consola.] Con el usuario \texttt{eicladmin} (AAA). La ACL 2000 se aplica a las vty y al servidor SSH, no a la consola.
+\end{description}
+
+% =====================================================================
+\section{Lecciones aprendidas}
+\begin{itemize}
+  \item En VRP, \texttt{save} se ejecuta en la vista de usuario; en la vista de sistema devuelve \texttt{Incomplete command}.
+  \item \texttt{stelnet server enable} no basta: el servidor SSH necesita una interfaz de escucha (\texttt{ssh server-source}).
+  \item La ACL de las vty no protege SFTP; para eso está \texttt{ssh server acl}.
+  \item Antes de pasar la consola a AAA hay que tener a mano la contraseña de consola anterior y comprobar el nuevo login antes de guardar.
+  \item Un registro vacío no significa que no haya tráfico: en el FortiGate, el filtro de severidad de la memoria descartaba todo el tráfico.
+  \item Mover un puerto de VLAN sin guardar permite probar segmentos sin DHCP y volver al estado validado sin riesgo.
+  \item Las pruebas negativas (bloqueos hacia casa, cuarto y MGMT) son tan importantes como las positivas, y los contadores por política sirven para comprobar que cada prueba pasó por la regla esperada.
+  \item Un equipo recibido puede traer el reloj muy desfasado; NTP desde una fuente interna lo corrige.
+  \item Las capturas pueden contener datos sensibles (MAC, hashes, nombres de interfaz que incluyen la MAC); se revisan antes de publicarlas.
+\end{itemize}
+
+\newpage
+% =====================================================================
+\section{Pendientes y siguiente paso}
+\subsection{Pendientes del componente}
+{\small
+\begin{longtable}{L{1.6cm} L{4.7cm} L{3.6cm} L{4.8cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Dato} & \textbf{Dónde se usa} & \textbf{Cómo verificar}\\
+  \midrule
+  \endhead
+  PEND-001 & Foto de la etiqueta del switch (E-B01) y número de serie & Levantamiento; inventario privado & Tomar la foto; guardar el original en la carpeta privada y tapar el serial en la versión pública\\
+  PEND-002 & Log de la primera sesión de consola de MobaXterm (E-B02) & B0 & Buscar el log guardado; si no existe, marcar la evidencia como no disponible\\
+  PEND-003 & Captura, nombre real y cifrado del respaldo del FortiGate del 24/10/2026 (E-34) & Memoria del FortiGate & Captura de la carpeta privada; confirmar si se cifró y que la contraseña está en el gestor\\
+  PEND-004 & Si se aplicó \texttt{set output standard} en el FortiGate para la copia en texto & Memoria del FortiGate & \texttt{show system console}\\
+  PEND-005 & Si el switch conserva la hora tras un apagado (TEST-026) & Riesgos; este documento & Apagar y encender; \texttt{display clock} antes de que sincronice NTP\\
+  PEND-006 & Copia saneada del respaldo \texttt{.txt} del switch & Apéndice de configuración & Quitar hashes y MAC de \fn{SW-LAB-01\_2026-10-24\_base-LAB-001.txt} y adjuntarla al chat de documentación\\
+  PEND-007 & Si la IP de la PC de administración se tapa en las capturas públicas & Datos sensibles & Resuelto en esta versión: sustituida por \texttt{<IP-PC-ADMIN>} en el texto y tapada en las capturas\\
+  \bottomrule
+\end{longtable}
+}
+
+Velocidad y NIC de los enlaces planeados LINK-003 a LINK-006: \pc.
+
+\subsection{Planeado (no implementado)}
+\begin{itemize}
+  \item Conectar SRV-01 a SRV-03 en GE0/0/2--4 (LAB-002).
+  \item Convertir GE0/0/5 en trunk hacia el Omada (componente C).
+  \item SNMP del switch desde VLAN 30: requiere una política MON \textrightarrow{} MGMT en el FortiGate y ampliar la ACL 2000 (LAB-005).
+  \item Syslog del FortiGate y del switch; registro de la regla implícita (LAB-006).
+  \item VLAN 60 (LAB-008) y VLAN 70 (LAB-012).
+\end{itemize}
+
+\newpage
+\subsection{Siguiente paso}
+\textbf{Componente C (Omada / TL-SG108):} verificar el modelo en la etiqueta, hacer el levantamiento, configurar el trunk desde GE0/0/5 y repetir las pruebas aplicables. Después: D (rack y cableado), E (topología final) y G (entregables \texttt{.md}).
+
+\textbf{Documentación pendiente:} memoria del FortiGate v1.1 con la sección~\ref{sec:fgt} y LAB-000 v0.3 (actividad 7 y VAL-005 completadas, SW-01 recibido, puertos de los enlaces asignados).
+
+% =====================================================================
+\appendix
+\renewcommand{\thesection}{\Alph{section}}
+\titleformat{\section}{\Large\bfseries\color{navy}}{Apéndice \thesection.}{0.6em}{}
+
+\section{Configuración aplicada al switch (reconstruida)}\label{ap:config}
+Comandos aplicados de B2 a B9, en orden, reconstruidos a partir de las evidencias. No es una exportación del equipo; la exportación real vive en la carpeta privada (EVID-082). Archivo fuente: \fn{configs/SW-LAB-01\_comandos-aplicados-reconstruidos.txt}.
+
+\lstinputlisting{configs/SW-LAB-01_comandos-aplicados-reconstruidos.txt}
+
+\section{Cambios del FortiGate para su v1.1}\label{ap:fgt}
+Archivo fuente: \fn{configs/FGT-LAB-01\_cambios-2026-10-24-reconstruidos.txt}.
+
+\lstinputlisting{configs/FGT-LAB-01_cambios-2026-10-24-reconstruidos.txt}
+
+\newpage
+\section{Evidencias}\label{ap:evid}
+Capturas de la consola del switch, de la interfaz del FortiGate, de la PC de administración y de la laptop de pruebas. Están censuradas según los criterios de protección de la información del proyecto (detalle en el apéndice~\ref{ap:prot}): MAC del switch, del FortiGate y de la laptop (incluidos los nombres de interfaz \texttt{wlx\ldots} y \texttt{enx\ldots} que contienen la MAC), hash de la contraseña de consola de fábrica (EVID-007, EVID-023) UUID de la política 1 y de los perfiles de \texttt{nmcli}, IP de la PC de administración (EVID-018, EVID-022, EVID-048, EVID-070), usuario y nombre de equipo de la laptop en el prompt y en \texttt{sudo} (EVID-061 a EVID-073), direcciones IPv6 de enlace local de la laptop , versión exacta de Windows (EVID-046) y versión exacta de parche de VRP y del firmware de los componentes (EVID-002, EVID-007 y EVID-009). Se excluyeron las dos capturas de la tabla de credenciales del operador.
+
+\subsection*{Correspondencia de identificadores}
+{\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{1.6cm} L{2.1cm} L{11.6cm}}
+  \toprule
+  \cab\textbf{EVID} & \textbf{ID en el chat} & \textbf{Qué demuestra}\\
+  \midrule
+  \endhead
+  EVID-001 & E-B03 a E-B07 & Salida completa del levantamiento inicial (saneada)\\
+  EVID-002 & E-B03 & Versión de VRP (parche redactado), 512 MB RAM y flash\\
+  EVID-003 & E-B04 & Modelo S5735-L8P4S-A1, estado Normal\\
+  EVID-004 & - & display elabel brief no existe en esta versión\\
+  EVID-005 & E-B05 & 12 puertos down sin cables al recibirlo\\
+  EVID-006 & E-B06 & Solo VLAN 1 de fábrica\\
+  EVID-007 & E-B07 & Configuración de fábrica (hash redactado)\\
+  EVID-008 & E-B08 & Sin configuración guardada\\
+  EVID-009 & E-B08 & startup saved-configuration NULL\\
+  EVID-010 & E-B09 & Hostname SW-LAB-01 y zona CST UTC-6; reloj en 2021\\
+  EVID-011 & E-B10 & Hora ajustada y primer save\\
+  EVID-012 & - & Mensajes del sistema apagados en la sesión\\
+  EVID-013 & E-B11 & Entrada a la vista AAA\\
+  EVID-014 & E-B11 & Alta de eicladmin con contraseña interactiva\\
+  EVID-015 & E-B11 & Privilegio 15\\
+  EVID-016 & E-B12 & Llave RSA de 3072 bits\\
+  EVID-017 & E-B12 & Stelnet activo, usuario SSH y Telnet apagado\\
+  EVID-018 & E-B13 & Creación de la ACL 2000\\
+  EVID-019 & E-B14 & vty 0-4 y 16-20 en AAA con ACL\\
+  EVID-020 & E-B14 & eicladmin activo, MS, nivel 15\\
+  EVID-021 & E-B14 & SSH sin interfaz de escucha (BLK-002)\\
+  EVID-022 & E-B13 & Tres reglas de la ACL 2000\\
+  EVID-023 & E-B14 & vty con ACL y AAA (hash redactado)\\
+  EVID-024 & E-B15 & Consola en AAA tras verificar la contraseña anterior\\
+  EVID-025 & E-B15 & Login con eicladmin y cambio obligatorio\\
+  EVID-026 & E-B15 & Consola autenticada y save\\
+  EVID-027 & E-B16 & Creación de VLAN y descripciones\\
+  EVID-028 & E-B16 & 7 VLAN con nombres del FortiGate\\
+  EVID-029 & E-B16 & save en vista de sistema da error (BLK-003)\\
+  EVID-030 & E-B16 & save correcto en vista de usuario\\
+  EVID-031 & E-B17 & Trunk GE0/0/1, PVID 999, VLAN permitidas\\
+  EVID-032 & E-B18 & Negociación 1000M y STP forwarding al conectar\\
+  EVID-033 & E-B18 & GE0/0/1 up/up\\
+  EVID-034 & E-B18 & 1000 Mbps full, 0 errores (MAC redactada)\\
+  EVID-035 & E-B18 & GE0/0/1 designado en forwarding\\
+  EVID-036 & E-B19 & lan5 up a 1000 Mbps full, sin IP\\
+  EVID-037 & E-29 & Política 1 con set action deny (V6)\\
+  EVID-038 & E-B20 & Vlanif10, ruta, ssh server-source, Vlanif1 apagada\\
+  EVID-039 & E-B21 & Gateway 5/5, internet 5/5, cuarto 0/5\\
+  EVID-040 & E-B22 & Vlanif10 up con 10.10.10.2\\
+  EVID-041 & E-B22 & Ruta por defecto a 10.10.10.1\\
+  EVID-042 & E-B22 & ARP del FortiGate por GE0/0/1 en VLAN 10 (MAC redactadas)\\
+  EVID-043 & E-B22 & SSH escuchando en Vlanif10\\
+  EVID-044 & E-B22 & Contadores de entrada de GE0/0/1 (MAC redactada)\\
+  EVID-045 & E-B23 & save de B6\\
+  EVID-046 & E-B24 & route -p add en la PC\\
+  EVID-047 & E-B25 & SSH desde la PC; llave ECDSA\\
+  EVID-048 & E-B25 & Sesión VTY SSH desde la PC de administración (IP tapada)\\
+  EVID-049 & E-30 & NTP server-mode en VLAN10-MGMT\\
+  EVID-050 & E-B26 & ntp-service unicast-server 10.10.10.1\\
+  EVID-051 & E-B27 & stp root primary y bpdu-protection\\
+  EVID-052 & E-B27 & Descripciones de puertos reservados\\
+  EVID-053 & E-B27 & Puertos reservados y sin uso a VLAN 999 y apagados\\
+  EVID-054 & E-B27 & GE0/0/6-8 access 10, 20 y 50, edge\\
+  EVID-055 & E-B27 & undo poe enable en GE0/0/1-8\\
+  EVID-056 & E-B27 & Plan de puertos aplicado\\
+  EVID-057 & E-B28 & STP raíz primaria; configuración de GE0/0/6 (MAC redactada)\\
+  EVID-058 & E-30 & FortiGate synchronized yes\\
+  EVID-059 & E-B26 & Switch sincronizado con 10.10.10.1, stratum 3\\
+  EVID-060 & E-B27 & save de B7\\
+  EVID-061 & E-B29 & VLAN 10: DHCP, gateway, internet y SSH al switch (MAC redactadas)\\
+  EVID-062 & E-B30 & VLAN 20: DHCP, gateway, internet; MGMT bloqueado\\
+  EVID-063 & E-B31 & VLAN 50: DHCP, gateway, internet; MGMT bloqueado\\
+  EVID-064 & E-B32 & VLAN 50: DNS, dominio y bloqueo de casa y cuarto\\
+  EVID-065 & E-B33 & VLAN 20: DNS, dominio y bloqueo de casa y cuarto\\
+  EVID-066 & E-B33 & Switch a 10.10.20.100: 5/5, TTL 63\\
+  EVID-067 & E-B34 & VLAN 10: DNS, dominio y bloqueo de casa y cuarto\\
+  EVID-068 & E-B35 & GE0/0/7 temporal a VLAN 30\\
+  EVID-069 & E-B35 & VLAN 30 con IP fija: gateway, internet, DNS; bloqueos\\
+  EVID-070 & E-B36 & GE0/0/7 temporal a VLAN 40\\
+  EVID-071 & E-B36 & VLAN 40 con IP fija: gateway, internet, DNS; bloqueos\\
+  EVID-072 & E-B37 & GE0/0/7 de vuelta en VLAN 20\\
+  EVID-073 & E-B37 & Perfiles temporales de la laptop borrados\\
+  EVID-074 & E-31 & Contadores por política (V5)\\
+  EVID-075 & - & Forward Traffic sin resultados (BLK-001)\\
+  EVID-076 & E-33 & Filtro de memoria en severity warning (causa)\\
+  EVID-077 & E-32 & Pings de prueba para generar registros\\
+  EVID-078 & - & Sigue vacío antes de la corrección\\
+  EVID-079 & E-33 & Filtro cambiado a severity information\\
+  EVID-080 & E-32 & 5 registros deny de la política 1 (MAC redactada)\\
+  EVID-081 & E-B38 & SFTP y ssh server acl 2000\\
+  EVID-082 & E-B39 & Respaldos .zip y .txt del switch\\
+  EVID-083 & - & SSH\_FAIL causado por el explorador SFTP de MobaXterm\\
+  \bottomrule
+\end{longtable}
+}
+
+Sin evidencia en el paquete: E-B01 (foto de la etiqueta), E-B02 (log de la primera sesión) y E-34 (respaldo del FortiGate). Ver PEND-001 a PEND-003.
+
+\subsection*{Capturas y salidas}
+
+\needspace{8\baselineskip}
+{\small\color{muted}\textbf{EVID-001} (E-B03 a E-B07): Salida completa del levantamiento inicial (saneada). Archivo \fn{EVID-001\_salida-consola-levantamiento-b1.txt}.}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{evidence/EVID-001_salida-consola-levantamiento-b1.txt}
+\bigskip
+\evid{0.68}{EVID-002_sw-display-version.png}{\textbf{EVID-002} (E-B03): Versión de VRP (parche redactado), 512 MB RAM y flash.}
+\evid{0.73}{EVID-003_sw-display-device.png}{\textbf{EVID-003} (E-B04): Modelo S5735-L8P4S-A1, estado Normal.}
+\evid{0.45}{EVID-004_sw-elabel-brief-error.png}{\textbf{EVID-004}: display elabel brief no existe en esta versión.}
+\evid{0.66}{EVID-005_sw-interface-brief-inicial.png}{\textbf{EVID-005} (E-B05): 12 puertos down sin cables al recibirlo.}
+\evid{0.68}{EVID-006_sw-display-vlan-inicial.png}{\textbf{EVID-006} (E-B06): Solo VLAN 1 de fábrica.}
+\evid{0.51}{EVID-007_sw-current-config-inicial.png}{\textbf{EVID-007} (E-B07): Configuración de fábrica (hash redactado).}
+\evid{0.45}{EVID-008_sw-saved-config-vacia.png}{\textbf{EVID-008} (E-B08): Sin configuración guardada.}
+\evid{0.80}{EVID-009_sw-display-startup-null.png}{\textbf{EVID-009} (E-B08): startup saved-configuration NULL.}
+\evid{0.99}{EVID-010_sw-sysname-zona-horaria.png}{\textbf{EVID-010} (E-B09): Hostname SW-LAB-01 y zona CST UTC-6; reloj en 2021.}
+\evid{0.99}{EVID-011_sw-hora-y-primer-save.png}{\textbf{EVID-011} (E-B10): Hora ajustada y primer save.}
+\evid{0.45}{EVID-012_sw-undo-terminal-monitor.png}{\textbf{EVID-012}: Mensajes del sistema apagados en la sesión.}
+\evid{0.47}{EVID-013_sw-vista-aaa.png}{\textbf{EVID-013} (E-B11): Entrada a la vista AAA.}
+\evid{0.99}{EVID-014_sw-usuario-local.png}{\textbf{EVID-014} (E-B11): Alta de eicladmin con contraseña interactiva.}
+\evid{0.99}{EVID-015_sw-privilegio-15.png}{\textbf{EVID-015} (E-B11): Privilegio 15.}
+\evid{0.69}{EVID-016_sw-llave-rsa-3072.png}{\textbf{EVID-016} (E-B12): Llave RSA de 3072 bits.}
+\evid{1.00}{EVID-017_sw-stelnet-telnet-off.png}{\textbf{EVID-017} (E-B12): Stelnet activo, usuario SSH y Telnet apagado.}
+\evid{0.67}{EVID-018_sw-acl-2000.png}{\textbf{EVID-018} (E-B13): Creación de la ACL 2000.}
+\evid{0.99}{EVID-019_sw-vty-aaa-acl.png}{\textbf{EVID-019} (E-B14): vty 0-4 y 16-20 en AAA con ACL.}
+\evid{0.82}{EVID-020_sw-display-local-user.png}{\textbf{EVID-020} (E-B14): eicladmin activo, MS, nivel 15.}
+\evid{0.47}{EVID-021_sw-ssh-status-sin-source.png}{\textbf{EVID-021} (E-B14): SSH sin interfaz de escucha (BLK-002).}
+\evid{0.45}{EVID-022_sw-display-acl-2000.png}{\textbf{EVID-022} (E-B13): Tres reglas de la ACL 2000.}
+\evid{0.90}{EVID-023_sw-user-interface-config.png}{\textbf{EVID-023} (E-B14): vty con ACL y AAA (hash redactado).}
+\evid{0.98}{EVID-024_sw-consola-aaa.png}{\textbf{EVID-024} (E-B15): Consola en AAA tras verificar la contraseña anterior.}
+\evid{0.99}{EVID-025_sw-login-cambio-password.png}{\textbf{EVID-025} (E-B15): Login con eicladmin y cambio obligatorio.}
+\evid{0.99}{EVID-026_sw-display-users-save-b3.png}{\textbf{EVID-026} (E-B15): Consola autenticada y save.}
+\evid{0.93}{EVID-027_sw-vlan-batch.png}{\textbf{EVID-027} (E-B16): Creación de VLAN y descripciones.}
+\evid{0.93}{EVID-028_sw-display-vlan-b4.png}{\textbf{EVID-028} (E-B16): 7 VLAN con nombres del FortiGate.}
+\evid{0.93}{EVID-029_sw-save-error-vista-sistema.png}{\textbf{EVID-029} (E-B16): save en vista de sistema da error (BLK-003).}
+\evid{0.98}{EVID-030_sw-save-b4.png}{\textbf{EVID-030} (E-B16): save correcto en vista de usuario.}
+\evid{0.74}{EVID-031_sw-trunk-ge001.png}{\textbf{EVID-031} (E-B17): Trunk GE0/0/1, PVID 999, VLAN permitidas.}
+\evid{0.99}{EVID-032_sw-enlace-up-stp-log.png}{\textbf{EVID-032} (E-B18): Negociación 1000M y STP forwarding al conectar.}
+\evid{0.73}{EVID-033_sw-interface-brief-ge001-up.png}{\textbf{EVID-033} (E-B18): GE0/0/1 up/up.}
+\evid{0.77}{EVID-034_sw-interface-ge001-1000-full.png}{\textbf{EVID-034} (E-B18): 1000 Mbps full, 0 errores (MAC redactada).}
+\evid{0.84}{EVID-035_sw-stp-brief-forwarding.png}{\textbf{EVID-035} (E-B18): GE0/0/1 designado en forwarding.}
+\evid{0.45}{EVID-036_fgt-lan5-up.png}{\textbf{EVID-036} (E-B19): lan5 up a 1000 Mbps full, sin IP.}
+\evid{0.49}{EVID-037_fgt-policy1-deny.png}{\textbf{EVID-037} (E-29): Política 1 con set action deny (V6).}
+\evid{0.87}{EVID-038_sw-vlanif10-ruta-ssh-source.png}{\textbf{EVID-038} (E-B20): Vlanif10, ruta, ssh server-source, Vlanif1 apagada.}
+\evid{0.66}{EVID-039_sw-pings-gw-internet-cuarto.png}{\textbf{EVID-039} (E-B21): Gateway 5/5, internet 5/5, cuarto 0/5.}
+\evid{0.68}{EVID-040_sw-ip-interface-brief.png}{\textbf{EVID-040} (E-B22): Vlanif10 up con 10.10.10.2.}
+\evid{0.71}{EVID-041_sw-tabla-rutas.png}{\textbf{EVID-041} (E-B22): Ruta por defecto a 10.10.10.1.}
+\evid{0.72}{EVID-042_sw-arp.png}{\textbf{EVID-042} (E-B22): ARP del FortiGate por GE0/0/1 en VLAN 10 (MAC redactadas).}
+\evid{0.52}{EVID-043_sw-ssh-status-vlanif10.png}{\textbf{EVID-043} (E-B22): SSH escuchando en Vlanif10.}
+\evid{0.77}{EVID-044_sw-contadores-ge001.png}{\textbf{EVID-044} (E-B22): Contadores de entrada de GE0/0/1 (MAC redactada).}
+\evid{0.60}{EVID-045_sw-save-b6.png}{\textbf{EVID-045} (E-B23): save de B6.}
+\evid{0.45}{EVID-046_pc-ruta-persistente.png}{\textbf{EVID-046} (E-B24): route -p add en la PC.}
+\evid{0.67}{EVID-047_pc-ssh-al-switch.png}{\textbf{EVID-047} (E-B25): SSH desde la PC; llave ECDSA.}
+\evid{0.58}{EVID-048_sw-display-users-vty.png}{\textbf{EVID-048} (E-B25): Sesión VTY SSH desde la PC de administración (IP tapada).}
+\evid{0.45}{EVID-049_fgt-ntp-server-mode.png}{\textbf{EVID-049} (E-30): NTP server-mode en VLAN10-MGMT.}
+\evid{0.71}{EVID-050_sw-ntp-cliente.png}{\textbf{EVID-050} (E-B26): ntp-service unicast-server 10.10.10.1.}
+\evid{0.45}{EVID-051_sw-stp-root-bpdu.png}{\textbf{EVID-051} (E-B27): stp root primary y bpdu-protection.}
+\evid{0.45}{EVID-052_sw-descripciones-puertos.png}{\textbf{EVID-052} (E-B27): Descripciones de puertos reservados.}
+\evid{0.96}{EVID-053_sw-puertos-999-apagados.png}{\textbf{EVID-053} (E-B27): Puertos reservados y sin uso a VLAN 999 y apagados.}
+\evid{0.62}{EVID-054_sw-puertos-access.png}{\textbf{EVID-054} (E-B27): GE0/0/6-8 access 10, 20 y 50, edge.}
+\evid{0.61}{EVID-055_sw-poe-apagado.png}{\textbf{EVID-055} (E-B27): undo poe enable en GE0/0/1-8.}
+\evid{0.61}{EVID-056_sw-port-vlan-interface-brief.png}{\textbf{EVID-056} (E-B27): Plan de puertos aplicado.}
+\evid{0.57}{EVID-057_sw-stp-raiz-ge006.png}{\textbf{EVID-057} (E-B28): STP raíz primaria; configuración de GE0/0/6 (MAC redactada).}
+\evid{0.45}{EVID-058_fgt-ntp-sincronizado.png}{\textbf{EVID-058} (E-30): FortiGate synchronized yes.}
+\evid{0.50}{EVID-059_sw-ntp-sincronizado.png}{\textbf{EVID-059} (E-B26): Switch sincronizado con 10.10.10.1, stratum 3.}
+\evid{0.50}{EVID-060_sw-save-b7.png}{\textbf{EVID-060} (E-B27): save de B7.}
+\evid{0.62}{EVID-061_laptop-vlan10-pruebas-iniciales.png}{\textbf{EVID-061} (E-B29): VLAN 10: DHCP, gateway, internet y SSH al switch (MAC redactadas).}
+\evid{0.62}{EVID-062_laptop-vlan20-pruebas-iniciales.png}{\textbf{EVID-062} (E-B30): VLAN 20: DHCP, gateway, internet; MGMT bloqueado.}
+\evid{0.61}{EVID-063_laptop-vlan50-pruebas-iniciales.png}{\textbf{EVID-063} (E-B31): VLAN 50: DHCP, gateway, internet; MGMT bloqueado.}
+\evid{0.83}{EVID-064_laptop-vlan50-dns-y-bloqueos.png}{\textbf{EVID-064} (E-B32): VLAN 50: DNS, dominio y bloqueo de casa y cuarto.}
+\evid{0.86}{EVID-065_laptop-vlan20-dns-y-bloqueos.png}{\textbf{EVID-065} (E-B33): VLAN 20: DNS, dominio y bloqueo de casa y cuarto.}
+\evid{0.86}{EVID-066_sw-ping-mgmt-a-srv.png}{\textbf{EVID-066} (E-B33): Switch a 10.10.20.100: 5/5, TTL 63.}
+\evid{0.85}{EVID-067_laptop-vlan10-dns-y-bloqueos.png}{\textbf{EVID-067} (E-B34): VLAN 10: DNS, dominio y bloqueo de casa y cuarto.}
+\evid{0.85}{EVID-068_sw-ge007-a-vlan30.png}{\textbf{EVID-068} (E-B35): GE0/0/7 temporal a VLAN 30.}
+\evid{0.69}{EVID-069_laptop-vlan30-ip-fija.png}{\textbf{EVID-069} (E-B35): VLAN 30 con IP fija: gateway, internet, DNS; bloqueos.}
+\evid{0.86}{EVID-070_sw-ge007-a-vlan40.png}{\textbf{EVID-070} (E-B36): GE0/0/7 temporal a VLAN 40.}
+\evid{0.67}{EVID-071_laptop-vlan40-ip-fija.png}{\textbf{EVID-071} (E-B36): VLAN 40 con IP fija: gateway, internet, DNS; bloqueos.}
+\evid{0.83}{EVID-072_sw-ge007-regreso-vlan20.png}{\textbf{EVID-072} (E-B37): GE0/0/7 de vuelta en VLAN 20.}
+\evid{0.86}{EVID-073_laptop-borrado-perfiles.png}{\textbf{EVID-073} (E-B37): Perfiles temporales de la laptop borrados.}
+\evid{1.00}{EVID-074_fgt-contadores-politicas.png}{\textbf{EVID-074} (E-31): Contadores por política (V5).}
+\evid{1.00}{EVID-075_fgt-forward-traffic-vacio.png}{\textbf{EVID-075}: Forward Traffic sin resultados (BLK-001).}
+\evid{0.45}{EVID-076_fgt-log-memory-warning.png}{\textbf{EVID-076} (E-33): Filtro de memoria en severity warning (causa).}
+\evid{0.45}{EVID-077_sw-pings-prueba-registro.png}{\textbf{EVID-077} (E-32): Pings de prueba para generar registros.}
+\evid{1.00}{EVID-078_fgt-forward-traffic-sin-resultados.png}{\textbf{EVID-078}: Sigue vacío antes de la corrección.}
+\evid{0.45}{EVID-079_fgt-log-severity-information.png}{\textbf{EVID-079} (E-33): Filtro cambiado a severity information.}
+\evid{1.00}{EVID-080_fgt-forward-traffic-deny.png}{\textbf{EVID-080} (E-32): 5 registros deny de la política 1 (MAC redactada).}
+\evid{0.80}{EVID-081_sw-sftp-acl-servidor-ssh.png}{\textbf{EVID-081} (E-B38): SFTP y ssh server acl 2000.}
+\evid{0.50}{EVID-082_respaldos-switch-carpeta-privada.png}{\textbf{EVID-082} (E-B39): Respaldos .zip y .txt del switch.}
+\needspace{8\baselineskip}
+{\small\color{muted}\textbf{EVID-083}: SSH\_FAIL causado por el explorador SFTP de MobaXterm. Archivo \fn{EVID-083\_sw-ssh-fail-explorador-sftp.txt}.}
+\lstinputlisting[basicstyle=\ttfamily\scriptsize]{evidence/EVID-083_sw-ssh-fail-explorador-sftp.txt}
+\bigskip
+
+\clearpage
+\section{Protección de la información}\label{ap:prot}
+Criterio del proyecto: se censura cualquier dato que no sea de dominio público o que pueda representar una vulnerabilidad, aunque sea mínima; en caso de duda, se censura. En el texto se usan marcadores (\texttt{<IP-PC-ADMIN>}, \texttt{<REDACTADO>}); en las capturas, recuadros negros opacos, con la etiqueta [REDACTADO] cuando hay espacio. Los originales sin censura solo se guardan en la carpeta privada del operador.
+
+\textbf{Canales revisados en esta versión (1.1):} texto general (incluidos tablas, pies de figura y metadatos del PDF), comandos y salidas de consola en forma de texto (bloques de código, \fn{configs/} y evidencias \texttt{.txt}) e imágenes (las 81 capturas, revisadas completas, incluidos prompts, barras de título y fondos).
+
+\subsection{Datos censurados}
+{\small
+\begin{longtable}{L{3.4cm} L{6.0cm} L{5.6cm}}
+  \toprule
+  \cab\textbf{Dato} & \textbf{Tratamiento (dónde se censuró)} & \textbf{Motivo de protección}\\
+  \midrule
+  \endhead
+  Contraseñas de \texttt{eicladmin} & Capturadas de forma interactiva; no aparecen en ningún texto ni captura. & Acceso directo a los equipos.\\
+  Hash de la contraseña de consola de fábrica & \texttt{<REDACTADO>} en EVID-001; recuadro en EVID-007 y EVID-023. & Permite ataques de diccionario fuera de línea.\\
+  Tabla de credenciales del operador & Las dos capturas se excluyeron del paquete. & Credenciales en claro.\\
+  IP de la PC de administración & \texttt{<IP-PC-ADMIN>} en el texto, en \fn{configs/} y en EVID-083; recuadro en EVID-018, EVID-022, EVID-048 y EVID-070. & Es el único origen autorizado (ACL 2000 y trusted hosts) para administrar desde fuera del laboratorio.\\
+  MAC del switch, del FortiGate y de la laptop & Recuadro en EVID-034, EVID-042, EVID-044, EVID-057, EVID-061 a EVID-071 y EVID-080, incluidos los nombres de interfaz \texttt{wlx\ldots} y \texttt{enx\ldots}. & Identifican el hardware y permiten rastrearlo o suplantarlo.\\
+  Número de serie (ESN) & No se registra; solo en el inventario privado (PEND-001). & Identifica el equipo ante el fabricante.\\
+  UUID de la política 1 y de los perfiles de \texttt{nmcli} & Recuadro en EVID-037 y EVID-069, EVID-071 y EVID-073. & Identifican de forma única la configuración.\\
+  Usuario y nombre de equipo de la laptop & Recuadro en el prompt de EVID-061 a EVID-073 y en el aviso de \texttt{sudo} de EVID-071. & Vinculan un alias personal con el laboratorio.\\
+  IPv6 de enlace local de la laptop & Recuadro en EVID-061 a EVID-071. & Huella del equipo personal; se tapan por prudencia.\\
+  Versión exacta de Windows de la PC & Recuadro en EVID-046. & Revela el nivel de parches del equipo de administración.\\
+  Versión exacta de parche de VRP y firmware de los componentes & Generalizada a «VRP V200R020» en el texto; \texttt{<REDACTADO>} en EVID-001 y en \fn{configs/}; recuadro en EVID-002, EVID-007 y EVID-009. Versión exacta de FortiOS generalizada a «6.x». & Junto con la topología, orienta la búsqueda de vulnerabilidades públicas de esa versión (regla D-022 de la norma de protección).\\
+  Respaldos del switch y del FortiGate & No se adjuntan; viven en la carpeta privada. & Contienen hashes y la configuración completa.\\
+  \bottomrule
+\end{longtable}
+}
+
+\needspace{12\baselineskip}
+\subsection{Datos visibles a propósito}
+{\small
+\begin{longtable}{L{3.4cm} L{6.0cm} L{5.6cm}}
+  \toprule
+  \cab\textbf{Dato} & \textbf{Dónde aparece} & \textbf{Motivo por el que es seguro}\\
+  \midrule
+  \endhead
+  Usuario \texttt{eicladmin} & Texto, configuración y capturas. & Excepción decidida por el propietario: el acceso está limitado por la ACL 2000 a la VLAN de gestión y a la PC de administración, y la contraseña no aparece.\\
+  Plan de direccionamiento del laboratorio (10.10.0.0/16, VLAN, gateways, 10.10.10.2) & Todo el documento. & Es el diseño que se documenta; no es accesible desde fuera del laboratorio.\\
+  Gateways domésticos (192.168.0.1, 192.168.1.1) y WAN 192.168.1.2 & Topología y pruebas de bloqueo. & Rangos privados genéricos de fábrica; son la evidencia de V2.\\
+  IP públicas (1.1.1.1, 8.8.8.8, servidores de pool.ntp.org y direcciones de google.com) & Pruebas de salida a internet y NTP. & Servicios públicos usados como destino de prueba.\\
+  Huella de la llave SSH del switch & EVID-047 y EVID-061. & Llave pública por naturaleza.\\
+  Prompt \texttt{/home/mobaxterm} & Capturas de MobaXterm (EVID-036, EVID-047, EVID-049, EVID-066 y otras). & Ruta genérica de la aplicación, igual en cualquier instalación; no contiene el usuario de Windows.\\
+  Modelo de los equipos y VRP V200R020 & Inventario y capturas. & Inventario técnico del laboratorio; la versión se generaliza a la rama, sin el parche.\\
+  Nombre del adaptador USB-Ethernet (\texttt{enp0s20f0u1c2}) & Comandos de B8 y capturas. & Se deriva de la ruta USB, no de la MAC.\\
+  \bottomrule
+\end{longtable}
+}
+
+\needspace{4\baselineskip}
+\begin{center}
+  \vspace{-2pt}
+  {\color{navy}\rule{0.5\textwidth}{0.6pt}}\\[4pt]
+  {\sffamily\bfseries\color{navy}FIN DEL DOCUMENTO}
+\end{center}
+
+\end{document}

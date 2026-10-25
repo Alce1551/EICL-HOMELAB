@@ -1,0 +1,155 @@
+# SW-LAB-01 (Huawei S5735-L8P4S-A1, VRP V200R020)
+# Comandos aplicados en LAB-001-B, en orden, RECONSTRUIDOS a partir de las evidencias del paquete.
+# No es una exportacion del equipo. La exportacion real (vrpcfg.zip y copia .txt) vive en la
+# carpeta privada del operador: SW-LAB-01_2026-10-24_base-LAB-001.zip / .txt (EVID-082).
+# Las contrasenas se capturaron de forma interactiva y no aparecen aqui.
+# Convencion: configurar en vista de sistema [ ], guardar con 'save' en vista de usuario < >.
+
+# --- B2: identidad y hora (EVID-010, EVID-011) ---
+system-view
+ sysname SW-LAB-01
+ clock timezone CST minus 06:00:00
+ quit
+clock datetime 23:57:30 2026-10-23
+save
+
+# --- B3: acceso seguro (EVID-014 a EVID-026) ---
+system-view
+ aaa
+  local-user eicladmin password            # contrasena interactiva <REDACTADO>
+  local-user eicladmin privilege level 15
+  local-user eicladmin service-type terminal ssh
+  quit
+ rsa local-key-pair create                 # 3072 bits, reemplaza la llave de fabrica
+ stelnet server enable
+ ssh user eicladmin authentication-type password
+ ssh user eicladmin service-type stelnet   # cambiado a 'all' en B9
+ undo telnet server enable
+ acl number 2000
+  description GESTION-SSH-SW
+  rule 5 permit source <IP-PC-ADMIN> 0     # PC de administracion (IP redactada)
+  rule 10 permit source 10.10.10.0 0.0.0.255
+  rule 100 deny
+  quit
+ user-interface vty 0 4
+  authentication-mode aaa
+  protocol inbound ssh                     # valor por defecto, no aparece en la configuracion
+  acl 2000 inbound
+  idle-timeout 10 0                        # valor por defecto, no aparece en la configuracion
+  quit
+ user-interface vty 16 20
+  authentication-mode aaa
+  acl 2000 inbound
+  quit
+ user-interface con 0
+  authentication-mode aaa                  # pide verificar la contrasena de consola anterior
+  idle-timeout 10 0
+  return
+save                                       # tras comprobar el login con eicladmin
+
+# --- B4: VLAN (EVID-027 a EVID-030) ---
+system-view
+ vlan batch 10 20 30 40 50 999
+ vlan 10
+  description VLAN10-MGMT
+ vlan 20
+  description VLAN20-SRV
+ vlan 30
+  description VLAN30-MON
+ vlan 40
+  description VLAN40-DMZ
+ vlan 50
+  description VLAN50-LAB
+ vlan 999
+  description NATIVA-SIN-USO
+  return
+save
+
+# --- B5: trunk hacia FGT-LAB-01 lan5 (EVID-031 a EVID-036) ---
+system-view
+ interface GigabitEthernet0/0/1
+  description TRUNK-A-FGT-LAB-01-lan5
+  port link-type trunk
+  port trunk pvid vlan 999
+  undo port trunk allow-pass vlan 1
+  port trunk allow-pass vlan 10 20 30 40 50 999
+  return
+save
+
+# --- B6: gestion en banda (EVID-038 a EVID-048) ---
+system-view
+ interface Vlanif10
+  description GESTION-SW-LAB-01
+  ip address 10.10.10.2 255.255.255.0
+  quit
+ ip route-static 0.0.0.0 0.0.0.0 10.10.10.1
+ ssh server-source -i Vlanif10
+ interface Vlanif1
+  shutdown
+  return
+save
+
+# --- B6: NTP cliente del FortiGate, decision D-007 (EVID-050, EVID-059) ---
+system-view
+ ntp-service unicast-server 10.10.10.1
+ return
+save
+
+# --- B7: plan de puertos, STP y PoE (EVID-051 a EVID-060) ---
+system-view
+ stp root primary
+ stp bpdu-protection
+ interface GigabitEthernet0/0/2
+  description RESERVADO-SRV-01
+ interface GigabitEthernet0/0/3
+  description RESERVADO-SRV-02
+ interface GigabitEthernet0/0/4
+  description RESERVADO-SRV-03
+ interface GigabitEthernet0/0/5
+  description RESERVADO-OMADA-SW-02
+ interface GigabitEthernet0/0/9
+  description SIN-USO
+ interface GigabitEthernet0/0/10
+  description SIN-USO
+ interface GigabitEthernet0/0/11
+  description SIN-USO
+ interface GigabitEthernet0/0/12
+  description SIN-USO
+  quit
+ port-group group-member GigabitEthernet0/0/2 to GigabitEthernet0/0/5 GigabitEthernet0/0/9 to GigabitEthernet0/0/12
+  port link-type access
+  port default vlan 999
+  shutdown
+  quit
+ interface GigabitEthernet0/0/6
+  description ACCESO-MGMT-VLAN10
+  port link-type access
+  port default vlan 10
+  stp edged-port enable
+ interface GigabitEthernet0/0/7
+  description PRUEBAS-SRV-VLAN20
+  port link-type access
+  port default vlan 20
+  stp edged-port enable
+ interface GigabitEthernet0/0/8
+  description CLIENTES-LAB-VLAN50
+  port link-type access
+  port default vlan 50
+  stp edged-port enable
+  quit
+ port-group group-member GigabitEthernet0/0/1 to GigabitEthernet0/0/8
+  undo poe enable                          # decision D-009
+  return
+save
+
+# --- B8: cambios temporales de prueba, NO guardados (EVID-068, EVID-070, EVID-072) ---
+# GE0/0/7 -> port default vlan 30, luego 40, y de regreso a 20. Sin save.
+
+# --- B9: SFTP para respaldos, decision D-010 (EVID-081) ---
+system-view
+ sftp server enable                        # el equipo respondio que ya estaba iniciado
+ ssh server acl 2000                       # la ACL de las vty no protege SFTP
+ ssh user eicladmin service-type all
+ ssh user eicladmin sftp-directory flash:
+ return
+save

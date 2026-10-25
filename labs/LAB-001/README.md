@@ -8,8 +8,8 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 
 | Componente | Equipo / alcance | Estado | Memoria técnica |
 |---|---|---|---|
-| A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · Release `lab-001-fortigate-v1.1` |
-| B | Huawei S5735 (SW-LAB-01) | ✅ Completado | `huawei/` · Release `lab-001-huawei-v1.0` |
+| A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · memoria v1.2 en preparación |
+| B | Huawei S5735 (SW-LAB-01) | ✅ Completado | `huawei/` · [lab-001-huawei-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-huawei-v1.1) |
 | C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · memoria en preparación |
 | D | Rack, cableado y etiquetado | 🔄 En curso | — |
 | E | Topología y tabla de puertos | 🔄 En curso | [`docs/port-mapping.md`](../../docs/port-mapping.md) |
@@ -27,7 +27,12 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 ## Carpetas
 
 ```
-fortigate/   memoria (.tex) y evidencias saneadas del componente A
-huawei/      ídem, componente B
-omada/       ídem, componente C
+fortigate/   componente A (memoria en preparación)
+huawei/      componente B
+├── EICL-LAB-001-huawei-levantamiento.tex   fuente de la memoria técnica
+├── evidence/                              capturas EVID-nnn y salidas de consola, saneadas
+└── configs/                               comandos aplicados (reconstruidos y saneados)
+omada/       componente C (memoria en preparación)
 ```
+
+Cada memoria se compila automáticamente y se publica como PDF en [Releases](https://github.com/Alce1551/EICL-HOMELAB/releases).

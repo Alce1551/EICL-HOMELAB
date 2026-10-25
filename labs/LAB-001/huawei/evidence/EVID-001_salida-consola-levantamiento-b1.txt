@@ -1,0 +1,199 @@
+EVID-001 - Salida de consola del levantamiento B1 (SW-LAB-01, entonces sysname HUAWEI)
+Fecha: 2026-10-23, aprox. 23:50 (UTC-6). Fuente: archivo de texto adjuntado por el operador.
+Saneado: hash de la contrasena de consola de fabrica sustituido por <REDACTADO>.
+Saneado (v1.1, 25/10/2026): version exacta de parche de VRP y versiones de BootROM, BootLoad, CPLD, MCU y FLASH sustituidas por <REDACTADO>.
+Nota: las palabras 'password expire', 'password history' y 'password policy' son parametros de VRP, no secretos.
+--------------------------------------------------------------------------
+<HUAWEI>screen-length 0 temporary
+Info: The configuration takes effect on the current user terminal interface only.
+<HUAWEI>display version
+Huawei Versatile Routing Platform Software
+VRP (R) software, Version 5.170 (S5735 V200R020<REDACTADO>)
+Copyright (C) 2000-2020 HUAWEI TECH Co., Ltd.
+HUAWEI S5735-L8P4S-A1 Routing Switch uptime is 0 week, 0 day, 0 hour, 5 minutes
+
+ES5D2V12S028 0(Master)  : uptime is 0 week, 0 day, 0 hour, 3 minutes
+DDR             Memory Size : 512   M bytes
+FLASH Total     Memory Size : 512   M bytes
+FLASH Available Memory Size : 253   M bytes
+Pcb           Version   : VER.A
+BootROM(1st)       Version   : <REDACTADO>
+BootROM(2nd)       Version   : <REDACTADO>
+BootLoad      Version   : <REDACTADO>
+CPLD          Version   : <REDACTADO>
+MCU           Version   : <REDACTADO>
+Software      Version   : VRP (R) Software, Version 5.170 (V200R020<REDACTADO>)
+FLASH         Version   : <REDACTADO>
+<HUAWEI>display device
+S5735-L8P4S-A1's Device status:
+Slot Sub  Type                   Online    Power    Register     Status   Role
+--------------------------------------------------------------------------------------
+0    -    S5735-L8P4S-A1         Present   PowerOn  Registered   Normal   Master
+<HUAWEI>
+<HUAWEI>display elabel brief
+                       ^
+Error:Too many parameters found at '^' position.
+<HUAWEI>display elabe
+<HUAWEI>display elabel
+<HUAWEI>display elabel b
+<HUAWEI>display elabel br
+<HUAWEI>display elabel
+Warning: It may take a long time to excute this command. Continue? [Y/N]:n
+<HUAWEI>
+<HUAWEI>display inter
+<HUAWEI>display interface bri
+<HUAWEI>display interface brief
+PHY: Physical
+*down: administratively down
+#down: LBDT down
+(l): loopback
+(s): spoofing
+(b): BFD down
+(e): ETHOAM down
+(dl): DLDP down
+(lb): LBDT block
+(o): Observe-port forwarding down
+InUti/OutUti: input utility/output utility
+Interface                   PHY   Protocol  InUti OutUti   inErrors  outErrors
+GigabitEthernet0/0/1        down  down         0%     0%          0          0
+GigabitEthernet0/0/2        down  down         0%     0%          0          0
+GigabitEthernet0/0/3        down  down         0%     0%          0          0
+GigabitEthernet0/0/4        down  down         0%     0%          0          0
+GigabitEthernet0/0/5        down  down         0%     0%          0          0
+GigabitEthernet0/0/6        down  down         0%     0%          0          0
+GigabitEthernet0/0/7        down  down         0%     0%          0          0
+GigabitEthernet0/0/8        down  down         0%     0%          0          0
+GigabitEthernet0/0/9        down  down         0%     0%          0          0
+GigabitEthernet0/0/10       down  down         0%     0%          0          0
+GigabitEthernet0/0/11       down  down         0%     0%          0          0
+GigabitEthernet0/0/12       down  down         0%     0%          0          0
+NULL0                       up    up(s)        0%     0%          0          0
+Vlanif1                     down  down         --     --          0          0
+<HUAWEI>display vlan
+The total number of VLANs is: 1
+--------------------------------------------------------------------------------
+U: Up;         D: Down;         TG: Tagged;         UT: Untagged;
+MP: Vlan-mapping;               ST: Vlan-stacking;
+#: ProtocolTransparent-vlan;    *: Management-vlan;
+--------------------------------------------------------------------------------
+
+VID  Type    Ports
+--------------------------------------------------------------------------------
+1    common  UT:GE0/0/1(D)      GE0/0/2(D)      GE0/0/3(D)      GE0/0/4(D)
+                GE0/0/5(D)      GE0/0/6(D)      GE0/0/7(D)      GE0/0/8(D)
+                GE0/0/9(D)      GE0/0/10(D)     GE0/0/11(D)     GE0/0/12(D)
+
+VID  Status  Property      MAC-LRN Statistics Description
+--------------------------------------------------------------------------------
+1    enable  default       enable  disable    VLAN 0001
+<HUAWEI>display curr
+<HUAWEI>display current-configuration
+!Software Version V200R020<REDACTADO>
+#
+sysname HUAWEI
+#
+authentication-profile name default_authen_profile
+authentication-profile name dot1x_authen_profile
+authentication-profile name dot1xmac_authen_profile
+authentication-profile name mac_authen_profile
+authentication-profile name multi_authen_profile
+authentication-profile name portal_authen_profile
+#
+diffserv domain default
+#
+radius-server template default
+#
+pki realm default
+ certificate-check none
+#
+free-rule-template name default_free_rule
+#
+portal-access-profile name portal_access_profile
+#
+aaa
+ authentication-scheme default
+  authentication-mode local
+ authentication-scheme radius
+  authentication-mode radius
+ authorization-scheme default
+  authorization-mode local
+ accounting-scheme default
+  accounting-mode none
+ local-aaa-user password policy administrator
+  password history record number 0
+  password expire 0
+ domain default
+  authentication-scheme radius
+  accounting-scheme default
+  radius-server default
+ domain default_admin
+  authentication-scheme default
+  accounting-scheme default
+ undo local-user admin
+#
+interface Vlanif1
+#
+interface GigabitEthernet0/0/1
+#
+interface GigabitEthernet0/0/2
+#
+interface GigabitEthernet0/0/3
+#
+interface GigabitEthernet0/0/4
+#
+interface GigabitEthernet0/0/5
+#
+interface GigabitEthernet0/0/6
+#
+interface GigabitEthernet0/0/7
+#
+interface GigabitEthernet0/0/8
+#
+interface GigabitEthernet0/0/9
+#
+interface GigabitEthernet0/0/10
+#
+interface GigabitEthernet0/0/11
+#
+interface GigabitEthernet0/0/12
+#
+interface NULL0
+#
+undo icmp name timestamp-request receive
+#
+ssh server cipher aes256_ctr aes128_ctr
+ssh server hmac sha2_256
+ssh server key-exchange dh_group16_sha512 dh_group15_sha512 dh_group14_sha256 dh_group_exchange_sha25
+ssh client cipher aes256_ctr aes128_ctr
+ssh client hmac sha2_256
+ssh client key-exchange dh_group16_sha512 dh_group15_sha512 dh_group14_sha256 dh_group_exchange_sha25
+ssh server dh-exchange min-len 2048
+#
+user-interface con 0
+ authentication-mode password
+ set authentication password cipher <REDACTADO>
+user-interface vty 0 4
+user-interface vty 16 20
+#
+dot1x-access-profile name dot1x_access_profile
+#
+mac-access-profile name mac_access_profile
+#
+ops
+#
+return
+<HUAWEI>display sa
+<HUAWEI>display saved-configuration
+<HUAWEI>
+<HUAWEI>
+<HUAWEI>display s
+<HUAWEI>display save
+<HUAWEI>display saved-configuration
+<HUAWEI>
+<HUAWEI>
+<HUAWEI>
+<HUAWEI>
+<HUAWEI>
+<HUAWEI>display save
+<HUAWEI>display saved-configuration
+<HUAWEI>
