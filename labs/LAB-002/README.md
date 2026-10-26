@@ -8,10 +8,10 @@ Desplegar dos plataformas de virtualización sobre la red base de LAB-001, compa
 
 | Componente | Equipo / alcance | Estado | Memoria técnica |
 |---|---|---|---|
-| A | Red de los nodos en el switch principal (GE0/0/2–4) | ✅ Completado | Pendiente de compilar |
-| B | `pve-lab-01` (SRV-01) · Proxmox VE | ✅ Completado | Pendiente de compilar |
-| C | `pve-lab-02` (SRV-02) · Proxmox VE | ✅ Completado | Pendiente de compilar |
-| D | `esx-lab-01` (SRV-03) · VMware ESXi | ✅ Completado | Pendiente de compilar |
+| A | Red de los nodos en el switch principal (GE0/0/2–4) | ✅ Completado | [`EICL-LAB-002-hipervisores-levantamiento`](EICL-LAB-002-hipervisores-levantamiento.tex) · [lab-002-v1.0](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-002-v1.0) |
+| B | `pve-lab-01` (SRV-01) · Proxmox VE | ✅ Completado | Misma memoria (A–D) |
+| C | `pve-lab-02` (SRV-02) · Proxmox VE | ✅ Completado | Misma memoria (A–D) |
+| D | `esx-lab-01` (SRV-03) · VMware ESXi | ✅ Completado | Misma memoria (A–D) |
 | E | Clúster Proxmox con tercer voto (QDevice) | ⏳ Pendiente | — |
 | F | Redes virtuales por VLAN y una máquina virtual Linux por plataforma | ⏳ Pendiente | — |
 
@@ -35,4 +35,11 @@ Hardware, puertos y decisiones en [`docs/architecture.md`](../../docs/architectu
 
 ## Carpetas
 
-Las memorias técnicas de este laboratorio se agregarán aquí cuando se compilen, una carpeta por componente, y su PDF se publicará en [Releases](https://github.com/Alce1551/EICL-HOMELAB/releases).
+```
+EICL-LAB-002-hipervisores-levantamiento.tex   memoria de los componentes A a D (v1.0)
+evidence/                                     capturas EVID-001 a EVID-017, saneadas
+```
+
+Los componentes A a D comparten una sola memoria porque se hicieron en la misma sesión y dependen unos de otros. Las versiones de software se publican generalizadas (Proxmox VE 9.x, ESXi 8.0; sin kernel, build ni BIOS) según la norma de protección. El clúster (E) y las redes virtuales (F) se agregarán como nuevas versiones o memorias propias.
+
+Cada memoria se compila automáticamente y se publica como PDF en [Releases](https://github.com/Alce1551/EICL-HOMELAB/releases).
