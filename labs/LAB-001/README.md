@@ -10,7 +10,7 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 |---|---|---|---|
 | A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · [lab-001-fortigate-v1.2](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-fortigate-v1.2) |
 | B | Huawei S5735 (SW-LAB-01) | ✅ Completado | `huawei/` · [lab-001-huawei-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-huawei-v1.1) |
-| C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · [lab-001-omada-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-omada-v1.1) |
+| C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · [lab-001-omada-v1.2](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-omada-v1.2) |
 | D | Rack, cableado y etiquetado | ✅ Completado | No se publica (D-024) |
 | E | Topología y tabla de puertos | ✅ Completado | [`docs/architecture.md`](../../docs/architecture.md) · [`docs/port-mapping.md`](../../docs/port-mapping.md) |
 | F | Validación de punta a punta | ✅ Completado | [`docs/validacion.md`](../../docs/validacion.md) |

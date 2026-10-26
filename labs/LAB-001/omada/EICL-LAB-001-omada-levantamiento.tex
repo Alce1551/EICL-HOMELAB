@@ -94,7 +94,7 @@
 
 % --- Cabecera y pie ---
 \newcommand{\docid}{EICL | LAB-001 | Omada ES208G}
-\newcommand{\docver}{Versión 1.1 | 25/10/2026}
+\newcommand{\docver}{Versión 1.2 | 26/10/2026}
 \fancypagestyle{eicl}{%
   \fancyhf{}
   \fancyhead[L]{\footnotesize\textcolor{muted}{\docid}}
@@ -176,11 +176,11 @@
   {\renewcommand{\arraystretch}{1.5}
   \begin{tabularx}{\textwidth}{>{\bfseries}L{3.4cm}Z}
     Identificador & EICL-LAB-001 (componente switch de acceso) \\
-    Versión & 1.1 \\
-    Fecha & 25 de octubre de 2026 \\
+    Versión & 1.2 \\
+    Fecha & 26 de octubre de 2026 \\
     Responsable & Carlos Eduardo Abundis Lira \\
     Equipo & TP-Link Omada ES208G (SW-LAB-02), firmware 1.0.x \\
-    Estado & Componente C completado; LAB-001 sigue en curso \\
+    Estado & Componente C completado; LAB-001 completado (23--25/10/2026) \\
     Clasificación & Portafolio técnico | Información saneada \\
   \end{tabularx}}
 
@@ -209,11 +209,11 @@
   Nombre & LAB-001 -- Levantamiento y configuración del switch de acceso Omada ES208G\\
   Proyecto & EICL -- Enterprise Infrastructure \& Cybersecurity Lab\\
   Componente & LAB-001-C: switch de acceso secundario (SW-LAB-02)\\
-  Alcance & Levantamiento, estado de fábrica, configuración base, VLAN 802.1Q, gestión en VLAN 10, uplink desde SW-LAB-01, política de administración en el FortiGate, validación y respaldos\\
-  Versión & 1.1\\
-  Fecha & 25/10/2026 (versión 1.1, re-saneamiento). Trabajo realizado el 24/10/2026, de 13:37 a 18:18, UTC-6\\
-  Estado & Componente C \estado{COMPLETADA}; LAB-001 \estado{EN CURSO} (faltan D, E y G)\\
-  Paquete de origen & EICL-PKG-E01-002 (24/10/2026)\\
+  Alcance & Levantamiento, estado de fábrica, configuración base, VLAN 802.1Q, gestión en VLAN 10, uplink desde SW-LAB-01, política de administración en el FortiGate, validación, respaldos y banco de clientes con el TL-SG108 (paso C9)\\
+  Versión & 1.2\\
+  Fecha & 26/10/2026 (versión 1.2). Trabajo realizado el 24/10/2026, de 13:37 a 18:18, y paso C9 el 25/10/2026, de 18:34 a 19:50 (UTC-6)\\
+  Estado & Componente C \estado{COMPLETADA}; LAB-001 \estado{COMPLETADA} (periodo 23/10/2026 -- 25/10/2026)\\
+  Paquetes de origen & EICL-PKG-E01-002 (24/10/2026) y EICL-PKG-E01-003 (25/10/2026, paso C9 y cierre de LAB-001)\\
   Documentos relacionados & Memorias del FortiGate (componente A) y del Huawei S5735 (componente B). Este punto les añade cambios (sección~\ref{sec:otros})\\
   \bottomrule
 \end{tabularx}
@@ -225,6 +225,7 @@
   \midrule
   1.0 & 24/10/2026 & Versión inicial: levantamiento, configuración, integración, validaciones y evidencias EVID-001 a EVID-054.\\
   1.1 & 25/10/2026 & Re-saneamiento para publicación (D-021) en los tres canales: texto, comandos y salidas de consola, e imágenes. Se generaliza la versión exacta de firmware (texto, EVID-003, EVID-009 y EVID-016) y se completa la tabla «Protección de la información». Sin cambios técnicos.\\
+  1.2 & 26/10/2026 & Paso C9: el puerto 7 pasa a la VLAN 50 como banco de clientes con el TL-SG108 (D-026); pruebas TEST-025 a TEST-030 y evidencias EVID-055 a EVID-057. Cierre de LAB-001: componente D sin documentación (D-024); E y G publicados en el repositorio.\\
   \bottomrule
 \end{tabularx}
 
@@ -268,9 +269,9 @@ Este documento registra el levantamiento y la configuración del switch de acces
 \end{tabularx}
 
 \subsection{Alcance de este documento}
-\textbf{Incluye.} Levantamiento y capacidades del ES208G, estado de fábrica, nombre, modo standalone, Loop Prevention, VLAN 802.1Q y PVID, cambio de la Management VLAN a la VLAN 10, configuración del uplink en GE0/0/5 de SW-LAB-01, política de administración en el FortiGate, validación de punta a punta por los puertos del Omada y respaldos.
+\textbf{Incluye.} Levantamiento y capacidades del ES208G, estado de fábrica, nombre, modo standalone, Loop Prevention, VLAN 802.1Q y PVID, cambio de la Management VLAN a la VLAN 10, configuración del uplink en GE0/0/5 de SW-LAB-01, política de administración en el FortiGate, validación de punta a punta por los puertos del Omada, respaldos y el banco de clientes con el TL-SG108 en el puerto 7 (paso C9).
 
-\textbf{No incluye.} El TL-SG108, que queda fuera de LAB-001 por ahora; el rack, el cableado y el etiquetado (componente D); la topología final (componente E) y los entregables \texttt{.md} (componente G).
+\textbf{No incluye.} El rack, el cableado y el etiquetado (componente D), que se cerró sin documentación por seguridad física (D-024); la topología final (componente E) y los entregables (componente G), publicados como documentos del repositorio.
 
 \subsection{Estado del componente}
 \begin{tabularx}{\textwidth}{Z L{3.3cm} L{3.3cm}}
@@ -281,11 +282,12 @@ Este documento registra el levantamiento y la configuración del switch de acces
   Nombre, modo standalone y Loop Prevention & \estado{COMPLETADA} & EVID-008, 016, 021; aplicado: reportado\\
   VLAN 802.1Q y PVID & \estado{COMPLETADA} & EVID-023 a 031, 037, 039\\
   Management VLAN 10 e IP fija 10.10.10.3 & \estado{COMPLETADA} & EVID-032 a 038; IP Settings: reportado\\
-  Puertos 6 a 8 deshabilitados y configuración conservada tras reinicio & \estado{COMPLETADA} (reportado) & Sin captura (PEND-007)\\
+  Puertos 6 a 8 deshabilitados y configuración conservada tras reinicio & \estado{COMPLETADA} (reportado) & Sin captura (PEND-007); puertos 6 y 8 tras C9: EVID-057\\
   Uplink en SW-LAB-01 GE0/0/5 & \estado{COMPLETADA} & EVID-040 a 042\\
   Validación de punta a punta por los puertos 2 a 5 & \estado{COMPLETADA} & EVID-043 a 046\\
   Administración desde la PC (política 5) & \estado{COMPLETADA} & EVID-047 a 054; acceso final: reportado\\
   Respaldos de SW-LAB-02, SW-LAB-01 y FGT-LAB-01 & \estado{COMPLETADA} (reportado) & Sin captura\\
+  Paso C9: banco de clientes con el TL-SG108 en el puerto 7 & \estado{COMPLETADA} & EVID-055 a 057; conexión y pruebas: reportadas\\
   \bottomrule
 \end{tabularx}
 
@@ -312,7 +314,9 @@ SW-LAB-02 puerto 1 (Omada ES208G, gestion 10.10.10.3)
    |-- P2    VLAN 10 (MGMT)
    |-- P3    VLAN 20 (SRV)
    |-- P4-P5 VLAN 50 (LAB)
-   `-- P6-P8 VLAN 999, deshabilitados (P6 tambien unico miembro de VLAN 1)
+   |-- P6    VLAN 999, deshabilitado (unico miembro de VLAN 1)
+   |-- P7    VLAN 50 --> TL-SG108 puerto 1 (banco de clientes, C9)
+   `-- P8    VLAN 999, deshabilitado
 \end{lstlisting}
 
 \subsection{Asignación de puertos de SW-LAB-02}
@@ -327,12 +331,13 @@ SW-LAB-02 puerto 1 (Omada ES208G, gestion 10.10.10.3)
   3 & Pruebas SRV & V20 sin etiqueta & 20 & Activo\\
   4--5 & Clientes LAB & V50 sin etiqueta & 50 & Activos\\
   6 & Sin uso & V999 sin etiqueta; único miembro de la VLAN 1 (D-017) & 999 & Deshabilitado (reportado)\\
-  7--8 & Sin uso & V999 sin etiqueta & 999 & Deshabilitados (reportado)\\
+  7 & Banco de clientes (TL-SG108) & V50 sin etiqueta & 50 & Activo desde el paso C9 (D-026)\\
+  8 & Sin uso & V999 sin etiqueta & 999 & Deshabilitado\\
   \bottomrule
 \end{longtable}
 }
 
-Fuente: EVID-037 (membresía), EVID-039 (PVID) y EVID-038 (Management VLAN 10). Ingress Checking habilitado en los 8 puertos.
+Fuente: EVID-037 (membresía), EVID-039 (PVID) y EVID-038 (Management VLAN 10); tras el paso C9, EVID-055 a EVID-057. Ingress Checking habilitado en los 8 puertos.
 
 \subsection{Plan de VLAN en SW-LAB-02}
 El diseño de VLAN e IP no cambia; solo se extiende al Omada. Los nombres son cortos porque el campo admite unos 10 caracteres (D-016).
@@ -391,6 +396,7 @@ STP: SW-LAB-01 sigue como raíz y GE0/0/5 tiene \texttt{stp root-protection}. No
   \item[D-015 Loop Prevention habilitado.] El equipo no tiene STP y la función venía deshabilitada. Es su única protección local ante bucles.
   \item[D-016 Nombres cortos de VLAN.] V10-MGMT, V20-SRV, V50-LAB y V999-NATIV, porque el campo admite unos 10 caracteres. Son solo etiquetas locales: el ID une las VLAN entre equipos.
   \item[D-017 VLAN 1 residual.] El equipo no permite dejar la VLAN 1 vacía; conserva al puerto 6 deshabilitado como único miembro. Sin impacto práctico: PVID 999, Ingress Checking y puerto deshabilitado.
+  \item[D-026 TL-SG108 como banco de clientes (25/10/2026).] El switch no administrable TL-SG108 cuelga del puerto 7 del Omada y extiende la VLAN 50. No entiende VLAN ni STP, así que solo puede alargar un segmento desde un puerto de acceso; nunca se usa para los nodos. Protección ante bucles: Loop Prevention del Omada y \texttt{stp root-protection} en GE0/0/5 del switch principal.
   \item[D-018 Política 5 en el FortiGate.] Solo HTTP desde la PC de administración hacia SW-LAB-02, en lugar de agregar HTTP a la política 4 (mínimo privilegio). Riesgo aceptado: las credenciales del Omada viajan en texto claro, también por la red del cuarto.
 \end{description}
 
@@ -525,6 +531,27 @@ end
 
 El objeto se creó primero como \texttt{SW-LAB0-02} por un error de escritura, lo que provocó \emph{entry not found} al referenciarlo en la política; se corrigió con \texttt{rename} (EVID-052 a EVID-054). Comprobación desde la PC: \texttt{Test-NetConnection 10.10.10.3 -Port 80}. El acceso final a la pantalla de login es reportado (TEST-023, PEND-009).
 
+\subsection{Paso C9: banco de clientes con el TL-SG108}\label{sec:c9}
+Después del cierre de LAB-001 se conectó un TL-SG108 (sin E, no administrable) al puerto 7 del Omada para tener más puertos de clientes en la VLAN 50 (D-026). Orden aplicado en el Omada:
+
+\begin{enumerate}
+  \item Agregar el puerto 7 a la VLAN 50 como \emph{untagged}.
+  \item Cambiar su PVID a 50.
+  \item Quitarlo de la VLAN 999.
+  \item Habilitar el puerto, \emph{Apply} y \emph{Save}.
+\end{enumerate}
+
+Membresía resultante (EVID-055 a EVID-057):
+\begin{lstlisting}
+VLAN 50:  tagged 1; untagged 4-5,7
+VLAN 999: untagged 1,6,8
+VLAN 1:   6
+\end{lstlisting}
+
+La conexión del puerto 7 al puerto 1 del TL-SG108, las pruebas con la laptop, el \emph{Save} y el respaldo del Omada son reportados (TEST-028, TEST-029; PEND-020 y PEND-022).
+
+\notebox{Límite del TL-SG108}{Todo lo que se conecte al TL-SG108 queda en la VLAN 50 y recibe IP por DHCP del firewall (10.10.50.100--.199), con las mismas políticas que los puertos 4 y 5. No se puede usar para equipos que necesiten otra VLAN ni para trunks.}
+
 \subsection{Cambios en las memorias del FortiGate y del Huawei}\label{sec:otros}
 \begin{itemize}
   \item \textbf{FortiGate:} nuevo objeto \texttt{SW-LAB-02} y política 5 \texttt{PC-ADMIN-A-SW02-HTTP} (EVID-054); nuevo respaldo (reportado).
@@ -591,6 +618,23 @@ nmcli device connect enp0s20f0u1c2
 curl -s -o /dev/null -w "%{http_code}\n" --max-time 5 http://10.10.10.3
 \end{lstlisting}
 
+\subsection{Pruebas del paso C9}
+{\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{longtable}{L{1.6cm} L{2.75cm} L{3.1cm} L{3.2cm} L{1.6cm} L{2.35cm}}
+  \toprule
+  \cab\textbf{ID} & \textbf{Objetivo} & \textbf{Método} & \textbf{Resultado obtenido} & \textbf{Evid.} & \textbf{Estado}\\
+  \midrule
+  \endhead
+  TEST-025 & Membresía de VLAN tras C9 & 802.1Q VLAN Config & VLAN 50: 1 etiquetado; 4, 5 y 7 sin etiqueta. VLAN 999: 1, 6 y 8. VLAN 1: solo 6 & EVID-055 & \estado{OK}\\
+  TEST-026 & PVID del puerto 7 & Port Config & PVID 50; Ingress Checking activo en los 8 puertos & EVID-056 & \estado{OK}\\
+  TEST-027 & Estado de los puertos tras C9 & Port Configuration & Puerto 7 habilitado (Link Down antes de conectar el cable); 6 y 8 deshabilitados & EVID-057 & \estado{OK}\\
+  TEST-028 & Un cliente en el TL-SG108 recibe IP de la VLAN 50 y sale a internet & Laptop en el TL-SG108: \texttt{ip -br addr}, \texttt{ip route}, ping al gateway, 1.1.1.1 y google.com & Todo en orden (reportado, sin salida adjunta; PEND-020) & Reportado & \estado{OK}\\
+  TEST-029 & Aislamiento del banco de clientes & Ping a 192.168.1.1, 192.168.0.1 y 10.10.10.2; \texttt{curl} a 10.10.10.3 & Todo en orden (reportado, sin salida adjunta; PEND-020) & Reportado & \estado{OK}\\
+  TEST-030 & Enlace del puerto 7 a 1000M & Port Configuration con el cable conectado & -- (PEND-021) & -- & \estado{NO EJECUTADA}\\
+  \bottomrule
+\end{longtable}
+}
+
 % =====================================================================
 \section{Troubleshooting}
 {\small
@@ -639,6 +683,7 @@ Respaldos de los tres equipos en la carpeta privada del operador (reportado, TES
   \item Un error de escritura en el nombre de un objeto del FortiGate aparece después como \emph{entry not found}; \texttt{rename} lo corrige sin borrar nada.
   \item El nombre de una interfaz USB-Ethernet en Linux depende del puerto USB: hay que comprobarlo antes de cada prueba.
   \item Algunos equipos no permiten dejar la VLAN 1 vacía; un puerto deshabilitado con PVID 999 la neutraliza.
+  \item Un switch no administrable solo puede extender un segmento desde un puerto de acceso; cualquier otra VLAN o un trunk exigen un equipo administrable.
 \end{itemize}
 
 % =====================================================================
@@ -656,6 +701,9 @@ Respaldos de los tres equipos en la carpeta privada del operador (reportado, TES
   PEND-008 & Velocidad negociada de LINK-001 & Matriz de enlaces & \texttt{display interface GigabitEthernet0/0/5 | include Speed}\\
   PEND-009 & Captura del acceso de la PC a la web del Omada & TEST-023 & Captura del navegador o contadores de la política 5\\
   PEND-010 & Foto de la etiqueta del ES208G (opcional) & Inventario & Foto con MAC y número de serie tapados\\
+  PEND-020 & Salida de las pruebas con la laptop desde el TL-SG108 (TEST-028 y TEST-029) & Pruebas del paso C9 & Repetir y capturar \texttt{ip -br addr}, \texttt{ip route}, pings y \texttt{curl}\\
+  PEND-021 & Velocidad del enlace del puerto 7 al TL-SG108 (TEST-030) & Matriz de enlaces & Port Configuration del Omada\\
+  PEND-022 & Extensión del respaldo del Omada posterior a C9 & Respaldos & Ver el archivo en la carpeta privada\\
   \bottomrule
 \end{longtable}
 }
@@ -668,7 +716,7 @@ Respaldos de los tres equipos en la carpeta privada del operador (reportado, TES
 \end{itemize}
 
 \subsection{Siguiente paso}
-\textbf{Componente D:} montaje en rack, cableado y etiquetado de puertos y cables. Después: E (topología final) y G (entregables \texttt{.md}). Al cerrar LAB-001, actualizar LAB-000 a v0.3.
+LAB-001 queda \estado{COMPLETADA} (periodo 23/10/2026 -- 25/10/2026): el componente D se cerró sin documentación (D-024) y los componentes E y G se publicaron como documentos del repositorio. El siguiente laboratorio es LAB-002 (virtualización con Proxmox VE y VMware ESXi).
 
 % =====================================================================
 \appendix
@@ -739,6 +787,9 @@ Capturas de la web del ES208G, de la consola de SW-LAB-01 y FGT-LAB-01, de la PC
   EVID-052 & -- & Objeto creado como SW-LAB0-02 por error de escritura\\
   EVID-053 & -- & Error «entry not found» al referenciar el objeto\\
   EVID-054 & E-C45 & Rename a SW-LAB-02 y política 5 creada\\
+  EVID-055 & -- & Paso C9: membresía de VLAN con el puerto 7 en la VLAN 50\\
+  EVID-056 & -- & Paso C9: PVID por puerto e Ingress Checking\\
+  EVID-057 & -- & Paso C9: estado configurado y real de los 8 puertos\\
   \bottomrule
 \end{longtable}
 }
@@ -799,12 +850,17 @@ Capturas de la web del ES208G, de la consola de SW-LAB-01 y FGT-LAB-01, de la PC
 \evid{0.74}{EVID-052_fgt-objeto-con-error-nombre.png}{\textbf{EVID-052}: Objeto creado como SW-LAB0-02 por error de escritura.}
 \evid{0.55}{EVID-053_fgt-politica5-error-dstaddr.png}{\textbf{EVID-053}: Error «entry not found» al referenciar el objeto.}
 \evid{0.57}{EVID-054_fgt-rename-y-politica5.png}{\textbf{EVID-054} (E-C45): Rename a SW-LAB-02 y política 5 creada.}
+\evid{0.78}{EVID-055_omada-vlan-config-c9.png}{\textbf{EVID-055}: Paso C9: membresía de VLAN con el puerto 7 en la VLAN 50.}
+\evid{0.78}{EVID-056_omada-pvid-c9.png}{\textbf{EVID-056}: Paso C9: PVID por puerto e Ingress Checking.}
+\evid{0.75}{EVID-057_omada-estado-puertos-c9.png}{\textbf{EVID-057}: Paso C9: estado configurado y real de los 8 puertos.}
 
 \clearpage
 \section{Protección de la información}\label{ap:prot}
 Criterio del proyecto: se censura cualquier dato que no sea de dominio público o que pueda representar una vulnerabilidad, aunque sea mínima. En el texto se usan marcadores (\texttt{<IP-PC-ADMIN>}); en las capturas, recuadros negros opacos, con la etiqueta [REDACTADO] cuando hay espacio. Los originales sin censura solo se guardan en la carpeta privada del operador.
 
 \textbf{Canales revisados en esta versión (1.1):} texto general (incluidos tablas, pies de figura y metadatos del PDF), comandos y salidas de consola en forma de texto, e imágenes (las 54 capturas, revisadas completas, incluidos prompts, barras de título, pestañas y barra de direcciones del navegador).
+
+\textbf{Canales revisados en esta versión (1.2):} los mismos tres canales en el texto nuevo (paso C9, D-026, pruebas y pendientes) y en las tres capturas nuevas (EVID-055 a EVID-057), revisadas completas; sin metadatos.
 
 \subsection{Datos censurados}
 {\small
@@ -824,6 +880,7 @@ Criterio del proyecto: se censura cualquier dato que no sea de dominio público 
   UUID de objetos y políticas del FortiGate & Tapados en EVID-049, EVID-050, EVID-051 y EVID-054. & Identifican de forma única la configuración del firewall.\\
   Versión exacta de firmware del Omada & Generalizada a «1.0.x» en el texto; recuadro en EVID-003, EVID-009 y EVID-016. & Junto con la topología, orienta la búsqueda de vulnerabilidades públicas de esa versión (regla D-022 de la norma de protección).\\
   Respaldos de configuración & No se adjuntan. & Contienen credenciales o hashes y la configuración completa.\\
+  Montaje en rack, cableado y etiquetado & No se publican fotos, plan de cables ni etiquetas (D-024). & El detalle físico revela equipos y su ubicación.\\
   \bottomrule
 \end{longtable}
 }
@@ -846,6 +903,8 @@ Criterio del proyecto: se censura cualquier dato que no sea de dominio público 
   Prompt \texttt{/home/mobaxterm} & EVID-040 y EVID-049. & Ruta genérica de MobaXterm, igual en cualquier instalación; no contiene el usuario de Windows.\\
   Nombres inversos de Google (\texttt{1e100.net}) & EVID-043 a EVID-046. & Servidores públicos de Google usados como destino de prueba.\\
   Nombre del adaptador USB-Ethernet (\texttt{enp0s20f0u\ldots}) & Comandos y capturas. & Se deriva de la ruta USB, no de la MAC.\\
+  Capturas del paso C9 & EVID-055 a EVID-057. & Solo muestran tablas de la web del Omada, sin barra de direcciones, usuario ni datos del equipo.\\
+  Modelo TP-Link TL-SG108 & Paso C9 y D-026. & Modelo de un equipo del laboratorio; no es administrable ni expone servicios.\\
   \bottomrule
 \end{longtable}
 }
