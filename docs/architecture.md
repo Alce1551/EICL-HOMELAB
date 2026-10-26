@@ -1,6 +1,6 @@
 # Arquitectura
 
-**Laboratorio:** LAB-001 · **Versión:** 1.2 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 25/10/2026
 
 ## Objetivo
 
@@ -20,12 +20,12 @@ flowchart TB
         SW1[SW-LAB-01 · switch principal<br/>STP raíz · trunks 802.1Q]
         SW2[SW-LAB-02 · switch de acceso]
     end
-    subgraph Computo[Cómputo - previsto en LAB-002]
-        NOD[SRV-01 y SRV-02 · clúster Proxmox<br/>SRV-03 · VMware ESXi<br/>SRV-04 · por definir]
+    subgraph Computo[Cómputo - LAB-002]
+        NOD[pve-lab-01 y pve-lab-02 · Proxmox VE<br/>esx-lab-01 · VMware ESXi<br/>SRV-04 · por definir]
     end
     ARC --> FGT
     FGT --> SW1 --> SW2
-    SW1 -.-> NOD
+    SW1 -->|trunks 802.1Q| NOD
 ```
 
 ## Topología lógica
@@ -65,30 +65,32 @@ flowchart LR
     SW1 -->|GE0/0/5 a puerto 1<br/>trunk VLAN 10/20/50| SW2[SW-LAB-02]
     SW2 -->|puerto 7 · VLAN 50| BAN[Banco de clientes<br/>TL-SG108 no administrable]
     FGT -.->|lan1 a lan4| OOB[Red OOB de emergencia]
-    SW1 -.->|GE0/0/2| N1[SRV-01 · Proxmox]
-    SW1 -.->|GE0/0/3| N2[SRV-02 · Proxmox]
-    SW1 -.->|GE0/0/4| N3[SRV-03 · ESXi]
+    SW1 -->|GE0/0/2 · trunk| N1[pve-lab-01 · Proxmox]
+    SW1 -->|GE0/0/3 · trunk| N2[pve-lab-02 · Proxmox]
+    SW1 -->|GE0/0/4 · trunk| N3[esx-lab-01 · ESXi]
     SW1 -.->|GE0/0/7| N4[SRV-04 · por definir]
 ```
 
 Líneas punteadas: enlaces previstos o de emergencia, sin tráfico de producción hoy. El switch no administrable solo extiende la VLAN 50: no entiende VLAN ni STP, por eso cuelga de un puerto de acceso y nunca se usa para los nodos (D-026). Detalle por puerto en [`port-mapping.md`](port-mapping.md).
 
-## Nodos de cómputo (previstos)
+## Nodos de cómputo
 
-El laboratorio contempla **hasta cuatro nodos** Dell OptiPlex 5070 Micro. Su número real, especificaciones y estado se confirman en LAB-000 antes de asignar roles; la instalación se hace en LAB-002.
+Tres Dell OptiPlex 5070 Micro iguales: Intel Core i5-9500T (6 núcleos), 16 GB de RAM, SSD de unos 256 GB, arranque EFI y **una sola interfaz de red**. El laboratorio admite un cuarto nodo (D-025).
 
-| Nodo | Rol previsto | Puerto en SW-LAB-01 | IP de gestión prevista |
-|---|---|---|---|
-| SRV-01 | Proxmox VE · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 |
-| SRV-02 | Proxmox VE · nodo 2 del clúster | GE0/0/3 | 10.10.10.12 |
-| SRV-03 | VMware ESXi, sujeto a compatibilidad y licencia | GE0/0/4 | 10.10.10.13 |
-| SRV-04 | Por definir | GE0/0/7 | 10.10.10.14 |
+| Nodo | Hostname | Plataforma | Puerto en SW-LAB-01 | IP de gestión | Estado |
+|---|---|---|---|---|---|
+| SRV-01 | `pve-lab-01` | Proxmox VE 9.x · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 | Instalado |
+| SRV-02 | `pve-lab-02` | Proxmox VE 9.x · nodo 2 del clúster | GE0/0/3 | 10.10.10.12 | Instalado |
+| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 (versión gratuita) | GE0/0/4 | 10.10.10.13 | Instalado |
+| SRV-04 | — | Por definir | GE0/0/7 | 10.10.10.14 | Previsto |
+
+- Los puertos de los nodos son **trunk**: la VLAN 10 va sin etiqueta para la gestión del hipervisor y las VLAN 20 a 50 van etiquetadas para las máquinas virtuales (D-028). Así el ruteo y el filtrado entre máquinas virtuales de distintas VLAN siguen pasando por el firewall.
+- Los tres hipervisores toman la hora del firewall (servidor NTP en la VLAN 10). Los dos Proxmox se resuelven entre sí por nombre mientras no exista DNS interno (LAB-003).
 
 - Los nodos se conectan al **switch principal**, no al de acceso: ahí hay STP, ACL de administración y trunks gestionables (D-025).
 - **Clúster Proxmox de dos nodos (D-027).** Un clúster de dos nodos no tiene quórum propio: si uno cae, el otro queda con 1 de 2 votos y bloquea los cambios. Hace falta un **tercer voto**, con un QDevice externo al clúster (por ejemplo, en SRV-04 o en una máquina virtual del nodo ESXi) o con SRV-04 como tercer nodo Proxmox. Se decide en LAB-002.
 - El tráfico del clúster viaja al inicio por la VLAN 10; en LAB-012 se agrega un segundo enlace del clúster en la VLAN 70.
 - La alta disponibilidad de máquinas virtuales requiere almacenamiento compartido o replicación entre los dos nodos; se evalúa con el inventario real de discos.
-- El modo exacto de cada puerto (trunk con qué VLAN y cuál nativa) se define en LAB-002 según la plataforma de cada nodo.
 
 ## Principios de diseño
 
@@ -118,5 +120,6 @@ El laboratorio contempla **hasta cuatro nodos** Dell OptiPlex 5070 Micro. Su nú
 | El switch de acceso no soporta SNMP, syslog ni STP | LAB-005/006 (monitoreo por ping y contadores; port mirroring para sensor) |
 | Política de salida a internet con servicio amplio | LAB-004 |
 | Varios niveles de NAT hacia internet | LAB-007 y LAB-010 (publicación y VPN) |
-| Número de interfaces de red por nodo por confirmar: con una sola, gestión, máquinas virtuales y clúster comparten enlace | LAB-000 (inventario) y LAB-002/012 |
+| Una sola interfaz de red por nodo: gestión, máquinas virtuales y clúster comparten 1 Gbps | LAB-012 (segundo enlace del clúster en VLAN 70; adaptador adicional si hace falta) |
+| Los puertos de los nodos llevan la VLAN de gestión sin etiqueta: un equipo conectado ahí cae en MGMT | Mitigado: puertos dentro del rack (D-028) |
 | Clúster Proxmox de dos nodos sin quórum propio | LAB-002 (QDevice o tercer nodo) |

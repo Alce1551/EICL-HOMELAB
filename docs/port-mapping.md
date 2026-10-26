@@ -1,6 +1,6 @@
 # Mapa de puertos
 
-**Laboratorio:** LAB-001 · **Versión:** 1.2 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 25/10/2026
 
 ## FGT-LAB-01 — FortiGate 50E
 
@@ -15,9 +15,9 @@
 | Puerto | Uso | Modo / VLAN | Estado |
 |---|---|---|---|
 | GE0/0/1 | FGT-LAB-01 lan5 | trunk 10–50 · PVID 999 · sin VLAN 1 | Activo |
-| GE0/0/2 | Reservado SRV-01 (Proxmox, nodo 1 del clúster) | access 999 | Apagado hasta LAB-002 |
-| GE0/0/3 | Reservado SRV-02 (Proxmox, nodo 2 del clúster) | access 999 | Apagado hasta LAB-002 |
-| GE0/0/4 | Reservado SRV-03 (VMware ESXi) | access 999 | Apagado hasta LAB-002 |
+| GE0/0/2 | `pve-lab-01` (SRV-01, Proxmox) · `SRV-01-PROXMOX` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
+| GE0/0/3 | `pve-lab-02` (SRV-02, Proxmox) · `SRV-02-PROXMOX` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
+| GE0/0/4 | `esx-lab-01` (SRV-03, ESXi) · `SRV-03-ESXI` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
 | GE0/0/5 | Uplink a SW-LAB-02 puerto 1 | trunk 10, 20, 50 · PVID 999 · `stp root-protection` | Activo |
 | GE0/0/6 | Acceso MGMT | access 10 · edge | Activo |
 | GE0/0/7 | Pruebas SRV · reservado para SRV-04 (D-025) | access 20 · edge | Activo; pasa a SRV-04 si se incorpora en LAB-002 |
@@ -48,8 +48,10 @@ Loop Prevention habilitado (D-015) e Ingress Checking activo. Gestión web solo 
 | FGT-LAB-01 lan5 | SW-LAB-01 GE0/0/1 | Trunk 802.1Q · VLAN 10–50 · nativa 999 | Activo |
 | SW-LAB-01 GE0/0/5 | SW-LAB-02 puerto 1 | Trunk 802.1Q · VLAN 10/20/50 · nativa 999 | Activo |
 | SW-LAB-02 puerto 7 | TL-SG108 (banco de clientes) | Acceso VLAN 50 | Activo |
-| SW-LAB-01 GE0/0/2 a GE0/0/4 | SRV-01 a SRV-03 | Por definir en LAB-002 | Reservados, apagados |
-| SW-LAB-01 GE0/0/7 | SRV-04 (por definir) | Por definir en LAB-002 | Reservado; hoy acceso de pruebas VLAN 20 |
+| SW-LAB-01 GE0/0/2 | pve-lab-01 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
+| SW-LAB-01 GE0/0/3 | pve-lab-02 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
+| SW-LAB-01 GE0/0/4 | esx-lab-01 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
+| SW-LAB-01 GE0/0/7 | SRV-04 (por definir) | Trunk como los demás nodos (D-028) | Reservado; hoy acceso de pruebas VLAN 20 |
 
 Cuando se conecte SRV-04, las pruebas en VLAN 20 se hacen en el puerto 3 del switch de acceso, que ya cumple esa función. Si hicieran falta más puertos en el switch principal, quedan los cuatro SFP (GE0/0/9–12), que admiten módulos 1000BASE-T.
 

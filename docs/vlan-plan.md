@@ -1,6 +1,6 @@
 # Plan de VLAN y direccionamiento
 
-**Laboratorio:** LAB-001 · **Versión:** 1.2 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 25/10/2026
 
 ## Criterios
 
@@ -43,14 +43,14 @@ En el switch de acceso (Omada) los nombres se acortan por el límite del campo: 
 | 10.10.10.1 | FGT-LAB-01 (FortiGate 50E) | Asignada |
 | 10.10.10.2 | SW-LAB-01 (Huawei S5735) | Asignada |
 | 10.10.10.3 | SW-LAB-02 (Omada ES208G) | Asignada |
-| 10.10.10.11 | SRV-01 (Proxmox, nodo 1 del clúster) | Prevista, LAB-002 |
-| 10.10.10.12 | SRV-02 (Proxmox, nodo 2 del clúster) | Prevista, LAB-002 |
-| 10.10.10.13 | SRV-03 (VMware ESXi) | Prevista, LAB-002 |
+| 10.10.10.11 | `pve-lab-01` (SRV-01, Proxmox) | Asignada |
+| 10.10.10.12 | `pve-lab-02` (SRV-02, Proxmox) | Asignada |
+| 10.10.10.13 | `esx-lab-01` (SRV-03, VMware ESXi) | Asignada |
 | 10.10.10.14 | SRV-04 (por definir) | Prevista, LAB-002 |
 
-Las IP de los nodos siguen la convención (.10–.49 para servidores e hipervisores) y el último octeto coincide con el número del nodo. Se confirman al instalar cada plataforma.
+Las IP de los nodos siguen la convención (.10–.49 para servidores e hipervisores) y el último octeto coincide con el número del nodo. Los hostnames siguen la convención `TIPO-LAB-NN` con el dominio `eicl.internal` (D-029).
 
 ## Servicios de red
 
 - **DNS para clientes:** 1.1.1.1 y 8.8.8.8 (entregados por DHCP).
-- **Hora:** `pool.ntp.org` → FGT-LAB-01 (servidor NTP solo en VLAN10-MGMT) → SW-LAB-01 (D-007). El Omada no soporta NTP.
+- **Hora:** `pool.ntp.org` → FGT-LAB-01 (servidor NTP solo en VLAN10-MGMT) → SW-LAB-01 y los tres hipervisores (D-007). El Omada no soporta NTP.

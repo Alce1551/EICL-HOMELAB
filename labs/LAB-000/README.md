@@ -9,9 +9,10 @@ Recepción e inspección del equipo, verificación de firmware, inventario de ha
 | Verificación de firmware del firewall y del switch principal | ✅ Completada |
 | Red doméstica documentada | ✅ Completada |
 | Plan de direccionamiento y VLAN | ✅ Implementado y validado en LAB-001 |
-| Eliminación de configuraciones anteriores | 🔄 Equipos de red listos; servidores pendientes |
+| Eliminación de configuraciones anteriores | ✅ Completada (los nodos se reinstalaron desde cero en LAB-002) |
 | Montaje en rack de los equipos de red | ✅ Completado (detalle físico no publicado, D-024) |
-| Arranque, POST y especificaciones de los servidores (hasta cuatro nodos) | ⏳ Pendiente |
+| Arranque, POST y especificaciones de los servidores | ✅ Completado: tres OptiPlex 5070 Micro iguales (i5-9500T, 16 GB, SSD de ~256 GB, una interfaz de red) |
+| Revisión de la placa base de repuesto | ⏳ Pendiente |
 | Verificación del material del cable | ⏳ Pendiente |
 | Inventario completo | 🔄 En curso |
 

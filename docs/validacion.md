@@ -1,6 +1,8 @@
-# Validaciones de LAB-001
+# Validaciones
 
 Cada prueba incluye casos positivos (lo permitido funciona) y negativos (lo prohibido se bloquea). Las evidencias completas están en las memorias técnicas de cada componente.
+
+## LAB-001
 
 | ID | Prueba | Resultado | Cómo se comprobó |
 |---|---|---|---|
@@ -13,8 +15,27 @@ Cada prueba incluye casos positivos (lo permitido funciona) y negativos (lo proh
 | V7 | Trunks con VLAN etiquetadas y VLAN 999 nativa | ✅ Aprobada | Firewall ↔ switch principal (VLAN 10–50) y switch principal ↔ switch de acceso (VLAN 10/20/50) |
 | V8 | Respaldo de la configuración del switch principal | ✅ Aprobada | Respaldo por SFTP (archivo en almacenamiento privado) |
 
-## Lección aprendida (componente C)
+### Lección aprendida (componente C)
 
 Al mover la gestión del Omada a la VLAN 10, el switch quedó inaccesible por web aunque **seguía respondiendo al ping**: el puerto usado para el acceso no había quedado en la VLAN nueva. Se recuperó con un reinicio, que restauró la última configuración guardada.
 
 Conclusión: un ping exitoso no garantiza acceso de administración. Desde entonces la verificación se hace con `curl` (`curl -s -o /dev/null -w "%{http_code}\n" --max-time 5 http://IP`) y el cambio de VLAN de gestión se hace con un puerto puente temporal ya ubicado en la VLAN nueva.
+
+## LAB-002
+
+En curso. Pruebas de la red de los nodos y de la instalación de los hipervisores; el clúster y las máquinas virtuales se agregan al avanzar.
+
+| ID | Prueba | Resultado | Cómo se comprobó |
+|---|---|---|---|
+| V1 | Los puertos de los nodos quedan en trunk con la VLAN 10 sin etiqueta y las VLAN 20–50 etiquetadas | ✅ Aprobada | `display port vlan` en GE0/0/2–4: trunk, PVID 10, VLAN 10 20 30 40 50. Los enlaces hacia el firewall y el switch de acceso siguen arriba |
+| V2 | La gestión web de los tres hipervisores es accesible desde la PC de administración | ✅ Aprobada | Proxmox en `https://10.10.10.11:8006` y `https://10.10.10.12:8006`; ESXi en `https://10.10.10.13` |
+| V3 | Los hipervisores salen a internet para actualizarse | ✅ Aprobada | Actualización completa de los dos Proxmox con el repositorio *No-Subscription* |
+| V4 | Los tres hipervisores sincronizan la hora con el firewall | ✅ Aprobada | `chronyc sources` con `^* 10.10.10.1` en los Proxmox; NTP del ESXi con hora UTC correcta |
+| V5 | Los nodos Proxmox se resuelven y alcanzan por nombre dentro de la VLAN 10 | ✅ Aprobada | `getent hosts` en ambos nodos y `ping` por FQDN con TTL 64 (sin pasar por el firewall) |
+| V6 | ESXi reconoce la interfaz de red del equipo | ✅ Aprobada | Un adaptador de red activo con la IP de gestión |
+| V7 | Las demás VLAN no alcanzan la gestión de los nodos | ⏳ Pendiente | — |
+| V8 | El clúster Proxmox mantiene quórum con un nodo apagado | ⏳ Pendiente | — |
+
+### Lección aprendida (instalación)
+
+El reloj del ESXi quedó adelantado seis horas: durante la instalación tomó la hora local como si fuera UTC. ESXi siempre trabaja en UTC, así que el error no se ve a simple vista. Se corrigió apuntando su cliente NTP al firewall; las marcas anteriores (fecha de instalación e historial) quedaron corridas. Desde entonces, la hora se verifica en cada equipo nuevo antes de darlo por instalado.
