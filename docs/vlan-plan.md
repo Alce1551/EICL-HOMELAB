@@ -1,6 +1,6 @@
 # Plan de VLAN y direccionamiento
 
-**Laboratorio:** LAB-001 · **Versión:** 1.0 · **Fecha:** 24/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.1 · **Fecha:** 25/10/2026
 
 ## Criterios
 
@@ -38,11 +38,17 @@ En el switch de acceso (Omada) los nombres se acortan por el límite del campo: 
 
 ## IP de infraestructura
 
-| IP | Equipo |
-|---|---|
-| 10.10.10.1 | FGT-LAB-01 (FortiGate 50E) |
-| 10.10.10.2 | SW-LAB-01 (Huawei S5735) |
-| 10.10.10.3 | SW-LAB-02 (Omada ES208G) |
+| IP | Equipo | Estado |
+|---|---|---|
+| 10.10.10.1 | FGT-LAB-01 (FortiGate 50E) | Asignada |
+| 10.10.10.2 | SW-LAB-01 (Huawei S5735) | Asignada |
+| 10.10.10.3 | SW-LAB-02 (Omada ES208G) | Asignada |
+| 10.10.10.11 | SRV-01 (gestión del hipervisor) | Prevista, LAB-002 |
+| 10.10.10.12 | SRV-02 (gestión del hipervisor) | Prevista, LAB-002 |
+| 10.10.10.13 | SRV-03 (gestión del hipervisor) | Prevista, LAB-002 |
+| 10.10.10.14 | SRV-04 (opcional) | Prevista, LAB-002 |
+
+Las IP de los nodos siguen la convención (.10–.49 para servidores e hipervisores) y el último octeto coincide con el número del nodo. Se confirman al instalar cada plataforma.
 
 ## Servicios de red
 

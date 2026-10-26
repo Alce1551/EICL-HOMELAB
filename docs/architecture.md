@@ -1,6 +1,6 @@
 # Arquitectura
 
-**Laboratorio:** LAB-001 · **Versión:** 1.0 · **Fecha:** 24/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.1 · **Fecha:** 25/10/2026
 
 ## Objetivo
 
@@ -20,9 +20,72 @@ flowchart TB
         SW1[SW-LAB-01 · switch principal<br/>STP raíz · trunks 802.1Q]
         SW2[SW-LAB-02 · switch de acceso]
     end
+    subgraph Computo[Cómputo - previsto en LAB-002]
+        NOD[SRV-01 a SRV-04<br/>hasta cuatro nodos]
+    end
     ARC --> FGT
     FGT --> SW1 --> SW2
+    SW1 -.-> NOD
 ```
+
+## Topología lógica
+
+Cada VLAN es un segmento independiente con su gateway en el firewall (`.1`). Ningún switch rutea: el tráfico entre segmentos sube por el trunk, pasa por las políticas del firewall y queda registrado (D-002).
+
+```mermaid
+flowchart LR
+    ARC[Router doméstico<br/>192.168.1.0/24] -->|WAN 192.168.1.2 · NAT| FGT[FGT-LAB-01<br/>gateway .1 de cada VLAN<br/>DHCP · NTP · políticas]
+    FGT --- V10[VLAN 10 · MGMT<br/>10.10.10.0/24<br/>equipos de red .1 a .3<br/>hipervisores .11 a .14]
+    FGT --- V20[VLAN 20 · SRV<br/>10.10.20.0/24<br/>máquinas virtuales y servicios]
+    FGT --- V30[VLAN 30 · MON<br/>10.10.30.0/24<br/>monitoreo y SOC]
+    FGT --- V40[VLAN 40 · DMZ<br/>10.10.40.0/24<br/>servicios publicados]
+    FGT --- V50[VLAN 50 · LAB<br/>10.10.50.0/24<br/>clientes de prueba]
+    FGT --- OOB[OOB · lan1 a lan4<br/>10.10.254.0/24<br/>sin internet]
+```
+
+| Segmento | Gateway | Qué vive ahí | Estado |
+|---|---|---|---|
+| VLAN 10 · MGMT | 10.10.10.1 | Gestión de firewall, switches e hipervisores | Activa |
+| VLAN 20 · SRV | 10.10.20.1 | Máquinas virtuales y servicios internos | Activa (máquinas virtuales desde LAB-002) |
+| VLAN 30 · MON | 10.10.30.1 | Monitoreo, logs y SOC | Creada, sin equipos (LAB-005/006) |
+| VLAN 40 · DMZ | 10.10.40.1 | Servicios publicados | Creada, sin equipos (LAB-007) |
+| VLAN 50 · LAB | 10.10.50.1 | Clientes y pruebas | Activa |
+| OOB | 10.10.254.1 | Acceso de emergencia al firewall | Activa, sin internet |
+
+Direccionamiento completo en [`vlan-plan.md`](vlan-plan.md).
+
+## Topología física (enlaces)
+
+Conexiones entre equipos, puerto a puerto. El montaje en rack, el cableado y el etiquetado están completados; su detalle físico no se publica (D-024).
+
+```mermaid
+flowchart LR
+    ARC[Router doméstico] -->|LAN a wan1| FGT[FGT-LAB-01]
+    FGT -->|lan5 a GE0/0/1<br/>trunk VLAN 10-50| SW1[SW-LAB-01]
+    SW1 -->|GE0/0/5 a puerto 1<br/>trunk VLAN 10/20/50| SW2[SW-LAB-02]
+    FGT -.->|lan1 a lan4| OOB[Red OOB de emergencia]
+    SW1 -.->|GE0/0/2| N1[SRV-01]
+    SW1 -.->|GE0/0/3| N2[SRV-02]
+    SW1 -.->|GE0/0/4| N3[SRV-03]
+    SW1 -.->|GE0/0/7| N4[SRV-04 · opcional]
+```
+
+Líneas punteadas: enlaces previstos o de emergencia, sin tráfico de producción hoy. Detalle por puerto en [`port-mapping.md`](port-mapping.md).
+
+## Nodos de cómputo (previstos)
+
+El laboratorio contempla **hasta cuatro nodos** Dell OptiPlex 5070 Micro. Su número real, especificaciones y estado se confirman en LAB-000 antes de asignar roles; la instalación se hace en LAB-002.
+
+| Nodo | Rol previsto | Puerto en SW-LAB-01 | IP de gestión prevista |
+|---|---|---|---|
+| SRV-01 | Proxmox VE (hipervisor principal) | GE0/0/2 | 10.10.10.11 |
+| SRV-02 | VMware ESXi, sujeto a compatibilidad y licencia | GE0/0/3 | 10.10.10.12 |
+| SRV-03 | Por definir: servicios, respaldos o segundo nodo Proxmox | GE0/0/4 | 10.10.10.13 |
+| SRV-04 | Opcional, por definir | GE0/0/7 | 10.10.10.14 |
+
+- Los nodos se conectan al **switch principal**, no al de acceso: ahí hay STP, ACL de administración y trunks gestionables (D-025).
+- Con tres nodos Proxmox se puede formar un clúster con quórum propio (LAB-012, VLAN 70 reservada). La asignación final se decide en LAB-002.
+- El modo exacto de cada puerto (trunk con qué VLAN y cuál nativa) se define en LAB-002 según la plataforma de cada nodo.
 
 ## Principios de diseño
 
@@ -52,3 +115,4 @@ flowchart TB
 | El switch de acceso no soporta SNMP, syslog ni STP | LAB-005/006 (monitoreo por ping y contadores; port mirroring para sensor) |
 | Política de salida a internet con servicio amplio | LAB-004 |
 | Varios niveles de NAT hacia internet | LAB-007 y LAB-010 (publicación y VPN) |
+| Número de interfaces de red por nodo por confirmar: con una sola, gestión, máquinas virtuales y clúster comparten enlace | LAB-000 (inventario) y LAB-002/012 |
