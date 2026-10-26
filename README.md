@@ -30,7 +30,8 @@ flowchart LR
     ARC -->|WAN| FGT[FGT-LAB-01<br/>FortiGate 50E]
     FGT -->|trunk 802.1Q<br/>VLAN 10-50| SW1[SW-LAB-01<br/>Huawei S5735]
     SW1 -->|trunk 802.1Q<br/>VLAN 10/20/50| SW2[SW-LAB-02<br/>Omada ES208G]
-    SW1 -.->|reservados LAB-002| SRV[SRV-01..04<br/>hasta cuatro nodos<br/>Proxmox / ESXi]
+    SW2 -->|VLAN 50| BAN[Banco de clientes<br/>switch no administrable]
+    SW1 -.->|reservados LAB-002| SRV[SRV-01..04<br/>clúster Proxmox de 2 nodos<br/>ESXi · un nodo por definir]
     FGT -.->|OOB lan1-lan4| OOB[Red de emergencia<br/>10.10.254.0/24]
 ```
 

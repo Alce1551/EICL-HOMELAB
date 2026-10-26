@@ -22,7 +22,7 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 
 **B — Switch principal.** Endurecimiento desde cero: usuario local con AAA, SSH con llave RSA 3072 y Telnet deshabilitado, ACL de administración también aplicada al servidor SSH (SFTP incluido), STP con raíz definida y protección BPDU, puertos sin uso en VLAN 999 y apagados, respaldo por SFTP.
 
-**C — Switch de acceso.** Integración de un equipo *easy managed* con capacidades limitadas: levantamiento aislado, VLAN 802.1Q, migración de la gestión a VLAN 10 sin perder acceso (y un incidente documentado), Loop Prevention y protección `root-protection` en el puerto del switch principal que lo conecta.
+**C — Switch de acceso.** Integración de un equipo *easy managed* con capacidades limitadas: levantamiento aislado, VLAN 802.1Q, migración de la gestión a VLAN 10 sin perder acceso (y un incidente documentado), Loop Prevention y protección `root-protection` en el puerto del switch principal que lo conecta. De él cuelga un switch no administrable como banco de clientes en VLAN 50 (D-026).
 
 **D — Montaje físico.** Equipos de red montados en rack, cableados y etiquetados. El detalle físico no se publica por seguridad (D-024); las conexiones se documentan puerto a puerto.
 

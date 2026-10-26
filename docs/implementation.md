@@ -1,6 +1,6 @@
 # Implementación
 
-**Laboratorio:** LAB-001 · **Versión:** 1.0 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.1 · **Fecha:** 25/10/2026
 
 Orden y método con que se construyó la red base del laboratorio, del firewall al switch de acceso. Este documento resume el **cómo** y el **por qué del orden**; los comandos, capturas y resultados detallados están en las memorias técnicas de cada componente.
 
@@ -73,6 +73,7 @@ Memoria técnica: [lab-001-huawei-v1.1](https://github.com/Alce1551/EICL-HOMELAB
 | C6 | Puertos sin uso deshabilitados; reinicio de prueba | La configuración se conserva |
 | C7 | Pruebas con laptop en los puertos 2–5 y política 5 en el firewall para la web desde la PC de administración | V1–V4 repetidas a través del switch de acceso |
 | C8 | Respaldo del Omada y nuevos respaldos del firewall y del switch principal | Archivos en almacenamiento privado |
+| C9 | Switch no administrable TL-SG108 en el puerto 7 como banco de clientes en VLAN 50 (D-026): puerto 7 *Untagged* en VLAN 50, PVID 50, fuera de la VLAN 999 y habilitado | Tablas de VLAN, PVID y estado de puertos; pruebas con laptop desde el TL-SG108; nuevo respaldo del Omada |
 
 Durante C5 el primer intento dejó la web inaccesible aunque el equipo respondía al ping; se recuperó con un reinicio. El caso y su lección están en [`validacion.md`](validacion.md).
 
@@ -125,7 +126,7 @@ Se aplicará a los nodos de LAB-002 y a cualquier equipo posterior.
 | Pendiente | Laboratorio |
 |---|---|
 | Arranque, especificaciones y roles de hasta cuatro nodos; verificación del material del cable | LAB-000 |
-| Instalación de hipervisores en SRV-01 a SRV-04 | LAB-002 |
+| Instalación de Proxmox en SRV-01 y SRV-02 (clúster con tercer voto), VMware ESXi en SRV-03 y rol de SRV-04 | LAB-002 |
 | Acotar el servicio de la política de salida a internet; caducidad de contraseñas del switch | LAB-004 |
 | Monitoreo del switch principal por SNMP y prueba negativa propia de su ACL | LAB-005 |
 | Syslog externo y registro de la regla implícita del firewall | LAB-006 |

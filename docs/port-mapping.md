@@ -1,6 +1,6 @@
 # Mapa de puertos
 
-**Laboratorio:** LAB-001 · **Versión:** 1.1 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.2 · **Fecha:** 25/10/2026
 
 ## FGT-LAB-01 — FortiGate 50E
 
@@ -15,9 +15,9 @@
 | Puerto | Uso | Modo / VLAN | Estado |
 |---|---|---|---|
 | GE0/0/1 | FGT-LAB-01 lan5 | trunk 10–50 · PVID 999 · sin VLAN 1 | Activo |
-| GE0/0/2 | Reservado SRV-01 (Proxmox) | access 999 | Apagado hasta LAB-002 |
-| GE0/0/3 | Reservado SRV-02 (ESXi) | access 999 | Apagado hasta LAB-002 |
-| GE0/0/4 | Reservado SRV-03 | access 999 | Apagado hasta LAB-002 |
+| GE0/0/2 | Reservado SRV-01 (Proxmox, nodo 1 del clúster) | access 999 | Apagado hasta LAB-002 |
+| GE0/0/3 | Reservado SRV-02 (Proxmox, nodo 2 del clúster) | access 999 | Apagado hasta LAB-002 |
+| GE0/0/4 | Reservado SRV-03 (VMware ESXi) | access 999 | Apagado hasta LAB-002 |
 | GE0/0/5 | Uplink a SW-LAB-02 puerto 1 | trunk 10, 20, 50 · PVID 999 · `stp root-protection` | Activo |
 | GE0/0/6 | Acceso MGMT | access 10 · edge | Activo |
 | GE0/0/7 | Pruebas SRV · reservado para SRV-04 (D-025) | access 20 · edge | Activo; pasa a SRV-04 si se incorpora en LAB-002 |
@@ -35,7 +35,8 @@ Protecciones globales: STP raíz primaria (prioridad 0), `stp bpdu-protection` e
 | 3 | Pruebas SRV | V20 untagged · PVID 20 | Activo |
 | 4–5 | Clientes LAB | V50 untagged · PVID 50 | Activos |
 | 6 | Sin uso (único miembro posible de VLAN 1, D-017) | V999 untagged · PVID 999 | Deshabilitado |
-| 7–8 | Sin uso | V999 untagged · PVID 999 | Deshabilitados |
+| 7 | Banco de clientes: TL-SG108 no administrable (D-026) | V50 untagged · PVID 50 | Activo |
+| 8 | Sin uso | V999 untagged · PVID 999 | Deshabilitado |
 
 Loop Prevention habilitado (D-015) e Ingress Checking activo. Gestión web solo en VLAN 10 (10.10.10.3).
 
@@ -46,9 +47,12 @@ Loop Prevention habilitado (D-015) e Ingress Checking activo. Gestión web solo 
 | Router doméstico (LAN) | FGT-LAB-01 wan1 | Enlace WAN | Activo |
 | FGT-LAB-01 lan5 | SW-LAB-01 GE0/0/1 | Trunk 802.1Q · VLAN 10–50 · nativa 999 | Activo |
 | SW-LAB-01 GE0/0/5 | SW-LAB-02 puerto 1 | Trunk 802.1Q · VLAN 10/20/50 · nativa 999 | Activo |
+| SW-LAB-02 puerto 7 | TL-SG108 (banco de clientes) | Acceso VLAN 50 | Activo |
 | SW-LAB-01 GE0/0/2 a GE0/0/4 | SRV-01 a SRV-03 | Por definir en LAB-002 | Reservados, apagados |
-| SW-LAB-01 GE0/0/7 | SRV-04 (opcional) | Por definir en LAB-002 | Reservado; hoy acceso de pruebas VLAN 20 |
+| SW-LAB-01 GE0/0/7 | SRV-04 (por definir) | Por definir en LAB-002 | Reservado; hoy acceso de pruebas VLAN 20 |
 
 Cuando se conecte SRV-04, las pruebas en VLAN 20 se hacen en el puerto 3 del switch de acceso, que ya cumple esa función. Si hicieran falta más puertos en el switch principal, quedan los cuatro SFP (GE0/0/9–12), que admiten módulos 1000BASE-T.
+
+El TL-SG108 se conecta al switch de acceso con un solo cable. Todo lo que se conecta a él queda en la VLAN 50 y pasa por el firewall como cualquier otro cliente; ante un bucle protegen el Loop Prevention del switch de acceso y `stp root-protection` en GE0/0/5.
 
 El montaje en rack, el cableado y el etiquetado están completados. Su detalle físico (fotos, plan de cables y etiquetas) no se publica (D-024).
