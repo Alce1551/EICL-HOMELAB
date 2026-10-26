@@ -1,6 +1,6 @@
 # LAB-000 — Preparación, inventario y línea base
 
-**Estado:** en curso (en pausa hasta cerrar LAB-001) · **Inicio:** 14/10/2026
+**Estado:** en curso (reanudado al cerrar LAB-001) · **Inicio:** 14/10/2026
 
 Recepción e inspección del equipo, verificación de firmware, inventario de hardware, limpieza de configuraciones previas y definición del direccionamiento.
 
@@ -10,7 +10,8 @@ Recepción e inspección del equipo, verificación de firmware, inventario de ha
 | Red doméstica documentada | ✅ Completada |
 | Plan de direccionamiento y VLAN | ✅ Implementado y validado en LAB-001 |
 | Eliminación de configuraciones anteriores | 🔄 Equipos de red listos; servidores pendientes |
-| Arranque, POST y especificaciones de los servidores | ⏳ Pendiente |
+| Montaje en rack de los equipos de red | ✅ Completado (detalle físico no publicado, D-024) |
+| Arranque, POST y especificaciones de los servidores (hasta cuatro nodos) | ⏳ Pendiente |
 | Verificación del material del cable | ⏳ Pendiente |
 | Inventario completo | 🔄 En curso |
 
@@ -20,7 +21,7 @@ Recepción e inspección del equipo, verificación de firmware, inventario de ha
 |---|---|---|
 | 0.3 | 25/10/2026 | [lab-000-v0.3](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-000-v0.3) |
 
-La v0.3 incorpora los datos ya confirmados de los tres equipos de red de LAB-001. La siguiente versión se publicará al cerrar la etapa (servidores, cableado e inventario completo).
+La v0.3 incorpora los datos ya confirmados de los tres equipos de red de LAB-001. La siguiente versión se publicará al cerrar la etapa (servidores, material del cable e inventario completo).
 
 ## Carpetas
 

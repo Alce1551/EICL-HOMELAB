@@ -2,7 +2,7 @@
 
 > Laboratorio personal construido con equipo empresarial real, documentado como un proyecto de infraestructura profesional: diseño, implementación, validación con evidencias y control de cambios.
 
-**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-001) · **Inicio:** octubre 2026
+**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-000; LAB-001 completado) · **Inicio:** octubre 2026
 
 *English summary: a hands-on enterprise homelab (FortiGate firewall, Huawei and TP-Link Omada switches, Proxmox/VMware planned) documented end to end — design decisions, VLAN segmentation, firewall policies, test evidence and sanitized configurations. Documentation is in Spanish.*
 
@@ -17,7 +17,7 @@
 | **Switching (Huawei S5735)** | Trunks 802.1Q con VLAN nativa sin uso, STP con raíz definida y protección BPDU/root, SSH con ACL, SFTP para respaldos, puertos sin uso apagados |
 | **Switching de acceso (Omada ES208G)** | Integración de un switch *easy managed* sin STP ni ACL, compensando sus limitaciones desde el firewall y el switch principal |
 | **Validación** | Pruebas de punta a punta por VLAN (DHCP, gateway, internet, aislamiento entre segmentos), con resultado esperado y obtenido |
-| **Documentación** | Memorias técnicas en LaTeX, registro de decisiones (D-001…), riesgos aceptados, incidentes y lecciones aprendidas |
+| **Documentación** | Memorias técnicas en LaTeX, procedimiento de implementación, registro de decisiones (D-001…), riesgos aceptados, incidentes y lecciones aprendidas |
 | **Seguridad de la información** | Norma propia de saneamiento: nada sensible se publica (credenciales, seriales, MAC, orígenes autorizados) |
 
 ---
@@ -30,7 +30,7 @@ flowchart LR
     ARC -->|WAN| FGT[FGT-LAB-01<br/>FortiGate 50E]
     FGT -->|trunk 802.1Q<br/>VLAN 10-50| SW1[SW-LAB-01<br/>Huawei S5735]
     SW1 -->|trunk 802.1Q<br/>VLAN 10/20/50| SW2[SW-LAB-02<br/>Omada ES208G]
-    SW1 -.->|reservados LAB-002| SRV[SRV-01..03<br/>Proxmox / ESXi]
+    SW1 -.->|reservados LAB-002| SRV[SRV-01..04<br/>hasta cuatro nodos<br/>Proxmox / ESXi]
     FGT -.->|OOB lan1-lan4| OOB[Red de emergencia<br/>10.10.254.0/24]
 ```
 
@@ -43,7 +43,7 @@ flowchart LR
 | 50 | Laboratorio / clientes (LAB) | 10.10.50.0/24 |
 | 999 | Nativa sin uso (solo switches) | — |
 
-Detalle completo en [`docs/vlan-plan.md`](docs/vlan-plan.md) y [`docs/port-mapping.md`](docs/port-mapping.md).
+Detalle completo en [`docs/architecture.md`](docs/architecture.md) (topología lógica y de enlaces), [`docs/vlan-plan.md`](docs/vlan-plan.md), [`docs/port-mapping.md`](docs/port-mapping.md) e [`docs/implementation.md`](docs/implementation.md).
 
 ---
 
@@ -51,8 +51,8 @@ Detalle completo en [`docs/vlan-plan.md`](docs/vlan-plan.md) y [`docs/port-mappi
 
 | Etapa | Laboratorio | Estado |
 |---|---|---|
-| 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | En curso (en pausa) |
-| 01 | [LAB-001 – Infraestructura física y red base](labs/LAB-001/) | **En curso** — firewall, switch principal y switch de acceso completados |
+| 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | **En curso** — se reanuda con los nodos de cómputo |
+| 01 | [LAB-001 – Infraestructura física y red base](labs/LAB-001/) | Completado |
 | 02 | LAB-002 – Proxmox y VMware | Pendiente |
 | 03 | LAB-003 – Servicios esenciales | Pendiente |
 | 04 | LAB-004 – Segmentación avanzada y troubleshooting | Pendiente |
@@ -77,7 +77,7 @@ Detalle completo en [`docs/vlan-plan.md`](docs/vlan-plan.md) y [`docs/port-mappi
 └── .github/         Compilación de las memorias y verificación en cada push
 ```
 
-Las memorias compiladas en PDF se publican en **[Releases](../../releases)**, una por versión (por ejemplo, `lab-001-huawei-v1.0`).
+Las memorias compiladas en PDF se publican en **[Releases](../../releases)**, una por versión (por ejemplo, `lab-001-huawei-v1.1`).
 
 ---
 

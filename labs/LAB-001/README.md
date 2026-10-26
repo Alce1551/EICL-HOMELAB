@@ -1,6 +1,6 @@
 # LAB-001 — Infraestructura física y red base
 
-**Estado:** en curso · **Inicio:** 23/10/2026
+**Estado:** completado · **Periodo:** 23/10/2026 – 25/10/2026
 
 Levantar la red base del laboratorio: firewall perimetral con segmentación por VLAN, switch principal, switch de acceso, montaje en rack y validación de punta a punta.
 
@@ -11,10 +11,10 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 | A | FortiGate 50E (FGT-LAB-01) | ✅ Completado | `fortigate/` · [lab-001-fortigate-v1.2](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-fortigate-v1.2) |
 | B | Huawei S5735 (SW-LAB-01) | ✅ Completado | `huawei/` · [lab-001-huawei-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-huawei-v1.1) |
 | C | Omada ES208G (SW-LAB-02) | ✅ Completado | `omada/` · [lab-001-omada-v1.1](https://github.com/Alce1551/EICL-HOMELAB/releases/tag/lab-001-omada-v1.1) |
-| D | Rack, cableado y etiquetado | 🔄 En curso | — |
-| E | Topología y tabla de puertos | 🔄 En curso | [`docs/port-mapping.md`](../../docs/port-mapping.md) |
+| D | Rack, cableado y etiquetado | ✅ Completado | No se publica (D-024) |
+| E | Topología y tabla de puertos | ✅ Completado | [`docs/architecture.md`](../../docs/architecture.md) · [`docs/port-mapping.md`](../../docs/port-mapping.md) |
 | F | Validación de punta a punta | ✅ Completado | [`docs/validacion.md`](../../docs/validacion.md) |
-| G | Entregables | 🔄 En curso | [`docs/`](../../docs/) |
+| G | Entregables | ✅ Completado | [`docs/implementation.md`](../../docs/implementation.md) y resto de [`docs/`](../../docs/) |
 
 ## Lo más relevante de cada componente
 
@@ -23,6 +23,14 @@ Levantar la red base del laboratorio: firewall perimetral con segmentación por 
 **B — Switch principal.** Endurecimiento desde cero: usuario local con AAA, SSH con llave RSA 3072 y Telnet deshabilitado, ACL de administración también aplicada al servidor SSH (SFTP incluido), STP con raíz definida y protección BPDU, puertos sin uso en VLAN 999 y apagados, respaldo por SFTP.
 
 **C — Switch de acceso.** Integración de un equipo *easy managed* con capacidades limitadas: levantamiento aislado, VLAN 802.1Q, migración de la gestión a VLAN 10 sin perder acceso (y un incidente documentado), Loop Prevention y protección `root-protection` en el puerto del switch principal que lo conecta.
+
+**D — Montaje físico.** Equipos de red montados en rack, cableados y etiquetados. El detalle físico no se publica por seguridad (D-024); las conexiones se documentan puerto a puerto.
+
+**E — Topología.** Topología lógica (segmentos, gateways y flujos) y de enlaces, con capacidad prevista para hasta cuatro nodos de cómputo en el switch principal (D-025).
+
+**F — Validación.** Ocho pruebas de punta a punta, positivas y negativas, repetidas a través del switch de acceso.
+
+**G — Entregables.** Memorias técnicas por componente, procedimiento de implementación, plan de VLAN, mapa de puertos, decisiones y validaciones.
 
 ## Carpetas
 
