@@ -24,23 +24,6 @@
 
 ---
 
-## Atención de incidentes
-
-Fallas reales del laboratorio, documentadas como en un área de soporte: síntoma, diagnóstico por capas, causa raíz, solución, validación y prevención.
-
-| Indicador | Valor |
-|---|---|
-| Incidentes registrados | 1 (1 resuelto, 0 abiertos) |
-| Tiempo medio de resolución | 17 min |
-
-| ID | Fecha | Síntoma | Causa raíz | Resolución | Estado |
-|---|---|---|---|---|---|
-| [INC-001](incidentes/INC-001-nodo-sin-enlace-fisico.md) | 27/10/2026 | Nodo Proxmox sin respuesta (`Destination Host Unreachable`) | Conector RJ45 mal insertado (capa 1) | 17 min | ✅ Resuelto |
-
-Registro completo, método y plantilla en [`incidentes/`](incidentes/).
-
----
-
 ## Topología actual (LAB-002)
 
 ```mermaid
@@ -84,6 +67,23 @@ Detalle completo en [`docs/architecture.md`](docs/architecture.md) (topología l
 | 10 | LAB-010 – VPN | Pendiente |
 | 11 | LAB-011 – Automatización | Pendiente |
 | 12 | LAB-012 – Integración final | Pendiente |
+
+---
+
+## Atención de incidentes
+
+Fallas reales del laboratorio, documentadas como en un área de soporte: síntoma, diagnóstico por capas, causa raíz, solución, validación y prevención.
+
+| Indicador | Valor |
+|---|---|
+| Incidentes registrados | 1 (1 resuelto, 0 abiertos) |
+| Tiempo medio de resolución | 17 min |
+
+| ID | Fecha | Síntoma | Causa raíz | Resolución | Estado |
+|---|---|---|---|---|---|
+| [INC-001](incidentes/INC-001-nodo-sin-enlace-fisico.md) | 27/10/2026 | Nodo Proxmox sin respuesta (`Destination Host Unreachable`) | Conector RJ45 mal insertado (capa 1) | 17 min | ✅ Resuelto |
+
+Registro completo, método y plantilla en [`incidentes/`](incidentes/).
 
 ---
 
