@@ -1,6 +1,6 @@
 # Mapa de puertos
 
-**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.4 · **Fecha:** 28/10/2026
 
 ## FGT-LAB-01 — FortiGate 50E
 
@@ -19,10 +19,11 @@
 | GE0/0/3 | `pve-lab-02` (SRV-02, Proxmox) · `SRV-02-PROXMOX` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
 | GE0/0/4 | `esx-lab-01` (SRV-03, ESXi) · `SRV-03-ESXI` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
 | GE0/0/5 | Uplink a SW-LAB-02 puerto 1 | trunk 10, 20, 50 · PVID 999 · `stp root-protection` | Activo |
-| GE0/0/6 | Acceso MGMT | access 10 · edge | Activo |
-| GE0/0/7 | Pruebas SRV · reservado para SRV-04 (D-025) | access 20 · edge | Activo; pasa a SRV-04 si se incorpora en LAB-002 |
+| GE0/0/6 | `pve-lab-03` (SRV-04, Proxmox) · `SRV-04-PROXMOX` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028, D-030) | Activo |
+| GE0/0/7 | Pruebas SRV | access 20 · edge | Activo |
 | GE0/0/8 | Clientes LAB | access 50 · edge | Activo |
-| GE0/0/9–12 (SFP) | Sin uso | access 999 | Apagados |
+| GE0/0/9 | Acceso MGMT (laptop o equipo de administración) · `ACCESO-MGMT-VLAN10` · puerto SFP | access 10 · edge (D-030) | Activo |
+| GE0/0/10–12 (SFP) | Sin uso | access 999 | Apagados |
 
 Protecciones globales: STP raíz primaria (prioridad 0), `stp bpdu-protection` en puertos edge, PoE apagado en todos los puertos (D-009). Gestión solo por SSH en Vlanif10 (10.10.10.2), limitada por ACL.
 
@@ -51,9 +52,9 @@ Loop Prevention habilitado (D-015) e Ingress Checking activo. Gestión web solo 
 | SW-LAB-01 GE0/0/2 | pve-lab-01 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
 | SW-LAB-01 GE0/0/3 | pve-lab-02 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
 | SW-LAB-01 GE0/0/4 | esx-lab-01 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
-| SW-LAB-01 GE0/0/7 | SRV-04 (por definir) | Trunk como los demás nodos (D-028) | Reservado; hoy acceso de pruebas VLAN 20 |
+| SW-LAB-01 GE0/0/6 | pve-lab-03 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
 
-Cuando se conecte SRV-04, las pruebas en VLAN 20 se hacen en el puerto 3 del switch de acceso, que ya cumple esa función. Si hicieran falta más puertos en el switch principal, quedan los cuatro SFP (GE0/0/9–12), que admiten módulos 1000BASE-T.
+SRV-04 ocupa `GE0/0/6`, contiguo a los demás nodos; el acceso de gestión que estaba ahí pasa a `GE0/0/9`, que estaba sin uso (D-030). El puerto 2 del switch de acceso sigue siendo un segundo acceso a la VLAN 10. Si hicieran falta más puertos en el switch principal, quedan tres SFP sin uso (GE0/0/10–12).
 
 El TL-SG108 se conecta al switch de acceso con un solo cable. Todo lo que se conecta a él queda en la VLAN 50 y pasa por el firewall como cualquier otro cliente; ante un bucle protegen el Loop Prevention del switch de acceso y `stp root-protection` en GE0/0/5.
 

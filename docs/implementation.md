@@ -1,6 +1,6 @@
 # Implementación
 
-**Laboratorio:** LAB-001 · **Versión:** 1.1 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.2 · **Fecha:** 28/10/2026
 
 Orden y método con que se construyó la red base del laboratorio, del firewall al switch de acceso. Este documento resume el **cómo** y el **por qué del orden**; los comandos, capturas y resultados detallados están en las memorias técnicas de cada componente.
 
@@ -125,8 +125,8 @@ Se aplicará a los nodos de LAB-002 y a cualquier equipo posterior.
 
 | Pendiente | Laboratorio |
 |---|---|
-| Arranque, especificaciones y roles de hasta cuatro nodos; verificación del material del cable | LAB-000 |
-| Instalación de Proxmox en SRV-01 y SRV-02 (clúster con tercer voto), VMware ESXi en SRV-03 y rol de SRV-04 | LAB-002 |
+| Revisión de la placa base de repuesto y verificación del material del cable | LAB-000 |
+| Clúster Proxmox de tres nodos (`pve-lab-01` a `pve-lab-03`), redes virtuales por VLAN y una máquina virtual por plataforma | LAB-002 |
 | Acotar el servicio de la política de salida a internet; caducidad de contraseñas del switch | LAB-004 |
 | Monitoreo del switch principal por SNMP y prueba negativa propia de su ACL | LAB-005 |
 | Syslog externo y registro de la regla implícita del firewall | LAB-006 |

@@ -1,6 +1,6 @@
 # Plan de VLAN y direccionamiento
 
-**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 25/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.4 · **Fecha:** 28/10/2026
 
 ## Criterios
 
@@ -46,11 +46,11 @@ En el switch de acceso (Omada) los nombres se acortan por el límite del campo: 
 | 10.10.10.11 | `pve-lab-01` (SRV-01, Proxmox) | Asignada |
 | 10.10.10.12 | `pve-lab-02` (SRV-02, Proxmox) | Asignada |
 | 10.10.10.13 | `esx-lab-01` (SRV-03, VMware ESXi) | Asignada |
-| 10.10.10.14 | SRV-04 (por definir) | Prevista, LAB-002 |
+| 10.10.10.14 | `pve-lab-03` (SRV-04, Proxmox) | Asignada |
 
-Las IP de los nodos siguen la convención (.10–.49 para servidores e hipervisores) y el último octeto coincide con el número del nodo. Los hostnames siguen la convención `TIPO-LAB-NN` con el dominio `eicl.internal` (D-029).
+Las IP de los nodos siguen la convención (.10–.49 para servidores e hipervisores) y el último octeto coincide con el número del equipo físico (SRV-NN). Los hostnames siguen la convención `TIPO-LAB-NN` con el dominio `eicl.internal` y numeran por plataforma (D-029, D-031). Los nodos usan gateway 10.10.10.1 y DNS 1.1.1.1.
 
 ## Servicios de red
 
 - **DNS para clientes:** 1.1.1.1 y 8.8.8.8 (entregados por DHCP).
-- **Hora:** `pool.ntp.org` → FGT-LAB-01 (servidor NTP solo en VLAN10-MGMT) → SW-LAB-01 y los tres hipervisores (D-007). El Omada no soporta NTP.
+- **Hora:** `pool.ntp.org` → FGT-LAB-01 (servidor NTP solo en VLAN10-MGMT) → SW-LAB-01 y los hipervisores (D-007). El Omada no soporta NTP.

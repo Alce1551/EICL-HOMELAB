@@ -2,7 +2,7 @@
 
 **Estado:** en curso · **Inicio:** 25/10/2026
 
-Desplegar dos plataformas de virtualización sobre la red base de LAB-001, comparar su operación y formar un clúster Proxmox de dos nodos con un tercer voto de quórum.
+Desplegar dos plataformas de virtualización sobre la red base de LAB-001, comparar su operación y formar un clúster Proxmox de tres nodos con quórum propio.
 
 ## Componentes
 
@@ -12,8 +12,9 @@ Desplegar dos plataformas de virtualización sobre la red base de LAB-001, compa
 | B | `pve-lab-01` (SRV-01) · Proxmox VE | ✅ Completado | Misma memoria (A–D) |
 | C | `pve-lab-02` (SRV-02) · Proxmox VE | ✅ Completado | Misma memoria (A–D) |
 | D | `esx-lab-01` (SRV-03) · VMware ESXi | ✅ Completado | Misma memoria (A–D) |
-| E | Clúster Proxmox con tercer voto (QDevice) | ⏳ Pendiente | — |
+| E | Clúster Proxmox de tres nodos | ⏳ Pendiente | — |
 | F | Redes virtuales por VLAN y una máquina virtual Linux por plataforma | ⏳ Pendiente | — |
+| G | `pve-lab-03` (SRV-04) · Proxmox VE, tercer nodo del clúster | ✅ Completado | Memoria pendiente |
 
 ## Lo más relevante de cada componente
 
@@ -23,6 +24,8 @@ Desplegar dos plataformas de virtualización sobre la red base de LAB-001, compa
 
 **D — VMware ESXi.** Versión gratuita instalada en el mismo hardware, con su tarjeta de red reconocida de forma nativa. Se detectó y corrigió un reloj adelantado seis horas (lección en [`validacion.md`](../../docs/validacion.md)).
 
+**G — Cuarto nodo.** Un cuarto OptiPlex, con la mitad de RAM que los demás, se integra como tercer Proxmox para que el clúster tenga quórum propio sin un QDevice externo (D-031). Ocupa `GE0/0/6` del switch principal, contiguo a los otros nodos y configurado como trunk igual que ellos; el acceso de gestión que estaba en ese puerto pasa a `GE0/0/9` (D-030).
+
 ## Nodos
 
 | Nodo | Hostname | Plataforma | IP de gestión |
@@ -30,8 +33,15 @@ Desplegar dos plataformas de virtualización sobre la red base de LAB-001, compa
 | SRV-01 | `pve-lab-01` | Proxmox VE 9.x | 10.10.10.11 |
 | SRV-02 | `pve-lab-02` | Proxmox VE 9.x | 10.10.10.12 |
 | SRV-03 | `esx-lab-01` | VMware ESXi 8.0 | 10.10.10.13 |
+| SRV-04 | `pve-lab-03` | Proxmox VE 9.x | 10.10.10.14 |
 
 Hardware, puertos y decisiones en [`docs/architecture.md`](../../docs/architecture.md), [`docs/port-mapping.md`](../../docs/port-mapping.md) y [`docs/decisiones.md`](../../docs/decisiones.md). Pruebas en [`docs/validacion.md`](../../docs/validacion.md).
+
+## Incidentes
+
+| ID | Resumen | Estado |
+|---|---|---|
+| [INC-001](../../incidentes/INC-001-nodo-sin-enlace-fisico.md) | `pve-lab-01` sin enlace físico con el switch principal (conector mal insertado) | ✅ Resuelto |
 
 ## Carpetas
 

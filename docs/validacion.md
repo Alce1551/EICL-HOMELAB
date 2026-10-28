@@ -35,6 +35,9 @@ En curso. Pruebas de la red de los nodos y de la instalación de los hipervisore
 | V6 | ESXi reconoce la interfaz de red del equipo | ✅ Aprobada | Un adaptador de red activo con la IP de gestión |
 | V7 | Las demás VLAN no alcanzan la gestión de los nodos | ⏳ Pendiente | — |
 | V8 | El clúster Proxmox mantiene quórum con un nodo apagado | ⏳ Pendiente | — |
+| V9 | El puerto del cuarto nodo queda en trunk como los demás | ✅ Aprobada | `display this` en `GE0/0/6`: trunk, PVID 10, VLAN 10 20 30 40 50, sin VLAN 1, edge; configuración guardada |
+| V10 | `pve-lab-03` alcanza a los demás nodos por la VLAN 10 | ✅ Aprobada | `ping` a `pve-lab-01` correcto, después de resolver [INC-001](../incidentes/INC-001-nodo-sin-enlace-fisico.md) |
+| V11 | El acceso de gestión reubicado en `GE0/0/9` funciona en la VLAN 10 | ✅ Aprobada | `display vlan`: `GE0/0/9` sin etiqueta en la VLAN 10 y `GE0/0/6` sin etiqueta en la 10 y etiquetado en la 20–50. `display interface brief`: `GE0/0/9` up/up con el equipo de administración conectado. Configuración guardada |
 
 ### Lección aprendida (instalación)
 
