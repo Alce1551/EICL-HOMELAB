@@ -1,0 +1,32 @@
+# EVID-006 - Salida de consola de pve-lab-03 (SRV-04), 2026-10-28 ~01:17 (UTC-6)
+# Saneado: IPv6 de enlace local (derivada de la MAC), version exacta de Proxmox VE,
+# kernel y BIOS sustituidos por <REDACTADO> (norma de proteccion, D-022).
+root@pve-lab-03:~# hostname -f
+pve-lab-03.eicl.internal
+root@pve-lab-03:~# pveversion
+pve-manager/9.x <REDACTADO> (running kernel: <REDACTADO>)
+root@pve-lab-03:~# lscpu | grep "Model name"
+Model name:                              Intel(R) Core(TM) i5-9500T CPU @ 2.20GHz
+root@pve-lab-03:~# free -h
+               total        used        free      shared  buff/cache   available
+Mem:           7.5Gi       1.6Gi       5.8Gi        50Mi       418Mi       5.9Gi
+Swap:          7.5Gi          0B       7.5Gi
+root@pve-lab-03:~# lsblk -d -o NAME,SIZE,TYPE,MODEL
+NAME      SIZE TYPE MODEL
+nvme0n1 238.5G disk BC901 NVMe SK hynix 256GB
+root@pve-lab-03:~# dmidecode -s bios-version
+<REDACTADO>
+root@pve-lab-03:~# ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+nic0             UP
+vmbr0            UP             10.10.10.14/24 <REDACTADO>
+root@pve-lab-03:~# ping -c 2 pve-lab-01
+ping: pve-lab-01: Name or service not known
+root@pve-lab-03:~# ping -c 2 10.10.10.11
+PING 10.10.10.11 (10.10.10.11) 56(84) bytes of data.
+64 bytes from 10.10.10.11: icmp_seq=1 ttl=64 time=0.936 ms
+64 bytes from 10.10.10.11: icmp_seq=2 ttl=64 time=1.24 ms
+
+--- 10.10.10.11 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.936/1.085/1.235/0.149 ms

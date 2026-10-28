@@ -2,7 +2,7 @@
 
 > Laboratorio personal construido con equipo empresarial real, documentado como un proyecto de infraestructura profesional: diseño, implementación, validación con evidencias y control de cambios.
 
-**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-002; LAB-001 completado) · **Inicio:** octubre 2026
+**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-002; LAB-000 y LAB-001 completados) · **Inicio:** octubre 2026
 
 *English summary: a hands-on enterprise homelab (FortiGate firewall, Huawei and TP-Link Omada switches, Proxmox/VMware planned) documented end to end — design decisions, VLAN segmentation, firewall policies, test evidence and sanitized configurations. Documentation is in Spanish.*
 
@@ -54,7 +54,7 @@ Detalle completo en [`docs/architecture.md`](docs/architecture.md) (topología l
 
 | Etapa | Laboratorio | Estado |
 |---|---|---|
-| 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | En curso — nodos inventariados; faltan placa base y material del cable |
+| 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | Completado |
 | 01 | [LAB-001 – Infraestructura física y red base](labs/LAB-001/) | Completado |
 | 02 | [LAB-002 – Proxmox y VMware](labs/LAB-002/) | **En curso** — cuatro hipervisores instalados (tres Proxmox y un ESXi); clúster pendiente |
 | 03 | LAB-003 – Servicios esenciales | Pendiente |

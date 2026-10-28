@@ -1,6 +1,6 @@
 # Arquitectura
 
-**Laboratorio:** LAB-001 · **Versión:** 1.4 · **Fecha:** 28/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.5 · **Fecha:** 28/10/2026
 
 ## Objetivo
 
@@ -124,4 +124,5 @@ Cuatro Dell OptiPlex 5070 Micro con Intel Core i5-9500T (6 núcleos), SSD de uno
 | Varios niveles de NAT hacia internet | LAB-007 y LAB-010 (publicación y VPN) |
 | Una sola interfaz de red por nodo: gestión, máquinas virtuales y clúster comparten 1 Gbps | LAB-012 (segundo enlace del clúster en VLAN 70; adaptador adicional si hace falta) |
 | Los puertos de los nodos llevan la VLAN de gestión sin etiqueta: un equipo conectado ahí cae en MGMT | Mitigado: puertos dentro del rack (D-028) |
+| Cableado CCA (aluminio recubierto de cobre), no apto para PoE | Aceptado con PoE apagado (D-009, D-032); reemplazo por cobre sólido si aparecen errores en los contadores (LAB-005) o se necesita PoE |
 | Memoria desigual en el clúster: `pve-lab-03` con 8 GB frente a 16 GB de los demás | LAB-002 (grupos y prioridades de alta disponibilidad según la RAM de cada nodo) |
