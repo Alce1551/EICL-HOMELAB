@@ -24,6 +24,23 @@
 
 ---
 
+## Atención de incidentes
+
+Fallas reales del laboratorio, documentadas como en un área de soporte: síntoma, diagnóstico por capas, causa raíz, solución, validación y prevención.
+
+| Indicador | Valor |
+|---|---|
+| Incidentes registrados | 1 (1 resuelto, 0 abiertos) |
+| Tiempo medio de resolución | 17 min |
+
+| ID | Fecha | Síntoma | Causa raíz | Resolución | Estado |
+|---|---|---|---|---|---|
+| [INC-001](incidentes/INC-001-nodo-sin-enlace-fisico.md) | 27/10/2026 | Nodo Proxmox sin respuesta (`Destination Host Unreachable`) | Conector RJ45 mal insertado (capa 1) | 17 min | ✅ Resuelto |
+
+Registro completo, método y plantilla en [`incidentes/`](incidentes/).
+
+---
+
 ## Topología actual (LAB-002)
 
 ```mermaid
