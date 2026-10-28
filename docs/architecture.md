@@ -1,6 +1,6 @@
 # Arquitectura
 
-**Laboratorio:** LAB-001 · **Versión:** 1.5 · **Fecha:** 28/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.6 · **Fecha:** 28/10/2026
 
 ## Objetivo
 
@@ -21,7 +21,7 @@ flowchart TB
         SW2[SW-LAB-02 · switch de acceso]
     end
     subgraph Computo[Cómputo - LAB-002]
-        NOD[pve-lab-01, pve-lab-02 y pve-lab-03<br/>clúster Proxmox VE<br/>esx-lab-01 · VMware ESXi]
+        NOD[pve-lab-01, pve-lab-02 y pve-lab-03<br/>clúster Proxmox VE pve-lab-clr<br/>esx-lab-01 · VMware ESXi]
     end
     ARC --> FGT
     FGT --> SW1 --> SW2
@@ -79,20 +79,41 @@ Cuatro Dell OptiPlex 5070 Micro con Intel Core i5-9500T (6 núcleos), SSD de uno
 
 | Nodo | Hostname | Plataforma | Puerto en SW-LAB-01 | IP de gestión | Estado |
 |---|---|---|---|---|---|
-| SRV-01 | `pve-lab-01` | Proxmox VE 9.x · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 | Instalado |
-| SRV-02 | `pve-lab-02` | Proxmox VE 9.x · nodo 2 del clúster | GE0/0/3 | 10.10.10.12 | Instalado |
-| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 (versión gratuita) | GE0/0/4 | 10.10.10.13 | Instalado |
-| SRV-04 | `pve-lab-03` | Proxmox VE 9.x · nodo 3 del clúster | GE0/0/6 | 10.10.10.14 | Instalado |
+| SRV-01 | `pve-lab-01` | Proxmox VE 9.x · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 | En el clúster; aloja `deb-lab-01` |
+| SRV-02 | `pve-lab-02` | Proxmox VE 9.x · nodo 2 del clúster | GE0/0/3 | 10.10.10.12 | En el clúster |
+| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 (versión gratuita) | GE0/0/4 | 10.10.10.13 | Operativo; aloja `deb-lab-02` |
+| SRV-04 | `pve-lab-03` | Proxmox VE 9.x · nodo 3 del clúster | GE0/0/6 | 10.10.10.14 | En el clúster |
 
 - Los puertos de los nodos son **trunk**: la VLAN 10 va sin etiqueta para la gestión del hipervisor y las VLAN 20 a 50 van etiquetadas para las máquinas virtuales (D-028). Así el ruteo y el filtrado entre máquinas virtuales de distintas VLAN siguen pasando por el firewall.
 - `SRV-NN` numera el equipo físico y el hostname numera por plataforma: el cuarto equipo es el tercer Proxmox, por eso SRV-04 es `pve-lab-03` (D-031).
 - Los hipervisores toman la hora del firewall (servidor NTP en la VLAN 10). Los Proxmox se resuelven entre sí por nombre mientras no exista DNS interno (LAB-003).
 
 - Los nodos se conectan al **switch principal**, no al de acceso: ahí hay STP, ACL de administración y trunks gestionables (D-025).
-- **Clúster Proxmox de tres nodos (D-031).** Con tres votos propios el clúster mantiene quórum (2 de 3) si cae cualquier nodo, sin depender de un QDevice externo. Así se resuelve el tercer voto que exigía el diseño de dos nodos (D-027).
+- **Clúster Proxmox de tres nodos `pve-lab-clr` (D-031, D-037).** Con tres votos propios el clúster mantiene quórum (2 de 3) si cae cualquier nodo, sin depender de un QDevice externo; se comprobó apagando un nodo (V8 de LAB-002). Así se resuelve el tercer voto que exigía el diseño de dos nodos (D-027).
 - **Monitoreo desde fuera del clúster:** el ESXi queda libre para alojar una máquina virtual con Zabbix que vigile el clúster Proxmox (LAB-005).
-- El tráfico del clúster viaja al inicio por la VLAN 10; en LAB-012 se agrega un segundo enlace del clúster en la VLAN 70.
-- La alta disponibilidad de máquinas virtuales requiere almacenamiento compartido o replicación entre los nodos; se evalúa con el inventario real de discos. `pve-lab-03` tiene la mitad de RAM que los demás, así que no puede recibir todas las máquinas virtuales de otro nodo en una falla.
+- El tráfico del clúster (corosync, transporte `knet` con autenticación segura) viaja por la VLAN 10, con la IP de gestión de cada nodo como enlace; en LAB-012 se agrega un segundo enlace en la VLAN 70.
+- La alta disponibilidad de máquinas virtuales requiere almacenamiento compartido o replicación entre los nodos: hoy cada nodo solo tiene su disco local. `pve-lab-03` tiene la mitad de RAM que los demás, así que no puede recibir todas las máquinas virtuales de otro nodo en una falla.
+
+## Red virtual
+
+Las máquinas virtuales se conectan a las mismas VLAN que llegan etiquetadas por el trunk de cada nodo; el gateway, el DHCP y las políticas siguen en el firewall, igual que para un equipo físico.
+
+```mermaid
+flowchart LR
+    SW1[SW-LAB-01<br/>trunk PVID 10<br/>VLAN 20-50 etiquetadas] --> BR[Proxmox · vmbr0<br/>VLAN aware 20-50]
+    SW1 --> VS[ESXi · vSwitch0<br/>un port group por VLAN]
+    BR -->|etiqueta 20| VM1[deb-lab-01<br/>10.10.20.0/24 por DHCP]
+    VS -->|port group VLAN20-SRV| VM2[deb-lab-02<br/>10.10.20.0/24 por DHCP]
+```
+
+| Plataforma | Conmutador virtual | VLAN para VM | Gestión del hipervisor |
+|---|---|---|---|
+| Proxmox VE (tres nodos) | `vmbr0` sobre la única NIC, *VLAN aware*, VLAN 20, 30, 40 y 50 permitidas (D-038) | La VM indica su VLAN con la etiqueta de su interfaz | Sin etiqueta en `vmbr0` (VLAN 10 del switch) |
+| VMware ESXi | `vSwitch0` con un *port group* por VLAN: `VLAN20-SRV` con VLAN ID 20 (D-041) | La VM se conecta al *port group* de su VLAN | `Management Network` sin etiqueta |
+
+- **Ninguna VM usa la VLAN 10.** El switch la entrega sin etiqueta, así que solo sirve para la gestión y el clúster; `VM Network` de ESXi (VLAN 0) tampoco se usa, porque caería en ella (D-038, D-041).
+- Las VM de prueba (D-039) comprueban la segmentación desde la capa virtual: salen a internet, pero no alcanzan la gestión de los hipervisores, el switch ni la red doméstica (V7, V15 y V16 de LAB-002).
+- Las VM de Proxmox usan el tipo de CPU por defecto para no impedir una migración futura entre nodos (D-040).
 
 ## Principios de diseño
 
@@ -125,4 +146,7 @@ Cuatro Dell OptiPlex 5070 Micro con Intel Core i5-9500T (6 núcleos), SSD de uno
 | Una sola interfaz de red por nodo: gestión, máquinas virtuales y clúster comparten 1 Gbps | LAB-012 (segundo enlace del clúster en VLAN 70; adaptador adicional si hace falta) |
 | Los puertos de los nodos llevan la VLAN de gestión sin etiqueta: un equipo conectado ahí cae en MGMT | Mitigado: puertos dentro del rack (D-028) |
 | Cableado CCA (aluminio recubierto de cobre), no apto para PoE | Aceptado con PoE apagado (D-009, D-032); reemplazo por cobre sólido si aparecen errores en los contadores (LAB-005) o se necesita PoE |
-| Memoria desigual en el clúster: `pve-lab-03` con 8 GB frente a 16 GB de los demás | LAB-002 (grupos y prioridades de alta disponibilidad según la RAM de cada nodo) |
+| Memoria desigual en el clúster: `pve-lab-03` con 8 GB frente a 16 GB de los demás | LAB-012 (grupos y prioridades de alta disponibilidad según la RAM de cada nodo) |
+| Sin almacenamiento compartido: una migración entre nodos copia los discos locales y la alta disponibilidad queda limitada | LAB-012 (replicación o almacenamiento compartido, según los discos disponibles) |
+| ESXi en versión gratuita: sin vCenter, vMotion ni alta disponibilidad | Aceptado: el ESXi es un nodo independiente para comparar plataformas y alojar el monitoreo (LAB-005) |
+| Los nodos se resuelven por `/etc/hosts`, sin DNS interno | LAB-003 (DNS interno) |

@@ -1,6 +1,6 @@
 # Implementación
 
-**Laboratorio:** LAB-001 · **Versión:** 1.3 · **Fecha:** 28/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.4 · **Fecha:** 28/10/2026
 
 Orden y método con que se construyó la red base del laboratorio, del firewall al switch de acceso. Este documento resume el **cómo** y el **por qué del orden**; los comandos, capturas y resultados detallados están en las memorias técnicas de cada componente.
 
@@ -103,7 +103,7 @@ Nombre de los archivos: `HOSTNAME_AAAA-MM-DD_descripcion.ext`. Los respaldos con
 
 ## Procedimiento para incorporar un equipo nuevo
 
-Se aplicará a los nodos de LAB-002 y a cualquier equipo posterior.
+Se aplicó a los nodos de LAB-002 y se aplica a cualquier equipo posterior.
 
 1. **Levantamiento aislado:** conectar el equipo fuera de la red de producción, registrar modelo, software y configuración de llegada.
 2. **Identidad:** hostname según la convención `TIPO-LAB-NN` e IP de gestión en VLAN 10 según la convención por /24 (.2–.9 equipos de red, .10–.49 servidores e hipervisores).
@@ -125,7 +125,7 @@ Se aplicará a los nodos de LAB-002 y a cualquier equipo posterior.
 
 | Pendiente | Laboratorio |
 |---|---|
-| Clúster Proxmox de tres nodos (`pve-lab-01` a `pve-lab-03`), redes virtuales por VLAN y una máquina virtual por plataforma | LAB-002 |
+| Clúster Proxmox de tres nodos (`pve-lab-01` a `pve-lab-03`), redes virtuales por VLAN y una máquina virtual por plataforma | LAB-002 · completado el 28/10/2026 |
 | Acotar el servicio de la política de salida a internet; caducidad de contraseñas del switch | LAB-004 |
 | Monitoreo del switch principal por SNMP y prueba negativa propia de su ACL | LAB-005 |
 | Syslog externo y registro de la regla implícita del firewall | LAB-006 |

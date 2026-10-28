@@ -1,5 +1,6 @@
-% EICL - Memoria técnica | LAB-002 componentes A-D (red de los nodos e instalación de los hipervisores)
-% Fuente: paquete de cierre EICL-PKG-E02-001 (25/10/2026).
+% EICL - Memoria técnica | LAB-002 componentes A a G (red de los nodos, hipervisores,
+% clúster Proxmox de tres nodos y una máquina virtual por plataforma).
+% Fuentes: paquetes de cierre EICL-PKG-E02-001 (25/10/2026) y EICL-PKG-E02-002 (28/10/2026).
 % Protección de la información: claude/EICL-Criterios-de-proteccion-de-datos.md (revisión 3)
 % Compila con pdfLaTeX o XeLaTeX (LaTeX Workshop: receta latexmk por defecto).
 % Estructura del proyecto:
@@ -59,7 +60,7 @@
   colorlinks=true,
   linkcolor=navy,
   urlcolor=blue,
-  pdftitle={EICL -- LAB-002 Red de los nodos e instalación de los hipervisores},
+  pdftitle={EICL -- LAB-002 Virtualización con Proxmox VE y VMware ESXi},
   pdfauthor={Carlos Eduardo Abundis Lira}
 }
 
@@ -93,8 +94,8 @@
 }
 
 % --- Cabecera y pie ---
-\newcommand{\docid}{EICL | LAB-002 | Nodos e hipervisores}
-\newcommand{\docver}{Versión 1.0 | 26/10/2026}
+\newcommand{\docid}{EICL | LAB-002 | Virtualización}
+\newcommand{\docver}{Versión 1.1 | 28/10/2026}
 \fancypagestyle{eicl}{%
   \fancyhf{}
   \fancyhead[L]{\footnotesize\textcolor{muted}{\docid}}
@@ -172,26 +173,26 @@
   {\sffamily\Large\bfseries\color{blue}
     ENTERPRISE INFRASTRUCTURE \& CYBERSECURITY LAB}\\[0.55cm]
   {\sffamily\fontsize{29}{34}\selectfont\bfseries\color{navy}
-    LAB-002\\[4pt] Red de los nodos\\ e instalación\\ de los hipervisores}\\[0.7cm]
-  {\Large\color{muted}Memoria técnica | Proxmox VE y VMware ESXi\\ sobre tres Dell OptiPlex 5070 Micro}\\[1.2cm]
+    LAB-002\\[4pt] Virtualización con\\ Proxmox VE\\ y VMware ESXi}\\[0.7cm]
+  {\Large\color{muted}Memoria técnica | Red de los nodos, hipervisores,\\ clúster de tres nodos y una VM por plataforma}\\[1.0cm]
 
   {\renewcommand{\arraystretch}{1.5}
   \begin{tabularx}{\textwidth}{>{\bfseries}L{3.4cm}Z}
-    Identificador & EICL-LAB-002 (componentes A a D) \\
-    Versión & 1.0 \\
-    Fecha & 26 de octubre de 2026 \\
+    Identificador & EICL-LAB-002 (componentes A a G) \\
+    Versión & 1.1 \\
+    Fecha & 28 de octubre de 2026 \\
     Responsable & Carlos Eduardo Abundis Lira \\
-    Equipos & SW-LAB-01 (Huawei S5735), pve-lab-01 y pve-lab-02 (Proxmox VE 9.x), esx-lab-01 (VMware ESXi 8.0) \\
-    Estado & Componentes A a D completados; LAB-002 en curso (faltan E y F) \\
+    Equipos & SW-LAB-01 (Huawei S5735), clúster \texttt{pve-lab-clr} con tres nodos Proxmox VE 9.x, \texttt{esx-lab-01} (VMware ESXi 8.0) \\
+    Estado & LAB-002 completado (25/10/2026 -- 28/10/2026), con pendientes menores \\
     Clasificación & Portafolio técnico | Información saneada \\
   \end{tabularx}}
 
-  \vspace{0.8cm}
-  \notebox{Finalidad del documento}{Registrar la conexión de los tres nodos al switch principal, la instalación de Proxmox VE en dos de ellos y de VMware ESXi en el tercero, su puesta a punto (repositorios, actualización, hora y nombres) y la evidencia de validación, como base para el clúster Proxmox (componente E) y las primeras máquinas virtuales.}
+  \vspace{0.6cm}
+  \notebox{Finalidad del documento}{Registrar la conexión de los cuatro nodos al switch principal, la instalación de Proxmox VE en tres de ellos y de VMware ESXi en el cuarto, la creación del clúster Proxmox de tres nodos con quórum propio, la red virtual por VLAN en ambas plataformas y una máquina virtual Debian por plataforma, con la evidencia de validación que cierra LAB-002.}
 
   \vfill
   {\color{navy}\rule{\textwidth}{1pt}}\\[0.25cm]
-  {\small\color{muted}Referencia de control: EICL-LAB-002 | Paquete de origen: EICL-PKG-E02-001 | Documento vivo, sujeto a actualización}
+  {\small\color{muted}Referencia de control: EICL-LAB-002 | Paquetes de origen: EICL-PKG-E02-001 y EICL-PKG-E02-002 | Documento vivo, sujeto a actualización}
 \end{titlepage}
 
 % =====================================================================
@@ -208,15 +209,15 @@
   \toprule
   \cab\textbf{Campo} & \textbf{Contenido}\\
   \midrule
-  Nombre & LAB-002 -- Red de los nodos e instalación de los hipervisores\\
+  Nombre & LAB-002 -- Virtualización con Proxmox VE y VMware ESXi\\
   Proyecto & EICL -- Enterprise Infrastructure \& Cybersecurity Lab\\
-  Componentes & A: red de los nodos en SW-LAB-01. B: pve-lab-01. C: pve-lab-02. D: esx-lab-01\\
-  Alcance & Puertos de los nodos en el switch principal, instalación de los hipervisores, repositorios y actualización de Proxmox, hora por NTP, nombres de host y resolución entre nodos, inventario de hardware y validación\\
-  Versión & 1.0\\
-  Fecha & 26/10/2026. Trabajo realizado el 25/10/2026, de 21:03 a 23:31 (UTC-6)\\
-  Estado & Componentes A a D \estado{COMPLETADA}; componentes E y F \estado{PENDIENTE}; LAB-002 \estado{EN CURSO}\\
-  Paquete de origen & EICL-PKG-E02-001 (25/10/2026)\\
-  Documentos relacionados & LAB-000 v0.3 (inventario y línea base) y memoria del Huawei S5735 (switch principal), a la que este trabajo añade cambios (sección~\ref{sec:otros})\\
+  Componentes & A: red de los nodos en SW-LAB-01. B: \texttt{pve-lab-01}. C: \texttt{pve-lab-02}. D: \texttt{esx-lab-01}. E: clúster Proxmox de tres nodos. F: redes virtuales por VLAN y una VM por plataforma. G: \texttt{pve-lab-03} (cuarto equipo, tercer nodo del clúster)\\
+  Alcance & Puertos de los nodos en el switch principal, instalación y puesta a punto de los hipervisores, clúster \texttt{pve-lab-clr}, bridges con VLAN en Proxmox y port groups en ESXi, VM de prueba en la VLAN 20, inventario y validación\\
+  Versión & 1.1\\
+  Fecha & 28/10/2026. Trabajo realizado el 25/10/2026, de 21:03 a 23:31 (A a D), y el 28/10/2026, de 10:59 a 13:18 (E, F y G), UTC-6\\
+  Estado & Componentes A a G \estado{COMPLETADA}; LAB-002 \estado{COMPLETADA}; respaldo externo del switch \estado{PENDIENTE} (PEND-030)\\
+  Paquetes de origen & EICL-PKG-E02-001 (25/10/2026) y EICL-PKG-E02-002 (28/10/2026)\\
+  Documentos relacionados & LAB-000 v1.0 (inventario y velocidades de los enlaces), memoria del Huawei S5735 (switch principal, sección~\ref{sec:otros}) e incidente INC-001 del repositorio\\
   \bottomrule
 \end{tabularx}
 
@@ -225,7 +226,8 @@
   \toprule
   \cab\textbf{Versión} & \textbf{Fecha} & \textbf{Cambio}\\
   \midrule
-  1.0 & 26/10/2026 & Versión inicial: componentes A a D, pruebas TEST-001 a TEST-019, bloqueos BLK-001 a BLK-004 y evidencias EVID-001 a EVID-017, saneadas en los tres canales (texto, consola e imágenes).\\
+  1.0 & 26/10/2026 & Versión inicial: componentes A a D, pruebas TEST-001 a TEST-019, bloqueos BLK-001 a BLK-004 y evidencias EVID-001 a EVID-017.\\
+  1.1 & 28/10/2026 & Componentes E, F y G: \texttt{pve-lab-03} completado, clúster \texttt{pve-lab-clr} de tres nodos sin QDevice (sustituye el clúster de dos nodos con tercer voto de la v1.0), bridges con VLAN, port group \texttt{VLAN20-SRV} y una VM Debian por plataforma. Pruebas TEST-020 a TEST-045, bloqueos BLK-005 a BLK-009, decisiones D-030, D-031 y D-037 a D-041, evidencias EVID-018 a EVID-063. Actualiza las pruebas TEST-013, TEST-018 y TEST-019 y cierra PEND-011, PEND-012, PEND-015, PEND-016 y PEND-019. LAB-002 completado.\\
   \bottomrule
 \end{tabularx}
 
@@ -236,7 +238,7 @@
   \item[{[POR CONFIRMAR]}:] dato desconocido o pendiente de verificación.
 \end{description}
 
-\notebox{Convención de identificadores}{Los EVID-nnn, TEST-nnn y BLK-nnn son locales a este documento. Las decisiones (D-024 a D-029) y los pendientes (PEND-011 a PEND-019) siguen la numeración global del proyecto. Los enlaces continúan la matriz de LAB-001 (LINK-003 a LINK-005).}
+\notebox{Convención de identificadores}{Los EVID-nnn, TEST-nnn y BLK-nnn son locales a este documento: EVID-001 a EVID-017, TEST-001 a TEST-019 y BLK-001 a BLK-004 vienen de la v1.0; EVID-018 a EVID-063, TEST-020 a TEST-045 y BLK-005 a BLK-009 son nuevos (en el paquete EICL-PKG-E02-002 llevaban la numeración 001 en adelante). Las decisiones (D-024 a D-041) y los pendientes (PEND-011 a PEND-036) siguen la numeración global del proyecto; los enlaces físicos continúan la matriz de LAB-000.}
 
 \clearpage
 \tableofcontents
@@ -250,7 +252,7 @@
 \pagestyle{eicl}
 
 \section{Objetivo}
-Este documento registra la primera parte de LAB-002: conectar los tres Dell OptiPlex 5070 Micro al switch principal con puertos preparados para virtualización, instalar Proxmox VE en dos de ellos y VMware ESXi en el tercero, y dejar los tres hipervisores administrables desde la VLAN de gestión, con la hora sincronizada con el firewall y nombres de host definitivos. Es la base para el clúster Proxmox (componente E) y para las máquinas virtuales que cierran el laboratorio.
+Este documento registra LAB-002 completo: conectar los cuatro Dell OptiPlex 5070 Micro al switch principal con puertos preparados para virtualización, instalar Proxmox VE en tres de ellos y VMware ESXi en el cuarto, unir los tres Proxmox en un clúster con quórum propio, preparar la red virtual por VLAN en ambas plataformas y comprobar con una máquina virtual Debian en cada una que las VM obtienen red, salen a internet y respetan la segmentación del firewall.
 
 \subsection*{Ficha del proyecto LAB-002 --- Despliegue de virtualización Proxmox y VMware}
 \begin{tabularx}{\textwidth}{L{3.6cm} Z}
@@ -259,39 +261,44 @@ Este documento registra la primera parte de LAB-002: conectar los tres Dell Opti
   \midrule
   Objetivo & Implementar dos plataformas de virtualización y conocer sus diferencias operativas.\\
   Tecnologías & Proxmox VE, VMware ESXi, KVM, Virtual Networking, vSwitch, VLAN y datastores.\\
-  Equipo existente & OptiPlex 01, 02 y 03.\\
+  Equipo existente & OptiPlex 01, 02, 03 y 04 (SRV-01 a SRV-04).\\
   Por conseguir & Medio de instalación y licencia válida de ESXi si corresponde.\\
   Dificultad & Intermedia.\\
   Dependencias & LAB-001 y verificación de compatibilidad.\\
   Resultado esperado & Host Proxmox funcionando, host ESXi funcionando si es compatible o licenciable, VM Linux en cada plataforma viable, comunicación entre VM, VLAN asignadas y recursos inventariados.\\
-  Entregables & Guía de instalación, comparación de plataformas, esquema de virtual networking y pruebas de conectividad. Este documento cubre la red de los nodos y la instalación.\\
+  Entregables & Guía de instalación, comparación de plataformas, esquema de virtual networking y pruebas de conectividad. Este documento los reúne.\\
   \bottomrule
 \end{tabularx}
 
 \subsection{Alcance de este documento}
-\textbf{Incluye.} Estado previo y configuración de GE0/0/2 a GE0/0/4 de SW-LAB-01; instalación y puesta a punto de pve-lab-01 y pve-lab-02 (repositorio sin suscripción, actualización, chrony y \texttt{/etc/hosts}); instalación y puesta a punto de esx-lab-01 (nombre, DNS y NTP); inventario de los tres nodos y pruebas.
+\textbf{Incluye.} Configuración de GE0/0/2 a GE0/0/4 y GE0/0/6 de SW-LAB-01; instalación y puesta a punto de los tres Proxmox (repositorio sin suscripción, actualización, chrony y \texttt{/etc/hosts}) y del ESXi (nombre, DNS y NTP); clúster \texttt{pve-lab-clr} y prueba de quórum; bridges con VLAN y port group por VLAN; VM \texttt{deb-lab-01} en Proxmox y \texttt{deb-lab-02} en ESXi con sus pruebas positivas y negativas; inventario de nodos y VM.
 
-\textbf{No incluye.} El clúster Proxmox con su tercer voto (componente E); los bridges con VLAN, los port groups por VLAN y las máquinas virtuales (componente F); el montaje de los nodos en el rack, que no se documenta por seguridad física (D-024).
+\textbf{No incluye.} Grupos de alta disponibilidad, migración de VM entre nodos y segundo enlace de corosync (LAB-012); VM de monitoreo (LAB-005); DNS interno (LAB-003); montaje de los nodos en el rack, que no se documenta por seguridad física (D-024).
 
 \subsection{Estado de los componentes}
 \begin{tabularx}{\textwidth}{Z L{3.3cm} L{3.3cm}}
   \toprule
   \cab\textbf{Actividad} & \textbf{Estado} & \textbf{Evidencia}\\
   \midrule
-  A. Puertos GE0/0/2 a GE0/0/4 en trunk para los nodos & \estado{COMPLETADA} & EVID-001 a 003; \texttt{save} y respaldo: reportados\\
-  B. pve-lab-01: instalación, actualización, hora y nombres & \estado{COMPLETADA} & EVID-004, 007 a 009, 016\\
-  C. pve-lab-02: instalación, actualización, hora y nombres & \estado{COMPLETADA} & EVID-005, 010 a 012, 017\\
-  D. esx-lab-01: instalación, nombre, DNS y hora & \estado{COMPLETADA} & EVID-006, 013 a 015\\
-  E. Clúster Proxmox con tercer voto & \estado{PENDIENTE} & --\\
-  F. Redes virtuales por VLAN y una VM Linux por plataforma & \estado{PENDIENTE} & --\\
+  A. Puertos GE0/0/2 a GE0/0/4 en trunk para los nodos & \estado{COMPLETADA} & EVID-001 a 003\\
+  B. \texttt{pve-lab-01}: instalación, actualización, hora y nombres & \estado{COMPLETADA} & EVID-004, 007 a 009, 016\\
+  C. \texttt{pve-lab-02}: instalación, actualización, hora y nombres & \estado{COMPLETADA} & EVID-005, 010 a 012, 017\\
+  D. \texttt{esx-lab-01}: instalación, nombre, DNS y hora & \estado{COMPLETADA} & EVID-006, 013 a 015\\
+  G. \texttt{pve-lab-03}: puerto GE0/0/6, repositorios, versiones alineadas, hora y nombres & \estado{COMPLETADA} & EVID-018 a 027; puerto: reportado\\
+  G. Respaldo externo de SW-LAB-01 tras GE0/0/6 y GE0/0/9 & \estado{PENDIENTE} & PEND-030\\
+  E. Clúster \texttt{pve-lab-clr} de tres nodos y prueba de quórum & \estado{COMPLETADA} & EVID-028 a 033\\
+  F. Bridges con VLAN y port group por VLAN & \estado{COMPLETADA} & EVID-034 a 038, 053, 054\\
+  F. Una VM Debian por plataforma, con pruebas & \estado{COMPLETADA} & EVID-039 a 051, 055 a 063\\
   \bottomrule
 \end{tabularx}
+
+El componente G se ejecutó antes que E porque el clúster necesitaba los tres nodos con la misma versión y resolución por nombre correcta.
 
 % =====================================================================
 \needspace{30\baselineskip}
 \section{Arquitectura}
-\subsection{Topología}
-Los tres nodos cuelgan del switch principal, cada uno por su única NIC. La gestión de cada hipervisor viaja sin etiqueta en la VLAN 10 y las VLAN de servicios llegan etiquetadas para las futuras máquinas virtuales. El FortiGate sigue siendo el gateway de cada VLAN. La conexión física es reportada por el operador; la configuración de los puertos está confirmada (EVID-002, EVID-003).
+\subsection{Topología física}
+Los cuatro nodos cuelgan del switch principal, cada uno por su única NIC. La gestión de cada hipervisor viaja sin etiqueta en la VLAN 10 y las VLAN de servicios llegan etiquetadas para las VM. El FortiGate sigue siendo el gateway de cada VLAN.
 
 \begin{lstlisting}
 FGT-LAB-01 lan5
@@ -302,20 +309,44 @@ SW-LAB-01 (Huawei S5735) GE0/0/1
    |
    |-- GE0/0/2  trunk PVID 10, VLAN 10-50 --> SRV-01 pve-lab-01 (nic0)
    |-- GE0/0/3  trunk PVID 10, VLAN 10-50 --> SRV-02 pve-lab-02 (nic0)
-   |-- GE0/0/4  trunk PVID 10, VLAN 10-50 --> SRV-03 esx-lab-01 (vmnic)
+   |-- GE0/0/4  trunk PVID 10, VLAN 10-50 --> SRV-03 esx-lab-01 (vmnic0)
    |-- GE0/0/5  trunk VLAN 10/20/50 -------> SW-LAB-02 (Omada) puerto 1
-   `-- GE0/0/7  access VLAN 20 (pruebas) --> reservado para SRV-04 (D-025)
+   |-- GE0/0/6  trunk PVID 10, VLAN 10-50 --> SRV-04 pve-lab-03 (nic0)
+   |-- GE0/0/7  access VLAN 20 (pruebas)
+   |-- GE0/0/8  access VLAN 50 (clientes)
+   `-- GE0/0/9  access VLAN 10 (acceso MGMT, SFP, D-030)
+\end{lstlisting}
+
+\subsection{Topología virtual}
+\begin{lstlisting}
+                 FGT-LAB-01 (gateway de las VLAN, DHCP, politicas)
+                      |
+                    lan5 (trunk 10-50)
+                      |
+                 SW-LAB-01 (Huawei)
+     +----------+-----+------+----------+
+     |GE0/0/2   |GE0/0/3     |GE0/0/4   |GE0/0/6      (trunk PVID 10, VLAN 10-50)
+     |          |            |          |
+ pve-lab-01  pve-lab-02  esx-lab-01  pve-lab-03
+  vmbr0       vmbr0       vSwitch0     vmbr0
+  (VLAN-aware 20-50)      |            (VLAN-aware 20-50)
+     |                    |
+ deb-lab-01          port group VLAN20-SRV
+ (tag 20)                 |
+                      deb-lab-02
+
+ Cluster pve-lab-clr: pve-lab-01 + pve-lab-02 + pve-lab-03 (corosync link0 en VLAN 10)
 \end{lstlisting}
 
 \subsection{Roles de los nodos}
 \begin{tabularx}{\textwidth}{L{1.6cm} L{2.4cm} L{3.4cm} Z}
   \toprule
-  \cab\textbf{Nodo} & \textbf{Hostname} & \textbf{Plataforma} & \textbf{Función (D-027)}\\
+  \cab\textbf{Nodo} & \textbf{Hostname} & \textbf{Plataforma} & \textbf{Función (D-027, D-031)}\\
   \midrule
-  SRV-01 & pve-lab-01 & Proxmox VE 9.x & Nodo 1 del futuro clúster Proxmox\\
-  SRV-02 & pve-lab-02 & Proxmox VE 9.x & Nodo 2 del futuro clúster Proxmox\\
-  SRV-03 & esx-lab-01 & VMware ESXi 8.0 (gratuito) & Plataforma VMware\\
-  SRV-04 & -- & -- & Posible cuarto equipo \pc{} (PEND-015); candidato a tercer voto\\
+  SRV-01 & \texttt{pve-lab-01} & Proxmox VE 9.x & Nodo 1 del clúster \texttt{pve-lab-clr}; aloja \texttt{deb-lab-01}\\
+  SRV-02 & \texttt{pve-lab-02} & Proxmox VE 9.x & Nodo 2 del clúster\\
+  SRV-04 & \texttt{pve-lab-03} & Proxmox VE 9.x & Nodo 3 del clúster; 8\,GB de RAM\\
+  SRV-03 & \texttt{esx-lab-01} & VMware ESXi 8.0 (gratuito) & Plataforma VMware; aloja \texttt{deb-lab-02} y, en LAB-005, la VM de monitoreo\\
   \bottomrule
 \end{tabularx}
 
@@ -324,99 +355,122 @@ SW-LAB-01 (Huawei S5735) GE0/0/1
   \toprule
   \cab\textbf{Hostname} & \textbf{IP de gestión} & \textbf{Acceso}\\
   \midrule
-  pve-lab-01 & 10.10.10.11/24 & \texttt{https://10.10.10.11:8006} (EVID-004)\\
-  pve-lab-02 & 10.10.10.12/24 & \texttt{https://10.10.10.12:8006} (EVID-005)\\
-  esx-lab-01 & 10.10.10.13/24 & \texttt{https://10.10.10.13} (vmk0, EVID-006)\\
+  \texttt{pve-lab-01} & 10.10.10.11/24 & \texttt{https://10.10.10.11:8006}; \texttt{link0} del clúster\\
+  \texttt{pve-lab-02} & 10.10.10.12/24 & \texttt{https://10.10.10.12:8006}; \texttt{link0} del clúster\\
+  \texttt{pve-lab-03} & 10.10.10.14/24 & \texttt{https://10.10.10.14:8006}; \texttt{link0} del clúster\\
+  \texttt{esx-lab-01} & 10.10.10.13/24 & \texttt{https://10.10.10.13} (vmk0)\\
   \bottomrule
 \end{tabularx}
 
 \begin{itemize}
   \item Gateway 10.10.10.1 (FGT-LAB-01). Las IP fijas quedan fuera del rango DHCP de la VLAN 10 (.100 a .120).
-  \item Dominio \texttt{eicl.internal}; DNS 1.1.1.1 y 8.8.8.8. Mientras no exista DNS interno (LAB-003), los Proxmox se resuelven entre sí por \texttt{/etc/hosts} (D-029).
-  \item Hora: FGT-LAB-01 sirve NTP en la VLAN 10 y los tres hipervisores son clientes (EVID-009, EVID-012, EVID-015).
-  \item Firewall sin cambios: la salida a internet de los nodos usa la política 2 (comprobada de forma indirecta con la actualización, TEST-006) y el acceso desde la PC de administración (\texttt{<IP-PC-ADMIN>}) usa la política 4.
+  \item Dominio \texttt{eicl.internal}; DNS 1.1.1.1 y 8.8.8.8. Mientras no exista DNS interno (LAB-003), los Proxmox se resuelven entre sí por \texttt{/etc/hosts} con los tres nodos (D-029).
+  \item Hora: FGT-LAB-01 sirve NTP en la VLAN 10 y los cuatro hipervisores son clientes (EVID-009, EVID-012, EVID-015, EVID-025).
+  \item La VLAN 10 llega sin etiqueta y en el bridge queda como PVID 1 sin etiqueta: por ahí van la gestión y corosync. No se usa para VM (D-038).
+  \item Firewall sin cambios: la salida a internet usa la política 2 y el acceso desde la PC de administración (\texttt{<IP-PC-ADMIN>}) usa la política 4.
 \end{itemize}
 
-\subsection{VLAN hacia los nodos}
+\subsection{VLAN hacia los nodos y las VM}
 {\small
-\begin{longtable}{L{2.6cm} L{2.6cm} L{1.8cm} L{3.0cm} L{4.2cm}}
+\begin{longtable}{L{2.6cm} L{2.6cm} L{1.8cm} L{3.2cm} L{4.0cm}}
   \toprule
-  \cab\textbf{Segmento} & \textbf{Red} & \textbf{Gateway} & \textbf{En el trunk} & \textbf{Estado}\\
+  \cab\textbf{Segmento} & \textbf{Red} & \textbf{Gateway} & \textbf{En el trunk y el bridge} & \textbf{Estado}\\
   \midrule
   \endhead
-  VLAN10-MGMT & 10.10.10.0/24 & .1 & Sin etiqueta (PVID 10) & Activa; nodos en .11, .12 y .13\\
-  VLAN20-SRV & 10.10.20.0/24 & .1 & Etiquetada & Activa; sin VM todavía\\
-  VLAN30-MON & 10.10.30.0/24 & .1 & Etiquetada & Creada; sin VM\\
-  VLAN40-DMZ & 10.10.40.0/24 & .1 & Etiquetada & Creada; sin VM\\
-  VLAN50-LAB & 10.10.50.0/24 & .1 & Etiquetada & Activa; sin VM\\
+  VLAN10-MGMT & 10.10.10.0/24 & .1 & Sin etiqueta (PVID 10); PVID 1 en \texttt{vmbr0} & Nodos en .11 a .14; corosync; sin VM\\
+  VLAN20-SRV & 10.10.20.0/24 & .1 & Etiquetada; \texttt{bridge-vids}; port group \texttt{VLAN20-SRV} & \texttt{deb-lab-01} (.101) y \texttt{deb-lab-02} (.103) por DHCP\\
+  VLAN30-MON & 10.10.30.0/24 & .1 & Etiquetada; \texttt{bridge-vids} & Sin VM todavía\\
+  VLAN40-DMZ & 10.10.40.0/24 & .1 & Etiquetada; \texttt{bridge-vids} & Sin VM todavía\\
+  VLAN50-LAB & 10.10.50.0/24 & .1 & Etiquetada; \texttt{bridge-vids} & Sin VM todavía\\
   \bottomrule
 \end{longtable}
 }
-Todavía no hay bridges con VLAN en Proxmox ni port groups por VLAN en ESXi (planeado).
 
 \subsection{Matriz de enlaces}
 {\small
-\begin{longtable}{L{1.6cm} L{2.6cm} L{3.0cm} L{2.5cm} L{4.5cm}}
+\begin{longtable}{L{1.6cm} L{2.6cm} L{3.0cm} L{2.0cm} L{5.0cm}}
   \toprule
   \cab\textbf{ID} & \textbf{Origen} & \textbf{Destino} & \textbf{Velocidad} & \textbf{Observación}\\
   \midrule
   \endhead
-  LINK-003 & SW-LAB-01 GE0/0/2 & SRV-01 (pve-lab-01) nic0 & \pc{} & Trunk, PVID 10, VLAN 10 a 50, sin VLAN 1, edge; descripción \fn{SRV-01-PROXMOX}\\
-  LINK-004 & SW-LAB-01 GE0/0/3 & SRV-02 (pve-lab-02) nic0 & \pc{} & Igual; descripción \fn{SRV-02-PROXMOX}\\
-  LINK-005 & SW-LAB-01 GE0/0/4 & SRV-03 (esx-lab-01), única NIC & \pc{} & Igual; descripción \fn{SRV-03-ESXI}\\
+  LINK-003 & SW-LAB-01 GE0/0/2 & SRV-01 (\texttt{pve-lab-01}) nic0 & 1000M full & Trunk PVID 10, VLAN 10 a 50, sin VLAN 1, edge; \fn{SRV-01-PROXMOX}\\
+  LINK-004 & SW-LAB-01 GE0/0/3 & SRV-02 (\texttt{pve-lab-02}) nic0 & 1000M full & Igual; \fn{SRV-02-PROXMOX}\\
+  LINK-005 & SW-LAB-01 GE0/0/4 & SRV-03 (\texttt{esx-lab-01}) vmnic0 & 1000M full & Igual; \fn{SRV-03-ESXI}\\
+  LINK-007 & SW-LAB-01 GE0/0/6 & SRV-04 (\texttt{pve-lab-03}) nic0 & 1000M full & Igual (D-028, D-030); \fn{SRV-04-PROXMOX}\\
   \bottomrule
 \end{longtable}
 }
-Velocidad negociada pendiente (PEND-011, TEST-018). Evidencia de los tres enlaces: EVID-002 y EVID-003.
+Velocidades y contadores de errores comprobados en LAB-000 v1.0 (EVID-002 y EVID-003 de esa memoria): cierra PEND-011. Configuración de GE0/0/2 a GE0/0/4: EVID-002 y EVID-003 de este documento; GE0/0/6: reportado y publicado en \texttt{docs/port-mapping.md}.
+
+\textbf{Conexiones virtuales de las VM}
+{\small
+\begin{longtable}{L{2.2cm} L{3.0cm} L{3.8cm} L{5.4cm}}
+  \toprule
+  \cab\textbf{VM} & \textbf{Interfaz} & \textbf{Conectada a} & \textbf{Observación}\\
+  \midrule
+  \endhead
+  \texttt{deb-lab-01} & \texttt{net0} / \texttt{ens18} (VirtIO) & \texttt{vmbr0} de \texttt{pve-lab-01}, \texttt{tag=20} & Firewall de Proxmox habilitado en la NIC (valor por defecto) (EVID-046)\\
+  \texttt{deb-lab-02} & Network adapter 1 / \texttt{ens192} (VMXNET 3) & \texttt{vSwitch0}, port group \texttt{VLAN20-SRV} & VLAN ID 20; seguridad heredada del vSwitch (EVID-060)\\
+  \bottomrule
+\end{longtable}
+}
 
 \subsection{Decisiones de diseño}
 \begin{description}
-  \item[D-027 Roles de los nodos.] SRV-01 y SRV-02 con Proxmox VE en clúster, SRV-03 con VMware ESXi y SRV-04 por definir. Motivo: practicar migración y alta disponibilidad en Proxmox; un clúster de dos nodos necesita un tercer voto (QDevice o tercer nodo). Sustituye el reparto de LAB-000 v0.3 y del documento maestro (SRV-02 con ESXi y SRV-03 flexible); el riesgo de compatibilidad de la NIC con ESXi (RSK-002) pasa al nodo 3.
-  \item[D-028 Puertos de los hipervisores.] GE0/0/2 a GE0/0/4 (y GE0/0/7 cuando se use para un nodo) quedan en trunk con PVID 10, VLAN 20 a 50 etiquetadas, sin VLAN 1 y como puertos edge. Motivo: la gestión del hipervisor funciona sin etiqueta desde la instalación y cada VM queda en su VLAN, con el ruteo y el filtrado en el firewall.
-  \item[D-029 Nombres de host.] Los nodos se llaman \fn{pve-lab-01}, \fn{pve-lab-02} y \fn{esx-lab-01}, dentro del dominio \texttt{eicl.internal}, según la convención TIPO-LAB-NN. Cambiar el nombre de un nodo después de crear el clúster es costoso, así que se fijó antes.
+  \item[D-027 Roles de los nodos.] SRV-01 y SRV-02 con Proxmox VE en clúster, SRV-03 con VMware ESXi y SRV-04 por definir. Sustituye el reparto de LAB-000 v0.3 y del documento maestro; el riesgo de compatibilidad de la NIC con ESXi (RSK-002) pasa al nodo 3.
+  \item[D-028 Puertos de los hipervisores.] Trunk con PVID 10, VLAN 20 a 50 etiquetadas, sin VLAN 1 y como puertos edge. La gestión del hipervisor funciona sin etiqueta desde la instalación y cada VM queda en su VLAN, con el ruteo y el filtrado en el firewall.
+  \item[D-029 Nombres de host.] Los nodos se llaman \fn{pve-lab-01}, \fn{pve-lab-02}, \fn{pve-lab-03} y \fn{esx-lab-01}, dentro del dominio \texttt{eicl.internal}, según la convención TIPO-LAB-NN.
+  \item[D-030 Puerto de SRV-04.] SRV-04 se conecta a GE0/0/6 como trunk igual que los demás nodos (modifica D-025); el acceso de gestión que ocupaba GE0/0/6 pasa a GE0/0/9 (SFP, access VLAN 10). Los cuatro nodos quedan en puertos contiguos.
+  \item[D-031 Tercer nodo del clúster.] SRV-04 con Proxmox VE como \texttt{pve-lab-03}: el clúster pasa a tres nodos con quórum propio y no se usa QDevice. Resuelve el tercer voto de D-027 y deja el ESXi libre para la VM de monitoreo. Riesgo aceptado: \texttt{pve-lab-03} tiene la mitad de RAM.
+  \item[D-037 Nombre del clúster.] \texttt{pve-lab-clr}, homologado con los nodos. Queda fijo en \texttt{corosync.conf} y es difícil de cambiar después.
+  \item[D-038 VLAN en los bridges.] \texttt{vmbr0} VLAN-aware en los tres Proxmox con \texttt{bridge-vids 20 30 40 50}; la VLAN 10 queda solo sin etiqueta para la gestión. El switch entrega la VLAN 10 sin etiqueta: una VM con \texttt{tag 10} enviaría tramas etiquetadas y recibiría las respuestas sin etiqueta. La VLAN 70 se agregará en LAB-012.
+  \item[D-039 VM de prueba.] En la VLAN 20 por DHCP: \texttt{deb-lab-01} (VMID 100, en \texttt{pve-lab-01}) y \texttt{deb-lab-02} (en \texttt{esx-lab-01}), Debian 13 netinst con solo servidor SSH y utilidades estándar. La VLAN 20 tiene DHCP y la política del FortiGate ya bloquea SRV hacia MGMT, así que la prueba negativa valida la segmentación desde una VM.
+  \item[D-040 Tipo de CPU.] Tipo por defecto (\texttt{x86-64-v2-AES}) en las VM de Proxmox, no \texttt{host}, para no limitar una migración futura entre nodos.
+  \item[D-041 Port groups en ESXi.] Un port group por VLAN; \texttt{VM Network} (VLAN 0) no se usa para VM, porque dejaría la VM en la VLAN 10 por el PVID del puerto.
 \end{description}
 
-\notebox{D-028: excepción consciente a la VLAN nativa 999}{La regla del proyecto es que la VLAN nativa de un trunk sea la 999, sin uso. Esa regla se pensó para los enlaces entre switches, donde el tráfico sin etiqueta no debe caer en ninguna red útil. En los puertos de los hipervisores se hace una excepción: la VLAN 10 va sin etiqueta para que el instalador y la interfaz de gestión funcionen sin configurar VLAN en el host. El riesgo aceptado es que un equipo conectado a uno de esos puertos quedaría en la VLAN de gestión; se mitiga porque los puertos están dentro del rack y configurados como edge. La decisión la aprobó el operador.}
+\notebox{D-028: excepción consciente a la VLAN nativa 999}{La regla del proyecto es que la VLAN nativa de un trunk sea la 999, sin uso. Esa regla se pensó para los enlaces entre switches. En los puertos de los hipervisores la VLAN 10 va sin etiqueta para que el instalador y la interfaz de gestión funcionen sin configurar VLAN en el host. El riesgo aceptado es que un equipo conectado a uno de esos puertos quedaría en la VLAN de gestión; se mitiga porque los puertos están dentro del rack y configurados como edge. D-038 y D-041 completan la regla en la capa virtual: ninguna VM usa la VLAN 10.}
 
 \subsection{Limitaciones conocidas}
 \begin{itemize}
-  \item Cada nodo tiene una sola NIC: gestión, tráfico de VM y, en el futuro, el tráfico del clúster comparten el mismo enlace.
-  \item Un clúster Proxmox de dos nodos pierde el quórum si cae uno de ellos; el tercer voto está pendiente (componente E).
-  \item ESXi gratuito: sin vCenter, vMotion ni HA; estado y caducidad de la licencia \pc{} (PEND-017).
+  \item Cada nodo tiene una sola NIC: gestión, tráfico de VM y corosync comparten el enlace. Un segundo enlace de corosync en la VLAN 70 se planea para LAB-012.
+  \item Sin almacenamiento compartido: una migración entre nodos tendría que copiar los discos locales y la alta disponibilidad queda limitada.
+  \item \texttt{pve-lab-03} tiene 8\,GB de RAM, la mitad que los otros nodos; condiciona la colocación de VM y los grupos de alta disponibilidad (D-031).
+  \item ESXi gratuito: sin vCenter, vMotion ni HA; estado y caducidad de la licencia \pc{} (PEND-017). No ofrece Debian 13 como sistema invitado; se eligió Debian 12 (64-bit) y funcionó sin problema.
 \end{itemize}
 
 % =====================================================================
 \section{Prerrequisitos e inventario}
 \subsection{Entorno}
 \begin{itemize}
-  \item LAB-001 completado: FortiGate, SW-LAB-01 y SW-LAB-02 operativos, con la VLAN 10 de gestión y NTP en el firewall.
-  \item Administración desde la PC de administración (\texttt{<IP-PC-ADMIN>}): navegador para las interfaces web y MobaXterm para el switch.
-  \item Antes del cambio, GE0/0/2 a GE0/0/4 estaban en access 999 y apagados (\texttt{*down}), con GE0/0/1 y GE0/0/5 activos (EVID-001).
+  \item LAB-001 completado: FortiGate, SW-LAB-01 y SW-LAB-02 operativos, con la VLAN 10 de gestión, DHCP en la VLAN 20 y NTP en el firewall.
+  \item LAB-000 v1.0: cuatro OptiPlex inventariados y montados; enlaces a 1000M sin errores.
+  \item Administración desde la PC de administración (\texttt{<IP-PC-ADMIN>}): navegador para las interfaces web, MobaXterm para el switch y consola web para las VM.
+  \item Antes del componente A, GE0/0/2 a GE0/0/4 estaban en access 999 y apagados (\texttt{*down}), con GE0/0/1 y GE0/0/5 activos (EVID-001).
 \end{itemize}
 
-\subsection{Inventario de los nodos}
-Los tres nodos son iguales en CPU, memoria y disco (EVID-004 a EVID-006, EVID-016, EVID-017).
-
+\subsection{Inventario de nodos y máquinas virtuales}
 {\small
 \begin{longtable}{L{1.5cm} L{3.4cm} L{6.6cm} L{3.0cm}}
   \toprule
   \cab\textbf{ID} & \textbf{Equipo} & \textbf{Especificaciones} & \textbf{Estado}\\
   \midrule
   \endhead
-  SRV-01 & Dell OptiPlex 5070 Micro (pve-lab-01) & Intel Core i5-9500T (6 núcleos, 2.2 GHz); 16 GB de RAM (15.40 GiB visibles); SSD de unos 256 GB (raíz de 67.61 GiB más \texttt{local-lvm}); arranque EFI; 1 NIC (nic0) & \estado{OPERATIVO VALIDADO}\\
-  SRV-02 & Dell OptiPlex 5070 Micro (pve-lab-02) & Igual que SRV-01 & \estado{OPERATIVO VALIDADO}\\
-  SRV-03 & Dell OptiPlex 5070 Micro (esx-lab-01) & Igual CPU y RAM (15.79 GB); datastore1 VMFS6 de 206.25 GB; arranque EFI; 1 NIC (Host adapters: 1) & \estado{OPERATIVO VALIDADO}\\
-  SRV-04 & Dell OptiPlex 5070 Micro \pc{} & Cuarto equipo mencionado por el operador; existencia y especificaciones \pc{} (PEND-015) & \estado{PROPUESTO}\\
-  REP-01 & Placa base de repuesto & Compatible con el OptiPlex 5070 Micro. Los tres nodos arrancan; no se sabe cuál tuvo la falla previa (PEND-015) & Por validar\\
+  SRV-01 & Dell OptiPlex 5070 Micro (\texttt{pve-lab-01}) & Intel Core i5-9500T (6 núcleos, 2.2 GHz); 16 GB de RAM; SSD de unos 256 GB (raíz más \texttt{local-lvm}); arranque EFI; 1 NIC (nic0); Proxmox VE 9.x & \estado{OPERATIVO VALIDADO}\\
+  SRV-02 & Dell OptiPlex 5070 Micro (\texttt{pve-lab-02}) & Igual que SRV-01 & \estado{OPERATIVO VALIDADO}\\
+  SRV-03 & Dell OptiPlex 5070 Micro (\texttt{esx-lab-01}) & Igual CPU y RAM (15.79 GB); datastore1 VMFS6 de 206.25 GB; arranque EFI; 1 NIC; ESXi 8.0 & \estado{OPERATIVO VALIDADO}\\
+  SRV-04 & Dell OptiPlex 5070 Micro (\texttt{pve-lab-03}) & i5-9500T; 8 GB de RAM; NVMe de 256 GB; 1 NIC (nic0); Proxmox VE 9.x & \estado{OPERATIVO VALIDADO}\\
+  VM-01 & \texttt{deb-lab-01} (VMID 100, QEMU/KVM en \texttt{pve-lab-01}) & 2 vCPU \texttt{x86-64-v2-AES}; 2048 MiB; disco de 16 GiB en \texttt{local-lvm} (VirtIO SCSI single); \texttt{net0} VirtIO en \texttt{vmbr0}, \texttt{tag=20}; Debian 13 con \texttt{qemu-guest-agent} & \estado{OPERATIVO VALIDADO}\\
+  VM-02 & \texttt{deb-lab-02} (VM de ESXi en \texttt{esx-lab-01}) & 2 vCPU; 2048 MB; disco de 16 GB thin (VMware Paravirtual); VMXNET 3 en \texttt{VLAN20-SRV}; Debian 13 con \texttt{open-vm-tools} & \estado{OPERATIVO VALIDADO}\\
   \bottomrule
 \end{longtable}
 }
 
 \subsection{Discrepancias}
 \begin{itemize}
-  \item Las versiones de BIOS de los tres nodos son distintas y la de SRV-01 es la más antigua (EVID-015 a EVID-017; las versiones exactas se omiten, véase el apéndice~\ref{ap:prot}). Se recomienda llevar SRV-01 y SRV-02 a la versión de SRV-03 (planeado).
-  \item El documento maestro registra tres OptiPlex; el operador mencionó un posible cuarto equipo (SRV-04), sin confirmar.
-  \item Los roles de SRV-02 y SRV-03 cambian respecto a LAB-000 v0.3 (D-027).
+  \item Las versiones de BIOS de los nodos son distintas (las exactas se omiten, véase el apéndice~\ref{ap:prot}). Igualarlas es opcional (PEND-029).
+  \item Tras el primer \emph{upgrade}, los Proxmox quedaron con versiones distintas (BLK-007); se alinearon antes de crear el clúster (EVID-025 a EVID-027).
+  \item Los roles cambian respecto a LAB-000 v0.3 y al documento maestro (D-027, D-031).
 \end{itemize}
 
 % =====================================================================
@@ -450,49 +504,95 @@ echo "server 10.10.10.1 iburst" > /etc/chrony/sources.d/eicl.sources
 systemctl restart chrony
 chronyc sources
 \end{lstlisting}
-  \item Resolución del otro nodo en \texttt{/etc/hosts} (EVID-008):
-\begin{lstlisting}
-echo "10.10.10.12 pve-lab-02.eicl.internal pve-lab-02" >> /etc/hosts
-getent hosts pve-lab-02
-\end{lstlisting}
-  \item Reinicio para cargar el kernel nuevo y comprobación con \texttt{uptime}, \texttt{uname -r} y \texttt{chronyc sources} (EVID-009).
+  \item Resolución del otro nodo en \texttt{/etc/hosts} (EVID-008) y reinicio para cargar el kernel nuevo (EVID-009).
   \item Inventario de BIOS y NIC con \texttt{dmidecode -s bios-version} e \texttt{ip -br link} (EVID-016).
 \end{enumerate}
 
 \subsection{Componente C: pve-lab-02}
-Mismo procedimiento que en pve-lab-01, con IP 10.10.10.12/24 (EVID-005, EVID-010 a EVID-012, EVID-017). Diferencias:
+Mismo procedimiento que en \texttt{pve-lab-01}, con IP 10.10.10.12/24 (EVID-005, EVID-010 a EVID-012, EVID-017). Diferencias:
 
 \begin{itemize}
   \item Antes de cambiar los repositorios, la tarea \emph{Update package database} falló porque el repositorio \emph{enterprise} exige suscripción (EVID-005, BLK-001).
-  \item Al agregar pve-lab-01 a \texttt{/etc/hosts} se escribió el dominio como \texttt{etc.internal} (EVID-010, BLK-004). Se corrigió en la misma línea, sin duplicarla (EVID-011):
+  \item Al agregar \texttt{pve-lab-01} a \texttt{/etc/hosts} se escribió el dominio como \texttt{etc.internal} (EVID-010, BLK-004). Se corrigió en la misma línea, sin duplicarla (EVID-011):
 \begin{lstlisting}
 sed -i 's/pve-lab-01\.etc\.internal/pve-lab-01.eicl.internal/' /etc/hosts
-grep pve-lab /etc/hosts
 getent hosts pve-lab-01
 \end{lstlisting}
-  \item Tras el reinicio se comprobó la conectividad entre nodos por nombre (EVID-012):
-\begin{lstlisting}
-ping -c 3 pve-lab-01
-\end{lstlisting}
+  \item Tras el reinicio se comprobó la conectividad entre nodos por nombre (EVID-012).
 \end{itemize}
 
 \subsection{Componente D: esx-lab-01}
 \begin{enumerate}
   \item Instalación de VMware ESXi 8.0 (versión gratuita) con IP fija 10.10.10.13/24 en vmk0. El instalador reconoció la NIC del OptiPlex (Host adapters: 1), con lo que se descarta el riesgo RSK-002 para este nodo, y creó datastore1 (VMFS6, 206.25 GB) (EVID-006).
   \item El host quedó como \texttt{localhost} y con el reloj adelantado unas 6 horas (EVID-006; BLK-002 y BLK-003).
-  \item En \emph{Networking > Default TCP/IP stack} se configuraron el hostname \texttt{esx-lab-01}, el dominio y dominio de búsqueda \texttt{eicl.internal}, DNS 1.1.1.1 y 8.8.8.8 y gateway 10.10.10.1 (EVID-013).
-  \item En \emph{Manage > System > Time \& date} se activó el cliente NTP con el servidor 10.10.10.1 y la política \emph{Start and stop with host} (EVID-014).
-  \item El resumen final muestra el nombre \texttt{esx-lab-01.eicl.internal} y la hora UTC correcta (EVID-015).
+  \item En \emph{Networking > Default TCP/IP stack} se configuraron el hostname, el dominio \texttt{eicl.internal}, DNS 1.1.1.1 y 8.8.8.8 y gateway 10.10.10.1 (EVID-013).
+  \item En \emph{Manage > System > Time \& date} se activó el cliente NTP con el servidor 10.10.10.1 (EVID-014). El resumen final muestra \texttt{esx-lab-01.eicl.internal} y la hora UTC correcta (EVID-015).
 \end{enumerate}
+
+\subsection{Componente G: pve-lab-03}
+\textbf{Puerto y gestión (D-030, reportado).} SRV-04 se conectó a GE0/0/6 con la misma configuración de trunk que los otros nodos y la descripción \texttt{SRV-04-PROXMOX}; el acceso de gestión pasó a GE0/0/9. La configuración está publicada en \texttt{docs/port-mapping.md}; el enlace negocia 1000M full sin errores (LAB-000 v1.0). El respaldo externo del switch tras este cambio está pendiente (PEND-030).
+
+\textbf{Repositorios y versiones.} En \texttt{pve-lab-03} se deshabilitaron los repositorios \emph{enterprise} de PVE y Ceph y se habilitó \texttt{pve-no-subscription} (EVID-018). Tras el \emph{upgrade}, \texttt{pve-lab-03} quedó en una versión más nueva que \texttt{pve-lab-01} (EVID-019, BLK-007), así que se actualizaron también \texttt{pve-lab-01} y \texttt{pve-lab-02} hasta tener la misma versión de Proxmox y de kernel en los tres nodos (EVID-025 a EVID-027). Las versiones exactas se omiten (D-022).
+
+\textbf{Hora.} Mismo procedimiento de chrony que en los otros nodos; \texttt{pve-lab-03} sincroniza con 10.10.10.1 (\texttt{\^{}*}, stratum 2, \emph{reach} 377) (EVID-025).
+
+\textbf{Nombres.} \texttt{/etc/hosts} con los tres nodos en cada Proxmox. Hubo dos errores, detectados antes de crear el clúster:
+\begin{itemize}
+  \item En \texttt{pve-lab-01}, \texttt{pve-lab-03} quedó con la IP del ESXi (10.10.10.13), y el ping por nombre respondía desde el ESXi (EVID-020, BLK-005). Se corrigió a 10.10.10.14 (EVID-021).
+  \item En \texttt{pve-lab-03}, la línea de 10.10.10.12 quedó con el FQDN de \texttt{pve-lab-01} (EVID-022, BLK-006). Se corrigió (EVID-024); \texttt{pve-lab-02} ya estaba bien (EVID-023).
+\end{itemize}
+La verificación final comprueba la IP de cada nombre, no solo que el ping responda (EVID-025):
+\begin{lstlisting}
+getent hosts pve-lab-01 pve-lab-02 pve-lab-03 pve-lab-01.eicl.internal pve-lab-02.eicl.internal pve-lab-03.eicl.internal
+ping -c 3 pve-lab-01 ; ping -c 3 pve-lab-02
+\end{lstlisting}
+
+\subsection{Componente E: clúster pve-lab-clr}
+El clúster se creó en \texttt{pve-lab-01} y los otros dos nodos se unieron indicando su IP de gestión como \texttt{link0} (EVID-028 a EVID-031):
+\begin{lstlisting}
+pvecm create pve-lab-clr --link0 10.10.10.11      # en pve-lab-01
+pvecm add 10.10.10.11 --link0 10.10.10.12         # en pve-lab-02
+pvecm add 10.10.10.11 --link0 10.10.10.14         # en pve-lab-03
+pvecm status ; pvecm nodes
+\end{lstlisting}
+
+Resultado: transporte \texttt{knet} con autenticación segura, tres nodos, tres votos, quórum de 2 y estado \emph{Quorate} (EVID-031). Al unir cada nodo, \texttt{pvecm add} pide la contraseña de \texttt{root} del primer nodo y acepta su huella; ambos datos están tapados en EVID-029 y EVID-031.
+
+\textbf{Prueba de quórum.} Con \texttt{pve-lab-03} apagado (\texttt{shutdown -h now}), \texttt{pve-lab-01} mostró 2 nodos, 2 votos de 3 esperados, quórum 2 y \emph{Quorate: Yes} (EVID-032). Al encenderlo de nuevo, el nodo se reincorporó solo en unos 2 minutos y volvieron los 3 votos (EVID-033). El apagado y el encendido son reportados; las salidas de consola son confirmadas.
+
+\subsection{Componente F: red virtual y una VM por plataforma}
+\textbf{Bridges con VLAN (Proxmox).} En los tres nodos se marcó \emph{VLAN aware} en \texttt{vmbr0} con los VLAN IDs \texttt{20 30 40 50} desde la web (EVID-034). El resultado en \texttt{/etc/network/interfaces} y en el kernel (EVID-035 a EVID-038):
+\begin{lstlisting}
+iface vmbr0 inet static
+        address 10.10.10.14/24
+        gateway 10.10.10.1
+        bridge-ports nic0
+        bridge-stp off
+        bridge-fd 0
+        bridge-vlan-aware yes
+        bridge-vids 20 30 40 50
+\end{lstlisting}
+\texttt{bridge vlan show} lista la VLAN 1 como PVID sin etiqueta (la VLAN 10 del switch) y las VLAN 20 a 50 en \texttt{nic0}. Después del cambio, cada nodo siguió alcanzando su gateway y el clúster siguió con quórum.
+
+\textbf{VM en Proxmox (\texttt{deb-lab-01}).} La ISO netinst de Debian 13 se descargó directamente en \texttt{local} de \texttt{pve-lab-01} (EVID-039; el árbol del Datacenter muestra el clúster con sus tres nodos). La VM se creó con el asistente (EVID-040 a EVID-046): VMID 100, VirtIO SCSI single y Qemu Agent, disco de 16 GiB en \texttt{local-lvm}, 2 núcleos con el tipo de CPU por defecto (D-040), 2048 MiB y \texttt{vmbr0} con \emph{VLAN Tag} 20. En el instalador se eligió solo servidor SSH y utilidades estándar, y GRUB en \texttt{/dev/sda} (EVID-047, EVID-048; BLK-008 y BLK-009). \texttt{qemu-guest-agent} ya venía instalado (EVID-049).
+
+\textbf{VM en ESXi (\texttt{deb-lab-02}).} Se creó el port group \texttt{VLAN20-SRV} con VLAN ID 20 en \texttt{vSwitch0} (EVID-053, EVID-054; D-041) y se subió la misma ISO a \texttt{datastore1/ISO} (EVID-055). La VM se creó con el asistente (EVID-056 a EVID-060): compatibilidad ESXi 8.0 U2, sistema invitado Debian 12 (64-bit), 2 vCPU, 2048 MB, disco de 16 GB thin, adaptador en \texttt{VLAN20-SRV} e ISO conectada al encender. El instalador arrancó en modo BIOS (EVID-061) y \texttt{open-vm-tools} ya venía instalado (EVID-062).
+
+\textbf{Pruebas desde las VM.} Mismos comandos en las dos (EVID-050, EVID-051, EVID-062, EVID-063):
+\begin{lstlisting}
+ip -br a ; ip route ; cat /etc/resolv.conf ; timedatectl | grep "Time zone"
+ping -c 3 10.10.20.1 ; ping -c 3 1.1.1.1 ; ping -c 3 debian.org
+ping -c 3 -W 2 10.10.10.11 ; ping -c 3 -W 2 10.10.10.2 ; ping -c 3 -W 2 192.168.1.1
+\end{lstlisting}
+Las dos VM reciben IP por DHCP en la VLAN 20 (.101 y .103), salen a internet y resuelven DNS, y no alcanzan la VLAN de gestión (hipervisor y switch) ni la red del cuarto: es la validación V3 de LAB-001 repetida desde VM.
 
 \subsection{Cambios en otros equipos y documentos}\label{sec:otros}
 \begin{itemize}
-  \item \textbf{SW-LAB-01:} GE0/0/2 a GE0/0/4 pasan de access 999 apagados a trunk para los nodos (D-028). Afecta a la memoria del Huawei.
-  \item \textbf{LAB-000:} VAL-001 y VAL-002 quedan completadas con el inventario de este documento. Afecta a LAB-000 v0.4.
-  \item \textbf{Roles de los nodos:} cambian respecto a LAB-000 v0.3 y al documento maestro (D-027).
+  \item \textbf{SW-LAB-01:} GE0/0/2 a GE0/0/4 y GE0/0/6 pasan a trunk para los nodos (D-028, D-030) y GE0/0/9 a acceso de gestión. Afecta a la memoria del Huawei.
+  \item \textbf{LAB-000:} inventario de nodos y velocidades cerrados en la v1.0.
 \end{itemize}
 
-\alertbox{Decisión pendiente}{Falta decidir si los cambios de GE0/0/2 a GE0/0/4 se publican como una nueva versión de la memoria del Huawei o si quedan solo en este documento, igual que los cambios de GE0/0/5 y de la política 5 del FortiGate registrados en la memoria del Omada. Mientras tanto, esta sección es la referencia.}
+\alertbox{Decisión pendiente}{Falta decidir si los cambios de GE0/0/2 a GE0/0/6 y GE0/0/9 se publican como una nueva versión de la memoria del Huawei o si quedan solo en este documento y en \texttt{docs/port-mapping.md}. Mientras tanto, esta sección es la referencia.}
 
 % =====================================================================
 \section{Validación}\label{sec:validacion}
@@ -502,30 +602,67 @@ ping -c 3 pve-lab-01
   \cab\textbf{ID} & \textbf{Objetivo} & \textbf{Método} & \textbf{Resultado obtenido} & \textbf{Evid.} & \textbf{Estado}\\
   \midrule
   \endhead
+  \multicolumn{6}{l}{\textbf{Componentes A a D (v1.0)}}\\
+  \midrule
   TEST-001 & Puertos de los nodos en trunk & \texttt{display port vlan} GE0/0/2 a 0/0/4 & Trunk, PVID 10, VLAN 10 20 30 40 50 en los tres & EVID-003 & \estado{OK}\\
-  TEST-002 & Puertos habilitados & \texttt{display interface brief} & \texttt{down} sin asterisco con los nodos apagados (antes \texttt{*down}) & EVID-001, 003 & \estado{OK}\\
+  TEST-002 & Puertos habilitados & \texttt{display interface brief} & \texttt{down} sin asterisco con los nodos apagados & EVID-001, 003 & \estado{OK}\\
   TEST-003 & Uplinks intactos tras el cambio & \texttt{display interface brief} & GE0/0/1 y GE0/0/5 up/up & EVID-001, 003 & \estado{OK}\\
-  TEST-004 & Gestión web de los tres nodos desde la PC & Navegador a .11:8006, .12:8006 y .13 & Las tres interfaces accesibles & EVID-004 a 006 & \estado{OK}\\
-  TEST-005 & Actualización con el repositorio \emph{enterprise} (estado inicial) & Registro de tareas de pve-lab-02 & \emph{Update package database: Error} & EVID-005 & \estado{FALLIDA} (resuelta, BLK-001)\\
+  TEST-004 & Gestión web de los nodos desde la PC & Navegador a .11:8006, .12:8006 y .13 & Las tres interfaces accesibles & EVID-004 a 006 & \estado{OK}\\
+  TEST-005 & Actualización con el repositorio \emph{enterprise} & Registro de tareas de \texttt{pve-lab-02} & \emph{Update package database: Error} & EVID-005 & \estado{FALLIDA} (resuelta, BLK-001)\\
   TEST-006 & Salida a internet y actualización tras \emph{No-Subscription} & \emph{Updates > Upgrade} en ambos nodos & \emph{Your System is up-to-date} en ambos & EVID-007, 010 & \estado{OK}\\
-  TEST-007 & Hora de pve-lab-01 desde el firewall & \texttt{chronyc sources} & \texttt{\^{}* 10.10.10.1}, desfase de microsegundos & EVID-007, 009 & \estado{OK}\\
-  TEST-008 & Hora de pve-lab-02 desde el firewall & \texttt{chronyc sources} & \texttt{\^{}* 10.10.10.1} & EVID-012 & \estado{OK}\\
-  TEST-009 & Kernel nuevo en pve-lab-01 & \texttt{uptime}, \texttt{ls /boot/vmlinuz-*}, \texttt{uname -r} & Kernel actualizado activo, \emph{up 0 min} & EVID-009 & \estado{OK}\\
-  TEST-010 & Kernel nuevo en pve-lab-02 & \texttt{uptime}, \texttt{uname -r} & Kernel actualizado activo, \emph{up 0 min} & EVID-012 & \estado{OK}\\
-  TEST-011 & Resolución de nombres entre nodos & \texttt{getent hosts} & FQDN \texttt{.eicl.internal} del otro nodo en cada uno & EVID-008, 011 & \estado{OK}\\
-  TEST-012 & Conectividad entre Proxmox en la VLAN 10 & \texttt{ping -c 3 pve-lab-01} desde pve-lab-02 & 0~\% de pérdida, TTL 64, rtt medio 1.3 ms & EVID-012 & \estado{OK}\\
-  TEST-013 & Conectividad inversa & \texttt{ping -c 3 pve-lab-02} desde pve-lab-01 & -- (PEND-019) & -- & \estado{NO EJECUTADA}\\
+  TEST-007 & Hora de \texttt{pve-lab-01} & \texttt{chronyc sources} & \texttt{\^{}* 10.10.10.1} & EVID-007, 009 & \estado{OK}\\
+  TEST-008 & Hora de \texttt{pve-lab-02} & \texttt{chronyc sources} & \texttt{\^{}* 10.10.10.1} & EVID-012 & \estado{OK}\\
+  TEST-009 & Kernel nuevo en \texttt{pve-lab-01} & \texttt{uptime}, \texttt{uname -r} & Kernel actualizado activo & EVID-009 & \estado{OK}\\
+  TEST-010 & Kernel nuevo en \texttt{pve-lab-02} & \texttt{uptime}, \texttt{uname -r} & Kernel actualizado activo & EVID-012 & \estado{OK}\\
+  TEST-011 & Resolución entre \texttt{pve-lab-01} y \texttt{pve-lab-02} & \texttt{getent hosts} & FQDN del otro nodo en cada uno & EVID-008, 011 & \estado{OK}\\
+  TEST-012 & Conectividad entre Proxmox & \texttt{ping} desde \texttt{pve-lab-02} & 0~\% de pérdida, TTL 64 & EVID-012 & \estado{OK}\\
+  TEST-013 & Conectividad de \texttt{pve-lab-01} a \texttt{pve-lab-02} & Corosync entre ambos nodos & Ambos en el clúster con quórum (TEST-028); ping directo no capturado & EVID-030 & \estado{OK}\\
   TEST-014 & Hostname del ESXi & Host Client > Host & \fn{esx-lab-01.eicl.internal} & EVID-013, 015 & \estado{OK}\\
-  TEST-015 & Hora del ESXi por NTP & Host Client > System Information & 05:25 UTC del 26/10 con hora local 23:25 del 25/10 (reportada) & EVID-014, 015 & \estado{OK}\\
-  TEST-016 & ESXi reconoce la NIC del OptiPlex (RSK-002) & Host Client > Networking & Host adapters: 1; vmk0 10.10.10.13 & EVID-006 & \estado{OK}\\
-  TEST-017 & Inventario de BIOS y NIC de los Proxmox & \texttt{dmidecode -s bios-version}; \texttt{ip -br link} & Versión de BIOS de cada nodo y una NIC (nic0) en cada uno & EVID-016, 017 & \estado{OK}\\
-  TEST-018 & Velocidad de enlace de los nodos & \texttt{display interface} GE0/0/2 a 0/0/4 & -- (PEND-011) & -- & \estado{NO EJECUTADA}\\
-  TEST-019 & Aislamiento de la gestión de los nodos & \texttt{ping} y \texttt{curl} desde las VLAN 20 y 50 & -- (PEND-012) & -- & \estado{NO EJECUTADA}\\
+  TEST-015 & Hora del ESXi por NTP & Host Client & Hora UTC correcta & EVID-014, 015 & \estado{OK}\\
+  TEST-016 & ESXi reconoce la NIC (RSK-002) & Host Client > Networking & Host adapters: 1 & EVID-006 & \estado{OK}\\
+  TEST-017 & BIOS y NIC de los Proxmox & \texttt{dmidecode}; \texttt{ip -br link} & BIOS registrada; una NIC en cada uno & EVID-016, 017 & \estado{OK}\\
+  TEST-018 & Velocidad de enlace de los nodos & \texttt{display interface} & 1000M full sin errores (LAB-000 v1.0) & LAB-000 & \estado{OK}\\
+  TEST-019 & Aislamiento de la gestión de los nodos & Ping desde la VLAN 20 & Sin respuesta de 10.10.10.11 ni 10.10.10.2 (TEST-038, TEST-042); VLAN 50 no probada & EVID-051, 063 & \estado{OK}\\
+  \midrule
+  \multicolumn{6}{l}{\textbf{Componente G: pve-lab-03}}\\
+  \midrule
+  TEST-020 & Repositorio sin suscripción en \texttt{pve-lab-03} & Updates > Repositories & \emph{enterprise} y Ceph deshabilitados; \texttt{pve-no-subscription} activo & EVID-018 & \estado{OK}\\
+  TEST-021 & Misma versión en los tres Proxmox & \texttt{pveversion}; \texttt{uname -r} & Misma versión y kernel en los tres & EVID-025 a 027 & \estado{OK}\\
+  TEST-022 & Resolución de \texttt{pve-lab-03} desde \texttt{pve-lab-01} & \texttt{cat /etc/hosts}; ping & Resolvía a .13 (ESXi) y el ESXi respondía & EVID-020 & \estado{FALLIDA} (resuelta, BLK-005)\\
+  TEST-023 & \texttt{/etc/hosts} de \texttt{pve-lab-01} corregido & \texttt{cat /etc/hosts} & \texttt{pve-lab-03} en .14 & EVID-021 & \estado{OK}\\
+  TEST-024 & \texttt{/etc/hosts} de \texttt{pve-lab-03} & \texttt{cat /etc/hosts} & .12 con el FQDN de \texttt{pve-lab-01} & EVID-022 & \estado{FALLIDA} (resuelta, BLK-006)\\
+  TEST-025 & Resolución y alcance por nombre desde \texttt{pve-lab-03} & \texttt{getent hosts} de 6 nombres; ping & .11, .12 y .14 correctos; 3/3 a ambos nodos & EVID-025 & \estado{OK}\\
+  TEST-026 & Hora de \texttt{pve-lab-03} & \texttt{chronyc sources} & \texttt{\^{}* 10.10.10.1}, stratum 2 & EVID-025 & \estado{OK}\\
+  \midrule
+  \multicolumn{6}{l}{\textbf{Componente E: clúster}}\\
+  \midrule
+  TEST-027 & Crear el clúster & \texttt{pvecm create}; \texttt{pvecm status} & 1 nodo, 1 voto, \emph{Quorate} & EVID-028 & \estado{OK}\\
+  TEST-028 & Unir \texttt{pve-lab-02} & \texttt{pvecm add}; \texttt{pvecm status} & 2 nodos, quórum 2 & EVID-029, 030 & \estado{OK}\\
+  TEST-029 & Unir \texttt{pve-lab-03} & \texttt{pvecm add}; \texttt{pvecm nodes} & 3 nodos, 3 votos, quórum 2, \emph{Quorate} & EVID-031 & \estado{OK}\\
+  TEST-030 & Quórum con un nodo apagado & \texttt{pvecm status} con \texttt{pve-lab-03} apagado & 2 de 3 votos, quórum 2, \emph{Quorate: Yes} & EVID-032 & \estado{OK}\\
+  TEST-031 & Reincorporación de \texttt{pve-lab-03} & Encendido; \texttt{pvecm status} & 3 votos sin intervención, en unos 2 minutos & EVID-033 & \estado{OK}\\
+  \midrule
+  \multicolumn{6}{l}{\textbf{Componente F: red virtual y VM}}\\
+  \midrule
+  TEST-032 & \texttt{vmbr0} con VLAN en \texttt{pve-lab-03} & Web; \texttt{interfaces}; \texttt{bridge vlan show}; ping; quórum & VLAN 20 a 50; gestión y clúster sin cambios & EVID-034 a 036 & \estado{OK}\\
+  TEST-033 & \texttt{vmbr0} con VLAN en \texttt{pve-lab-02} & Mismos comandos & Igual que TEST-032 & EVID-037 & \estado{OK}\\
+  TEST-034 & \texttt{vmbr0} con VLAN en \texttt{pve-lab-01} & Mismos comandos & Igual que TEST-032 & EVID-038 & \estado{OK}\\
+  TEST-035 & Descarga de la ISO desde el nodo & \emph{Download from URL} & 756 MiB, \emph{TASK OK} & EVID-039 & \estado{OK}\\
+  TEST-036 & DHCP en VLAN 20 para \texttt{deb-lab-01} & \texttt{ip}, \texttt{resolv.conf}, \texttt{timedatectl} & 10.10.20.101/24, ruta por .1, DNS, CST & EVID-050 & \estado{OK}\\
+  TEST-037 & Salida de \texttt{deb-lab-01} & Ping a .1, 1.1.1.1 y \texttt{debian.org} & 3/3 en cada uno & EVID-050 & \estado{OK}\\
+  TEST-038 & Segmentación desde \texttt{deb-lab-01} & Ping a 10.10.10.11, 10.10.10.2 y 192.168.1.1 & 100~\% de pérdida en los tres & EVID-051 & \estado{OK}\\
+  TEST-039 & Port group \texttt{VLAN20-SRV} & Networking > Port groups & VLAN ID 20 en \texttt{vSwitch0} & EVID-054 & \estado{OK}\\
+  TEST-040 & DHCP en VLAN 20 para \texttt{deb-lab-02} & \texttt{ip}, \texttt{resolv.conf}, \texttt{timedatectl} & 10.10.20.103/24, ruta por .1, DNS, CST & EVID-062 & \estado{OK}\\
+  TEST-041 & Salida de \texttt{deb-lab-02} & Ping a .1, 1.1.1.1 y \texttt{debian.org} & 3/3 en cada uno & EVID-062 & \estado{OK}\\
+  TEST-042 & Segmentación desde \texttt{deb-lab-02} & Ping a 10.10.10.11, 10.10.10.2 y 192.168.1.1 & 100~\% de pérdida en los tres & EVID-063 & \estado{OK}\\
+  TEST-043 & Vista web del clúster con tres nodos & Datacenter > Summary & Solo el árbol del Datacenter en EVID-039; sin captura dedicada (PEND-032) & EVID-039 & \estado{NO EJECUTADA}\\
+  TEST-044 & Respaldo externo de SW-LAB-01 & \texttt{save} y copia por SFTP & No realizado (PEND-030) & -- & \estado{NO EJECUTADA}\\
+  TEST-045 & IP de las VM reportada por el agente & Summary de la VM & No se capturó (PEND-036) & -- & \estado{NO EJECUTADA}\\
   \bottomrule
 \end{longtable}
 }
 
-Resumen: 19 pruebas; 15 OK, 1 fallida y resuelta (TEST-005) y 3 no ejecutadas (TEST-013, TEST-018 y TEST-019).
+Resumen: 45 pruebas; 39 OK, 3 fallidas y resueltas (TEST-005, TEST-022 y TEST-024) y 3 no ejecutadas (TEST-043 a TEST-045), ninguna de ellas criterio de cierre. El criterio de cierre de LAB-002 del documento maestro (VM operativas con conectividad en cada plataforma) se cumple con TEST-036 a TEST-042.
 
 % =====================================================================
 \section{Troubleshooting}
@@ -535,83 +672,91 @@ Resumen: 19 pruebas; 15 OK, 1 fallida y resuelta (TEST-005) y 3 no ejecutadas (T
   \cab\textbf{ID} & \textbf{Síntoma} & \textbf{Causa} & \textbf{Solución}\\
   \midrule
   \endhead
-  BLK-001 & \texttt{apt-get update} falla en pve-lab-02 (EVID-005) & Repositorio \emph{enterprise} sin suscripción & Repositorios \emph{enterprise} de PVE y Ceph deshabilitados, \emph{No-Subscription} agregado y actualización (EVID-007, EVID-010)\\
-  BLK-002 & Reloj del ESXi adelantado unas 6 h (EVID-006) & La hora local se registró como UTC durante la instalación & Cliente NTP hacia 10.10.10.1 (EVID-014, EVID-015). Residual: \emph{Install date} y gráficas previas quedan corridas 6 h\\
-  BLK-003 & Hostname del ESXi como \texttt{localhost} (EVID-006) & No se definió en la instalación & \texttt{esx-lab-01.eicl.internal} en el TCP/IP stack (EVID-013, EVID-015)\\
-  BLK-004 & FQDN de pve-lab-01 mal escrito en \texttt{/etc/hosts} de pve-lab-02 (EVID-010) & Error de escritura: \texttt{etc.internal} & Corrección con \texttt{sed} sobre la misma línea (EVID-011)\\
+  BLK-001 & \texttt{apt-get update} falla en \texttt{pve-lab-02} (EVID-005) & Repositorio \emph{enterprise} sin suscripción & Repositorios \emph{enterprise} deshabilitados, \emph{No-Subscription} agregado y actualización (EVID-007, EVID-010)\\
+  BLK-002 & Reloj del ESXi adelantado unas 6 h (EVID-006) & La hora local se registró como UTC en la instalación & Cliente NTP hacia 10.10.10.1 (EVID-014, EVID-015). Residual: \emph{Install date} y gráficas previas corridas 6 h\\
+  BLK-003 & Hostname del ESXi como \texttt{localhost} (EVID-006) & No se definió en la instalación & \fn{esx-lab-01.eicl.internal} en el TCP/IP stack (EVID-013, EVID-015)\\
+  BLK-004 & FQDN mal escrito en \texttt{/etc/hosts} de \texttt{pve-lab-02} (EVID-010) & Error de escritura: \texttt{etc.internal} & Corrección con \texttt{sed} sobre la misma línea (EVID-011)\\
+  BLK-005 & En \texttt{pve-lab-01}, \texttt{pve-lab-03} resolvía a 10.10.10.13 y el ping respondía (EVID-020) & IP del ESXi escrita en \texttt{/etc/hosts}; el ping parecía correcto & Corregido a .14 antes de crear el clúster (EVID-021); habría apuntado el clúster al ESXi\\
+  BLK-006 & En \texttt{pve-lab-03}, 10.10.10.12 con el FQDN de \texttt{pve-lab-01} (EVID-022) & Error de escritura en \texttt{/etc/hosts} & Corregido y verificado con \texttt{getent} (EVID-024, EVID-025)\\
+  BLK-007 & Versiones de Proxmox distintas entre nodos tras el \emph{upgrade} (EVID-019) & \texttt{pve-lab-03} se actualizó después que los otros nodos & Actualización de \texttt{pve-lab-01} y \texttt{pve-lab-02} (EVID-026, EVID-027)\\
+  BLK-008 & Instalador de \texttt{deb-lab-01} con zona de EE.\,UU. y teclado US (EVID-047) & Se eligió Estados Unidos como país & Zona corregida con \texttt{timedatectl} (EVID-049, EVID-050); teclado: método \pc{} (PEND-034). En \texttt{deb-lab-02} se eligió México y teclado latinoamericano desde el inicio\\
+  BLK-009 & En la consola noVNC no se podían escribir números en la pregunta de GRUB (EVID-048) & Teclado de la consola web & Se aceptó el valor por defecto (\emph{Yes}) y \texttt{/dev/sda} (reportado)\\
   \bottomrule
 \end{longtable}
 }
 
-Los cuatro bloqueos quedaron \estado{RESUELTO}; no hay bloqueos activos. Tipos según el documento maestro: BLK-001 «Licencia»; BLK-002 a BLK-004 «Configuración».
+Los nueve bloqueos quedaron \estado{RESUELTO}; no hay bloqueos activos.
 
 % =====================================================================
 \section{Backup y recuperación}
 \subsection{Respaldos}
 \begin{itemize}
-  \item SW-LAB-01: respaldo del 25/10/2026 en \fn{vrpcfg.zip} y \fn{.txt}, en la carpeta privada del operador (reportado, PEND-014).
-  \item Hipervisores: todavía no hay respaldos de configuración ni de VM; la estrategia de respaldo se aborda en LAB-008.
+  \item SW-LAB-01: respaldo del 25/10/2026 en la carpeta privada (reportado, PEND-014). Falta el respaldo posterior a los cambios de GE0/0/6 y GE0/0/9 (PEND-030).
+  \item Clúster: copia de \texttt{/etc/pve/corosync.conf} en la carpeta privada pendiente (PEND-033).
+  \item VM e hipervisores: sin respaldos todavía; la estrategia de respaldo se aborda en LAB-008.
 \end{itemize}
 
 \alertbox{Respaldos}{Los respaldos contienen credenciales o hashes y la configuración completa. No se publican en el repositorio.}
 
 \subsection{Rutas de recuperación}
 \begin{description}
-  \item[Puertos del switch.] Volver a \texttt{port link-type access}, \texttt{port default vlan 999} y \texttt{shutdown} en GE0/0/2 a GE0/0/4, o restaurar el respaldo del 25/10.
-  \item[Hipervisores.] Sin VM ni configuración propia todavía; ante una falla, la ruta es reinstalar con los mismos datos de este documento (IP, nombre, repositorios, chrony y \texttt{/etc/hosts}).
+  \item[Un nodo del clúster caído.] Los otros dos mantienen el quórum (TEST-030); al volver, el nodo se reincorpora solo (TEST-031).
+  \item[Puertos del switch.] Volver a \texttt{port link-type access}, \texttt{port default vlan 999} y \texttt{shutdown}, o restaurar el respaldo.
+  \item[Bridge VLAN-aware.] Desmarcar \emph{VLAN aware} en \texttt{vmbr0} y aplicar; la gestión no depende de las VLAN etiquetadas.
+  \item[VM de prueba.] Sin datos propios; se recrean con los parámetros de este documento.
 \end{description}
 
 % =====================================================================
 \section{Lecciones aprendidas}
 \begin{itemize}
   \item En un Proxmox recién instalado sin suscripción, lo primero es cambiar los repositorios; si no, ni siquiera se actualiza la lista de paquetes.
-  \item Un reloj mal definido durante la instalación del ESXi deja marcas de tiempo corridas aunque luego se corrija; conviene fijar NTP antes de generar registros.
-  \item Los nombres de host se deciden antes de crear el clúster, porque cambiarlos después obliga a rehacer parte de su configuración.
-  \item Al editar \texttt{/etc/hosts} a mano, verificar con \texttt{getent hosts} detecta al momento un error de escritura en el dominio.
-  \item La VLAN nativa puede ser una excepción justificada en los puertos de los hipervisores, siempre que se documente el riesgo y su mitigación.
+  \item Un ping por nombre que responde no prueba que se llegó al equipo correcto: hay que revisar la IP en la salida (\texttt{getent hosts}) y, si hay duda, la MAC.
+  \item Antes de crear un clúster, todos los nodos deben tener la misma versión, la hora sincronizada y resolución por nombre comprobada.
+  \item Un clúster de tres nodos con un voto cada uno sigue operando con un nodo caído sin depender de un QDevice.
+  \item Si el switch entrega la VLAN de gestión sin etiqueta, esa VLAN no se puede usar etiquetada en las VM; en ESXi, \texttt{VM Network} (VLAN 0) también cae en ella.
+  \item El país elegido en el instalador de Debian fija la zona horaria y el teclado propuestos; conviene elegirlo bien desde el inicio.
+  \item Un reloj mal definido durante la instalación del ESXi deja marcas de tiempo corridas aunque luego se corrija.
 \end{itemize}
 
 % =====================================================================
 \section{Pendientes y siguiente paso}
-\subsection{Pendientes}
+\subsection{Pendientes abiertos}
 {\small
-\begin{longtable}{L{1.6cm} L{4.7cm} L{3.4cm} L{5.0cm}}
+\begin{longtable}{L{1.6cm} L{4.9cm} L{3.2cm} L{5.0cm}}
   \toprule
   \cab\textbf{ID} & \textbf{Dato} & \textbf{Dónde se usa} & \textbf{Cómo verificar}\\
   \midrule
   \endhead
-  PEND-011 & Velocidad negociada de GE0/0/2 a GE0/0/4 & Matriz de enlaces; TEST-018 & \texttt{display interface GigabitEthernet0/0/2 | include Speed}\\
-  PEND-012 & Aislamiento de la gestión de los nodos (TEST-019) & Validación & Laptop en la VLAN 20 o 50: \texttt{ping} y \texttt{curl} a 10.10.10.11 a .13\\
-  PEND-013 & Captura de \emph{Updates > Repositories} con \emph{No-Subscription} & Componentes B y C & Captura en cada nodo\\
+  PEND-013 & Captura de \emph{Repositories} en \texttt{pve-lab-01} y \texttt{pve-lab-02} (\texttt{pve-lab-03}: EVID-018) & Componentes B y C & Captura en cada nodo\\
   PEND-014 & Respaldo del Huawei del 25/10/2026 & Respaldos & Verificar en la carpeta privada\\
-  PEND-015 & Nodo que tuvo la falla de placa base, necesidad de REP-01 y existencia de SRV-04 (VAL-003) & Inventario; LAB-000 v0.4 & Revisión física o registro del operador\\
-  PEND-016 & Tercer voto del clúster: QDevice en una VM del ESXi o en SRV-04 & Componente E & Decisión del operador\\
   PEND-017 & Licencia del ESXi gratuito (estado y caducidad) & Inventario de servicios & Host Client > Manage > Licensing\\
   PEND-018 & Sesiones VTY abiertas en el switch al iniciar sesión & Seguridad del Huawei & \texttt{display users}\\
-  PEND-019 & Ping de pve-lab-01 a pve-lab-02 (TEST-013) & Validación & \texttt{ping -c 3 pve-lab-02} desde pve-lab-01\\
+  PEND-025 & GE0/0/9 sin enlace y tipo de módulo SFP & Acceso MGMT & \texttt{display interface brief} con el equipo conectado\\
+  PEND-026 & Cable real de LINK-002 & Memoria del Huawei & Confirmar qué cable une lan5 con GE0/0/1\\
+  PEND-029 & BIOS desiguales entre nodos & Mantenimiento & Opcional: igualarlas a la de SRV-03\\
+  PEND-030 & Respaldo externo de SW-LAB-01 tras GE0/0/6 y GE0/0/9 (TEST-044) & Respaldos & \texttt{save} y copia por SFTP a la carpeta privada\\
+  PEND-031 & GE0/0/5 no aparece en la VLAN 999 en \texttt{display vlan} aunque su PVID es 999 & Plan de puertos del Huawei & \texttt{display port vlan GigabitEthernet 0/0/5} y \texttt{display vlan 999}\\
+  PEND-032 & Captura de la web con el clúster de tres nodos (TEST-043) & Componente E & Datacenter > Summary\\
+  PEND-033 & Copia de \texttt{/etc/pve/corosync.conf} & Respaldo del clúster & \texttt{cat /etc/pve/corosync.conf} a la carpeta privada\\
+  PEND-034 & Método aplicado al teclado de \texttt{deb-lab-01} & BLK-008 & Revisar \texttt{/etc/default/keyboard}\\
+  PEND-035 & Recapturas limpias opcionales de EVID-026 (texto residual) y EVID-035 (ruta mal escrita y línea con \texttt{p64}) & Evidencias & Repetir los comandos\\
+  PEND-036 & IP de las VM reportada por el agente (TEST-045) & Evidencia de los agentes & Summary de cada VM\\
   \bottomrule
 \end{longtable}
 }
 
+La fuente NTP de las VM no se revisó \pc{}. Cerrados en esta versión: PEND-011 y PEND-019 (TEST-018 y TEST-013), PEND-012 (TEST-019, desde la VLAN 20), PEND-015 (LAB-000 v1.0), PEND-016 (D-031) y PEND-024 (componente G).
+
 \subsection{Planeado (no implementado)}
 \begin{itemize}
-  \item Clúster Proxmox entre pve-lab-01 y pve-lab-02 con QDevice (componente E).
-  \item Bridges con VLAN en Proxmox y port groups por VLAN en ESXi, y una VM Linux por plataforma con conectividad (componente F, criterio de cierre de LAB-002).
-  \item Actualizar la BIOS de SRV-01 y SRV-02.
+  \item Grupos y prioridades de alta disponibilidad según la RAM de cada nodo, y prueba de migración de una VM entre nodos (con discos locales).
+  \item Segundo enlace de corosync en la VLAN 70 (LAB-012).
+  \item VM de monitoreo en \texttt{esx-lab-01} (LAB-005).
+  \item DNS interno que sustituya \texttt{/etc/hosts} (LAB-003).
 \end{itemize}
 
 \subsection{Siguiente paso}
-\textbf{Componente E: clúster Proxmox con tercer voto.}
-\begin{enumerate}
-  \item Decidir el tercer voto (PEND-016). Propuesta: VM Debian mínima en esx-lab-01 (1 vCPU, 512 MB, 8 GB, VLAN 10, IP fija \pc{}).
-  \item Crear la VM del QDevice e instalar \texttt{corosync-qnetd}.
-  \item \texttt{pvecm create} en pve-lab-01, \texttt{pvecm add} desde pve-lab-02, instalar \texttt{corosync-qdevice} en ambos y \texttt{pvecm qdevice setup}.
-  \item Comprobar con \texttt{pvecm status} y guardar capturas.
-\end{enumerate}
-
-\textbf{Criterio de éxito:} \texttt{pvecm status} muestra 3 votos y el clúster mantiene el quórum al apagar uno de los dos Proxmox.
-
-\textbf{Después:} componente F, bridges con VLAN y una VM Linux por plataforma con conectividad; cerrar VAL-003 y VAL-006 para emitir LAB-000 v0.4.
+LAB-002 queda \estado{COMPLETADA} (25/10/2026 -- 28/10/2026). Antes de seguir conviene una sesión corta para PEND-030, PEND-031, PEND-032 y PEND-033. El siguiente laboratorio es \textbf{LAB-003}: servicios esenciales, empezando por un DNS interno que sustituya \texttt{/etc/hosts}.
 
 % =====================================================================
 \appendix
@@ -619,7 +764,7 @@ Los cuatro bloqueos quedaron \estado{RESUELTO}; no hay bloqueos activos. Tipos s
 \titleformat{\section}{\Large\bfseries\color{navy}}{Apéndice \thesection.}{0.6em}{}
 
 \section{Evidencias}\label{ap:evid}
-Capturas de la consola de SW-LAB-01, de las interfaces web de Proxmox VE y del ESXi Host Client, y de la consola de los Proxmox. Todas están censuradas según los criterios de protección de la información del proyecto; el detalle está en el apéndice~\ref{ap:prot}.
+Capturas de la consola de SW-LAB-01, de las interfaces web de Proxmox VE y del ESXi Host Client, de la consola de los nodos y de las VM, y dos salidas de consola en texto (EVID-032 y EVID-033). Todas están censuradas según los criterios de protección de la información del proyecto; el detalle está en el apéndice~\ref{ap:prot}.
 
 \subsection*{Índice de evidencias}
 {\footnotesize\setlength{\tabcolsep}{4pt}
@@ -628,51 +773,164 @@ Capturas de la consola de SW-LAB-01, de las interfaces web de Proxmox VE y del E
   \cab\textbf{EVID} & \textbf{Qué demuestra}\\
   \midrule
   \endhead
+  \multicolumn{2}{l}{\textbf{Componentes A a D}}\\
   EVID-001 & Estado previo de GE0/0/2 a GE0/0/4 (access 999, \texttt{*down})\\
   EVID-002 & Comandos aplicados en GE0/0/2 a GE0/0/4, sin errores\\
   EVID-003 & \texttt{display port vlan} (trunk, PVID 10, VLAN 10 a 50) y \texttt{display interface brief}\\
-  EVID-004 & Resumen inicial de pve-lab-01: CPU, RAM, disco, EFI y repositorio \emph{enterprise}\\
-  EVID-005 & Resumen inicial de pve-lab-02 y error de \emph{Update package database}\\
+  EVID-004 & Resumen inicial de \texttt{pve-lab-01}: CPU, RAM, disco, EFI y repositorio \emph{enterprise}\\
+  EVID-005 & Resumen inicial de \texttt{pve-lab-02} y error de \emph{Update package database}\\
   EVID-006 & ESXi instalado: hostname \texttt{localhost}, reloj adelantado, 1 NIC y datastore\\
-  EVID-007 & Actualización terminada y chrony sincronizado en pve-lab-01\\
-  EVID-008 & \texttt{/etc/hosts} de pve-lab-01 y resolución de pve-lab-02\\
-  EVID-009 & Reinicio, kernel nuevo y chrony en pve-lab-01\\
-  EVID-010 & Actualización, chrony y \texttt{/etc/hosts} (con el error de FQDN) en pve-lab-02\\
-  EVID-011 & Corrección del FQDN y resolución de pve-lab-01\\
-  EVID-012 & Reinicio, kernel nuevo, chrony y ping por nombre con TTL 64 en pve-lab-02\\
+  EVID-007 & Actualización terminada y chrony sincronizado en \texttt{pve-lab-01}\\
+  EVID-008 & \texttt{/etc/hosts} de \texttt{pve-lab-01} y resolución de \texttt{pve-lab-02}\\
+  EVID-009 & Reinicio, kernel nuevo y chrony en \texttt{pve-lab-01}\\
+  EVID-010 & Actualización, chrony y \texttt{/etc/hosts} (con el error de FQDN) en \texttt{pve-lab-02}\\
+  EVID-011 & Corrección del FQDN y resolución de \texttt{pve-lab-01}\\
+  EVID-012 & Reinicio, kernel nuevo, chrony y ping por nombre en \texttt{pve-lab-02}\\
   EVID-013 & Hostname y DNS del ESXi\\
   EVID-014 & Cliente NTP del ESXi\\
-  EVID-015 & Resumen final del ESXi: hostname \texttt{esx-lab-01} y hora UTC correcta\\
-  EVID-016 & BIOS y NIC de pve-lab-01\\
-  EVID-017 & BIOS y NIC de pve-lab-02\\
+  EVID-015 & Resumen final del ESXi: hostname y hora UTC correcta\\
+  EVID-016 & BIOS y NIC de \texttt{pve-lab-01}\\
+  EVID-017 & BIOS y NIC de \texttt{pve-lab-02}\\
+  \midrule
+  \multicolumn{2}{l}{\textbf{Componente G}}\\
+  EVID-018 & Repositorios de \texttt{pve-lab-03}: \texttt{pve-no-subscription} activo, \emph{enterprise} deshabilitados\\
+  EVID-019 & \texttt{pve-lab-01} con una versión anterior antes de alinear (BLK-007)\\
+  EVID-020 & BLK-005: \texttt{pve-lab-03} en .13 y el ping respondiendo desde el ESXi\\
+  EVID-021 & \texttt{/etc/hosts} de \texttt{pve-lab-01} corregido (.14)\\
+  EVID-022 & BLK-006: FQDN cruzado en \texttt{pve-lab-03}\\
+  EVID-023 & \texttt{/etc/hosts} de \texttt{pve-lab-02} con los tres nodos\\
+  EVID-024 & \texttt{/etc/hosts} de \texttt{pve-lab-03} corregido\\
+  EVID-025 & \texttt{getent}, pings por nombre, versión y chrony en \texttt{pve-lab-03}\\
+  EVID-026 & \texttt{pve-lab-01} actualizado (con texto residual antes de la salida)\\
+  EVID-027 & \texttt{pve-lab-02} actualizado\\
+  \midrule
+  \multicolumn{2}{l}{\textbf{Componente E}}\\
+  EVID-028 & Creación del clúster y estado con un nodo\\
+  EVID-029 & Unión de \texttt{pve-lab-02} (huella y contraseña tapadas)\\
+  EVID-030 & Clúster con dos nodos y quórum 2\\
+  EVID-031 & Unión de \texttt{pve-lab-03}: tres nodos, tres votos, quórum 2 (huella y contraseña tapadas)\\
+  EVID-032 & Quórum conservado con \texttt{pve-lab-03} apagado (texto)\\
+  EVID-033 & Vuelven los tres votos al encender \texttt{pve-lab-03} (texto)\\
+  \midrule
+  \multicolumn{2}{l}{\textbf{Componente F}}\\
+  EVID-034 & Edición de \texttt{vmbr0} en la web: \emph{VLAN aware} y VLAN IDs 20 30 40 50\\
+  EVID-035 & \texttt{bridge vlan show}, ping al gateway y quórum en \texttt{pve-lab-03}\\
+  EVID-036 & \texttt{/etc/network/interfaces} de \texttt{pve-lab-03} con \texttt{bridge-vlan-aware} y \texttt{bridge-vids}\\
+  EVID-037 & Bridge con VLAN completo en \texttt{pve-lab-02}\\
+  EVID-038 & Bridge con VLAN completo en \texttt{pve-lab-01}\\
+  EVID-039 & Descarga de la ISO (\emph{TASK OK}) y árbol del Datacenter (\texttt{pve-lab-clr}) con tres nodos\\
+  EVID-040 & Asistente: nodo, VMID 100, nombre \texttt{deb-lab-01}\\
+  EVID-041 & Asistente: VirtIO SCSI single y Qemu Agent\\
+  EVID-042 & Asistente: disco de 16 GiB en \texttt{local-lvm}\\
+  EVID-043 & Asistente: 2 núcleos, CPU por defecto\\
+  EVID-044 & Asistente: 2048 MiB\\
+  EVID-045 & Asistente: \texttt{vmbr0} con VLAN Tag 20\\
+  EVID-046 & Resumen de la VM (\texttt{net0} con \texttt{tag=20})\\
+  EVID-047 & BLK-008: el instalador solo ofrece zonas de EE.\,UU.\\
+  EVID-048 & Software mínimo e instalación de GRUB\\
+  EVID-049 & Primer login de \texttt{deb-lab-01} y \texttt{qemu-guest-agent} ya instalado\\
+  EVID-050 & \texttt{deb-lab-01}: IP por DHCP en VLAN 20, ruta, DNS, zona horaria y pings positivos\\
+  EVID-051 & \texttt{deb-lab-01}: sin acceso a MGMT ni a la red del cuarto\\
+  EVID-052 & Resumen de \texttt{esx-lab-01}\\
+  EVID-053 & Creación del port group \texttt{VLAN20-SRV} con VLAN ID 20\\
+  EVID-054 & Port groups de \texttt{vSwitch0} con \texttt{VLAN20-SRV} creado\\
+  EVID-055 & ISO subida a \texttt{datastore1/ISO}\\
+  EVID-056 & Asistente de nueva VM en el ESXi\\
+  EVID-057 & \texttt{deb-lab-02}, compatibilidad ESXi 8.0 U2, Debian 12 (64-bit)\\
+  EVID-058 & 2 vCPU, 2048 MB, 16 GB thin\\
+  EVID-059 & Adaptador en \texttt{VLAN20-SRV} e ISO conectada al encender\\
+  EVID-060 & Resumen final de \texttt{deb-lab-02} (VMXNET 3, \texttt{VLAN20-SRV})\\
+  EVID-061 & Arranque del instalador de Debian 13 en el ESXi\\
+  EVID-062 & \texttt{deb-lab-02}: \texttt{open-vm-tools}, zona CST, IP por DHCP, ruta, DNS y pings positivos\\
+  EVID-063 & \texttt{deb-lab-02}: sin acceso a MGMT ni a la red del cuarto\\
   \bottomrule
 \end{longtable}
 }
 
-\subsection*{Capturas}
+\subsection*{Capturas de los componentes A a D}
 \evid{0.62}{EVID-001_huawei-estado-previo-puertos-nodos.png}{\textbf{EVID-001}: Estado previo de GE0/0/2 a GE0/0/4 en SW-LAB-01.}
 \evid{0.70}{EVID-002_huawei-config-trunks-nodos.png}{\textbf{EVID-002}: Configuración de los trunks de los nodos.}
 \evid{0.70}{EVID-003_huawei-verificacion-trunks-nodos.png}{\textbf{EVID-003}: Verificación de los trunks y del estado de los puertos.}
-\evid{0.95}{EVID-004_pve-lab-01-resumen-inicial.png}{\textbf{EVID-004}: Resumen inicial de pve-lab-01.}
-\evid{0.95}{EVID-005_pve-lab-02-resumen-inicial-error-apt.png}{\textbf{EVID-005}: Resumen inicial de pve-lab-02 y error del repositorio \emph{enterprise}.}
+\evid{0.95}{EVID-004_pve-lab-01-resumen-inicial.png}{\textbf{EVID-004}: Resumen inicial de \texttt{pve-lab-01}.}
+\evid{0.95}{EVID-005_pve-lab-02-resumen-inicial-error-apt.png}{\textbf{EVID-005}: Resumen inicial de \texttt{pve-lab-02} y error del repositorio \emph{enterprise}.}
 \evid{0.95}{EVID-006_esxi-resumen-inicial.png}{\textbf{EVID-006}: ESXi recién instalado.}
-\evid{0.78}{EVID-007_pve-lab-01-upgrade-y-chrony.png}{\textbf{EVID-007}: Actualización y chrony en pve-lab-01.}
-\evid{0.72}{EVID-008_pve-lab-01-etc-hosts.png}{\textbf{EVID-008}: \texttt{/etc/hosts} de pve-lab-01.}
-\evid{0.72}{EVID-009_pve-lab-01-reinicio-kernel-chrony.png}{\textbf{EVID-009}: Reinicio, kernel y chrony en pve-lab-01.}
-\evid{0.72}{EVID-010_pve-lab-02-upgrade-chrony-hosts.png}{\textbf{EVID-010}: Actualización, chrony y \texttt{/etc/hosts} en pve-lab-02.}
-\evid{0.76}{EVID-011_pve-lab-02-correccion-etc-hosts.png}{\textbf{EVID-011}: Corrección del FQDN en pve-lab-02.}
-\evid{0.76}{EVID-012_pve-lab-02-reinicio-kernel-chrony-ping.png}{\textbf{EVID-012}: Reinicio, kernel, chrony y ping entre nodos en pve-lab-02.}
+\evid{0.78}{EVID-007_pve-lab-01-upgrade-y-chrony.png}{\textbf{EVID-007}: Actualización y chrony en \texttt{pve-lab-01}.}
+\evid{0.72}{EVID-008_pve-lab-01-etc-hosts.png}{\textbf{EVID-008}: \texttt{/etc/hosts} de \texttt{pve-lab-01}.}
+\evid{0.72}{EVID-009_pve-lab-01-reinicio-kernel-chrony.png}{\textbf{EVID-009}: Reinicio, kernel y chrony en \texttt{pve-lab-01}.}
+\evid{0.72}{EVID-010_pve-lab-02-upgrade-chrony-hosts.png}{\textbf{EVID-010}: Actualización, chrony y \texttt{/etc/hosts} en \texttt{pve-lab-02}.}
+\evid{0.76}{EVID-011_pve-lab-02-correccion-etc-hosts.png}{\textbf{EVID-011}: Corrección del FQDN en \texttt{pve-lab-02}.}
+\evid{0.76}{EVID-012_pve-lab-02-reinicio-kernel-chrony-ping.png}{\textbf{EVID-012}: Reinicio, kernel, chrony y ping entre nodos en \texttt{pve-lab-02}.}
 \evid{0.95}{EVID-013_esxi-hostname-y-dns.png}{\textbf{EVID-013}: Hostname y DNS del ESXi.}
 \evid{0.95}{EVID-014_esxi-ntp.png}{\textbf{EVID-014}: Cliente NTP del ESXi.}
 \evid{0.95}{EVID-015_esxi-resumen-final-hostname-hora.png}{\textbf{EVID-015}: Resumen final del ESXi.}
-\evid{0.70}{EVID-016_pve-lab-01-bios-y-nic.png}{\textbf{EVID-016}: BIOS y NIC de pve-lab-01.}
-\evid{0.70}{EVID-017_pve-lab-02-bios-y-nic.png}{\textbf{EVID-017}: BIOS y NIC de pve-lab-02.}
+\evid{0.70}{EVID-016_pve-lab-01-bios-y-nic.png}{\textbf{EVID-016}: BIOS y NIC de \texttt{pve-lab-01}.}
+\evid{0.70}{EVID-017_pve-lab-02-bios-y-nic.png}{\textbf{EVID-017}: BIOS y NIC de \texttt{pve-lab-02}.}
+
+\subsection*{Capturas del componente G}
+\evid{0.95}{EVID-018_g1-repositorios-pve-lab-03.png}{\textbf{EVID-018}: Repositorios de \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-019_g1-version-previa-pve-lab-01.png}{\textbf{EVID-019}: Versión de \texttt{pve-lab-01} antes de alinear.}
+\evid{0.80}{EVID-020_g3-hosts-pve-lab-01-ip-equivocada.png}{\textbf{EVID-020}: BLK-005, \texttt{pve-lab-03} con la IP del ESXi.}
+\evid{0.72}{EVID-021_g3-hosts-pve-lab-01-corregido.png}{\textbf{EVID-021}: \texttt{/etc/hosts} de \texttt{pve-lab-01} corregido.}
+\evid{0.72}{EVID-022_g3-hosts-pve-lab-03-fqdn-cruzado.png}{\textbf{EVID-022}: BLK-006, FQDN cruzado en \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-023_g3-hosts-pve-lab-02.png}{\textbf{EVID-023}: \texttt{/etc/hosts} de \texttt{pve-lab-02}.}
+\evid{0.72}{EVID-024_g3-hosts-pve-lab-03-corregido.png}{\textbf{EVID-024}: \texttt{/etc/hosts} de \texttt{pve-lab-03} corregido.}
+\evid{0.98}{EVID-025_g2-g3-getent-ping-version-chrony-pve-lab-03.png}{\textbf{EVID-025}: Resolución, pings, versión y chrony en \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-026_g1-version-pve-lab-01-actualizado.png}{\textbf{EVID-026}: \texttt{pve-lab-01} actualizado.}
+\evid{0.72}{EVID-027_g1-version-pve-lab-02-actualizado.png}{\textbf{EVID-027}: \texttt{pve-lab-02} actualizado.}
+
+\subsection*{Capturas del componente E}
+\evid{0.62}{EVID-028_e1-pvecm-create-pve-lab-clr.png}{\textbf{EVID-028}: Creación del clúster \texttt{pve-lab-clr}.}
+\evid{0.90}{EVID-029_e2-pvecm-add-pve-lab-02.png}{\textbf{EVID-029}: Unión de \texttt{pve-lab-02}.}
+\evid{0.60}{EVID-030_e2-pvecm-status-dos-nodos.png}{\textbf{EVID-030}: Clúster con dos nodos.}
+\evid{0.80}{EVID-031_e3-pvecm-add-pve-lab-03-status-nodes.png}{\textbf{EVID-031}: Unión de \texttt{pve-lab-03} y estado con tres nodos.}
+
+\needspace{20\baselineskip}
+\textbf{EVID-032}: quórum con \texttt{pve-lab-03} apagado (salida de consola en texto).
+{\lstinputlisting[basicstyle=\ttfamily\scriptsize,columns=fixed]{evidence/EVID-032_e5-quorum-con-pve-lab-03-apagado.txt}}
+
+\needspace{20\baselineskip}
+\textbf{EVID-033}: reincorporación de \texttt{pve-lab-03} (salida de consola en texto).
+{\lstinputlisting[basicstyle=\ttfamily\scriptsize,columns=fixed]{evidence/EVID-033_e5-quorum-pve-lab-03-reincorporado.txt}}
+
+\subsection*{Capturas del componente F}
+\evid{0.75}{EVID-034_f1-vmbr0-vlan-aware-gui-pve-lab-03.png}{\textbf{EVID-034}: \texttt{vmbr0} con \emph{VLAN aware} en la web de \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-035_f1-bridge-vlan-pve-lab-03.png}{\textbf{EVID-035}: \texttt{bridge vlan show}, gateway y quórum en \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-036_f1-interfaces-pve-lab-03.png}{\textbf{EVID-036}: \texttt{vmbr0} en \texttt{/etc/network/interfaces} de \texttt{pve-lab-03}.}
+\evid{0.72}{EVID-037_f1-vmbr0-pve-lab-02.png}{\textbf{EVID-037}: Bridge con VLAN en \texttt{pve-lab-02}.}
+\evid{0.72}{EVID-038_f1-vmbr0-pve-lab-01.png}{\textbf{EVID-038}: Bridge con VLAN en \texttt{pve-lab-01}.}
+\evid{0.98}{EVID-039_f2-iso-debian-pve-lab-01-y-arbol-cluster.png}{\textbf{EVID-039}: Descarga de la ISO y árbol del clúster.}
+\evid{0.75}{EVID-040_f3-vm-general.png}{\textbf{EVID-040}: Asistente de VM, General.}
+\evid{0.75}{EVID-041_f3-vm-system.png}{\textbf{EVID-041}: Asistente de VM, System.}
+\evid{0.75}{EVID-042_f3-vm-disks.png}{\textbf{EVID-042}: Asistente de VM, Disks.}
+\evid{0.75}{EVID-043_f3-vm-cpu.png}{\textbf{EVID-043}: Asistente de VM, CPU.}
+\evid{0.75}{EVID-044_f3-vm-memory.png}{\textbf{EVID-044}: Asistente de VM, Memory.}
+\evid{0.75}{EVID-045_f3-vm-network-vlan20.png}{\textbf{EVID-045}: Asistente de VM, Network con VLAN Tag 20.}
+\evid{0.75}{EVID-046_f3-vm-confirm.png}{\textbf{EVID-046}: Resumen de la VM.}
+\evid{0.98}{EVID-047_f3-instalador-zona-horaria.png}{\textbf{EVID-047}: BLK-008, zonas horarias del instalador.}
+\evid{0.98}{EVID-048_f3-instalador-software-grub.png}{\textbf{EVID-048}: Software mínimo y GRUB.}
+\evid{0.90}{EVID-049_f3-deb-lab-01-primer-login-agente.png}{\textbf{EVID-049}: Primer login de \texttt{deb-lab-01}.}
+\evid{0.68}{EVID-050_f4-deb-lab-01-dhcp-y-pruebas-positivas.png}{\textbf{EVID-050}: \texttt{deb-lab-01}, DHCP y pruebas positivas.}
+\evid{0.90}{EVID-051_f4-deb-lab-01-pruebas-negativas.png}{\textbf{EVID-051}: \texttt{deb-lab-01}, pruebas negativas.}
+\evid{0.98}{EVID-052_f5-esxi-resumen-host.png}{\textbf{EVID-052}: Resumen de \texttt{esx-lab-01}.}
+\evid{0.98}{EVID-053_f5-esxi-port-group-vlan20.png}{\textbf{EVID-053}: Creación del port group \texttt{VLAN20-SRV}.}
+\evid{0.98}{EVID-054_f5-esxi-lista-port-groups.png}{\textbf{EVID-054}: Port groups de \texttt{vSwitch0}.}
+\evid{0.98}{EVID-055_f5-esxi-iso-en-datastore.png}{\textbf{EVID-055}: ISO en \texttt{datastore1/ISO}.}
+\evid{0.98}{EVID-056_f5-esxi-crear-vm.png}{\textbf{EVID-056}: Asistente de nueva VM en el ESXi.}
+\evid{0.90}{EVID-057_f5-esxi-vm-nombre-so.png}{\textbf{EVID-057}: Nombre y sistema invitado de \texttt{deb-lab-02}.}
+\evid{0.90}{EVID-058_f5-esxi-vm-hardware-1.png}{\textbf{EVID-058}: Hardware virtual de \texttt{deb-lab-02} (1).}
+\evid{0.90}{EVID-059_f5-esxi-vm-hardware-2.png}{\textbf{EVID-059}: Hardware virtual de \texttt{deb-lab-02} (2).}
+\evid{0.90}{EVID-060_f5-esxi-vm-resumen.png}{\textbf{EVID-060}: Resumen final de \texttt{deb-lab-02}.}
+\evid{0.90}{EVID-061_f5-deb-lab-02-instalador.png}{\textbf{EVID-061}: Instalador de Debian 13 en el ESXi.}
+\evid{0.68}{EVID-062_f5-deb-lab-02-dhcp-y-pruebas-positivas.png}{\textbf{EVID-062}: \texttt{deb-lab-02}, DHCP y pruebas positivas.}
+\evid{0.70}{EVID-063_f5-deb-lab-02-pruebas-negativas.png}{\textbf{EVID-063}: \texttt{deb-lab-02}, pruebas negativas.}
 
 \clearpage
 \section{Protección de la información}\label{ap:prot}
 Criterio del proyecto: se censura cualquier dato que no sea de dominio público o que pueda representar una vulnerabilidad, aunque sea mínima. En el texto se usan marcadores (\texttt{<IP-PC-ADMIN>}, \texttt{<REDACTADO>}); en las capturas, recuadros negros opacos, con la etiqueta [REDACTADO] cuando hay espacio. Los originales sin censura solo se guardan en la carpeta privada del operador.
 
-\textbf{Canales revisados en esta versión (1.0):} texto general (incluidos tablas, pies de figura y metadatos del PDF), comandos y salidas de consola en forma de texto, e imágenes (las 17 capturas, revisadas completas, incluidos prompts, barras de título, pestañas, barra de direcciones y paneles de tareas). Las imágenes se regrabaron sin metadatos.
+\textbf{Canales revisados en la versión 1.0:} texto general (incluidos tablas, pies de figura y metadatos del PDF), comandos y salidas de consola, e imágenes (EVID-001 a EVID-017, revisadas completas).
+
+\textbf{Canales revisados en esta versión (1.1):} los mismos tres canales en el texto nuevo, en las dos salidas de texto (EVID-032 y EVID-033) y en las 44 capturas nuevas (EVID-018 a EVID-063), revisadas completas, incluidos los fondos detrás de los diálogos. Las imágenes se regrabaron sin metadatos.
 
 \subsection{Datos censurados}
 {\small
@@ -682,17 +940,20 @@ Criterio del proyecto: se censura cualquier dato que no sea de dominio público 
   \midrule
   \endhead
   Contraseñas & No aparecen en ningún texto ni captura. & Acceso directo a los equipos.\\
-  IP de la PC de administración & Marcador \texttt{<IP-PC-ADMIN>} en el texto; tapada en el último acceso de EVID-001. & Es el único origen autorizado para administrar desde fuera del laboratorio.\\
-  Número de serie de SRV-03 (visible en el ESXi) & Tapado en EVID-006 y EVID-015; \texttt{<REDACTADO>} en el inventario privado. & Identifica el equipo ante el fabricante (soporte y garantía) y permite rastrear el hardware.\\
-  MAC de las NIC de los nodos & Tapadas en EVID-016 y EVID-017. & Identifican el hardware y permiten rastrearlo o suplantarlo.\\
-  IPv6 de los nodos & Tapadas en EVID-006, EVID-013 y EVID-015. & Las de enlace local se derivan de la MAC.\\
-  Versión exacta de Proxmox VE y de sus paquetes (\texttt{pve-manager}, \texttt{pve-ha-manager}) & Generalizada a «9.x» en el texto; tapada en EVID-004, EVID-005 y EVID-007. & Orienta la búsqueda de vulnerabilidades públicas de esa versión (regla D-022).\\
-  Versión del kernel & Se omite en el texto («kernel nuevo»); tapada en EVID-004 y EVID-005 (panel de resumen) y en EVID-009 y EVID-012 (\texttt{uname -r}, \texttt{vmlinuz} y banner de Linux). & Revela el nivel de parches del hipervisor (D-022).\\
-  Update, build e \emph{image profile} del ESXi & Generalizada a «8.0» en el texto; tapados en EVID-006 y EVID-015. & Revela el nivel de parches del hipervisor (D-022).\\
-  Versión y fecha de la BIOS de los nodos & Se omiten en el texto; tapadas en EVID-015, EVID-016 y EVID-017. & Una BIOS atrasada es una vulnerabilidad conocida del firmware (D-022).\\
-  Controles de seguridad no aplicados en los puertos de los nodos & El riesgo aceptado de D-028 se describe en términos generales; el detalle queda en el inventario privado. & Señalaría una vía de ataque concreta en la red de gestión.\\
-  Avatar del perfil del navegador & Tapado en EVID-004, EVID-005 y EVID-006. & Puede contener una imagen personal del operador.\\
-  Respaldos de configuración & No se adjuntan. & Contienen credenciales o hashes y la configuración completa.\\
+  Asteriscos de la contraseña de \texttt{root} y huella X509 del primer nodo & Tapados en EVID-029 y EVID-031. & Longitud de la contraseña e identificador del certificado del nodo.\\
+  IP de la PC de administración & Marcador \texttt{<IP-PC-ADMIN>} en el texto; tapada en EVID-001. & Es el único origen autorizado para administrar desde fuera del laboratorio.\\
+  Número de serie de SRV-03 & Tapado en EVID-006, EVID-015 y EVID-052. & Identifica el equipo ante el fabricante y permite rastrear el hardware.\\
+  MAC de las NIC & Tapadas en EVID-016 y EVID-017. & Identifican el hardware y permiten rastrearlo o suplantarlo.\\
+  IPv6 de los nodos y de las VM & Tapadas en EVID-006, EVID-013, EVID-015, EVID-050, EVID-052 y EVID-062. & Las de enlace local se derivan de la MAC.\\
+  UUID y \emph{Location} de \texttt{datastore1} & Tapados en EVID-055. & El UUID de un datastore VMFS termina con la MAC de la NIC del host.\\
+  Versión exacta de Proxmox VE y de sus paquetes & Generalizada a «9.x» en el texto; tapada en EVID-004, EVID-005, EVID-007, EVID-019, EVID-025 a EVID-027 y en la cabecera de EVID-039. & Orienta la búsqueda de vulnerabilidades públicas de esa versión (D-022).\\
+  Versión del kernel de los nodos & Se omite en el texto; tapada en EVID-004, EVID-005, EVID-009, EVID-012, EVID-019 y EVID-025 a EVID-027. & Revela el nivel de parches del hipervisor (D-022).\\
+  Update, build e \emph{image profile} del ESXi & Generalizada a «8.0» en el texto; tapados en EVID-006, EVID-015, EVID-052 y en el fondo de EVID-056. & Revela el nivel de parches del hipervisor (D-022).\\
+  Versión y fecha de la BIOS de los nodos & Se omiten en el texto; tapadas en EVID-015 a EVID-017, EVID-052 y EVID-056. & Una BIOS atrasada es una vulnerabilidad conocida del firmware (D-022).\\
+  Versión menor de Debian, kernel de las VM y versiones de \texttt{qemu-guest-agent} y \texttt{open-vm-tools} & El texto dice «Debian 13»; tapadas en el nombre de la ISO (EVID-039, EVID-046, EVID-055, EVID-059 y EVID-060), en el banner de inicio de sesión (EVID-049 y EVID-051) y en la salida de \texttt{apt} (EVID-049 y EVID-062). & Revelan el nivel de parches de las VM (D-022).\\
+  Barra del navegador y avatar del perfil & Recortada en EVID-052; avatar tapado en EVID-004 a EVID-006. & Puede contener datos personales del operador.\\
+  Controles de seguridad no aplicados en los puertos de los nodos & El riesgo aceptado de D-028 se describe en términos generales. & Señalaría una vía de ataque concreta en la red de gestión.\\
+  Respaldos y \texttt{corosync.conf} & No se adjuntan. & Contienen la configuración completa.\\
   Montaje en rack y cableado de los nodos & No se publican fotos ni plan de cables (D-024). & El detalle físico revela equipos y su ubicación.\\
   \bottomrule
 \end{longtable}
@@ -707,15 +968,15 @@ Criterio del proyecto: se censura cualquier dato que no sea de dominio público 
   \midrule
   \endhead
   Usuario \texttt{eicladmin} del switch & EVID-001. & Excepción decidida por el propietario. El acceso al switch está limitado por la ACL 2000 a la VLAN de gestión y a la PC de administración; la contraseña no aparece.\\
-  Usuario \texttt{root} de los hipervisores & EVID-007 a EVID-015 y comandos. & Usuario por defecto de Proxmox VE y ESXi, documentado por los fabricantes; la contraseña no aparece.\\
-  Plan de direccionamiento (10.10.0.0/16, VLAN, gateways, IP de los nodos .11 a .13) & Todo el documento. & Es el diseño que se documenta; no es accesible desde fuera del laboratorio.\\
-  Hostnames y dominio \texttt{eicl.internal} & Todo el documento. & Nombres internos del laboratorio, sin resolución pública.\\
-  DNS públicos 1.1.1.1 y 8.8.8.8 & Texto, EVID-013. & Servicios públicos.\\
-  Modelo, CPU, RAM y disco de los nodos & Inventario y EVID-004 a EVID-006. & Inventario técnico de un modelo comercial; no identifica unidades concretas.\\
-  Familia de versión (Proxmox VE 9.x, ESXi 8.0, Debian 13) & Texto. & Nivel de detalle permitido por D-022; no revela el nivel de parches.\\
-  Prompt \texttt{/home/mobaxterm} & EVID-001 a EVID-003. & Ruta genérica de MobaXterm, igual en cualquier instalación; no contiene el usuario de Windows.\\
-  Número de sesiones VTY & EVID-001 y PEND-018. & Mensaje informativo del login; no revela origen ni usuarios.\\
-  Direcciones IPv6 reservadas de \texttt{/etc/hosts} (\texttt{::1}, \texttt{ff02::}) & EVID-008. & Valores estándar de Debian, iguales en cualquier instalación.\\
+  Usuarios \texttt{root} y \texttt{root@pam} & Consolas, interfaces web y comandos. & Usuarios por defecto de Proxmox VE, ESXi y Debian; la contraseña no aparece.\\
+  Plan de direccionamiento (10.10.0.0/16, VLAN, gateways, IP de nodos y VM) & Todo el documento. & Es el diseño que se documenta; no es accesible desde fuera del laboratorio.\\
+  Nombre del clúster, \texttt{link0}, versión de configuración, Ring ID e identificadores de nodo & Componente E, EVID-028 a EVID-033. & Datos internos del clúster sin valor fuera del laboratorio; no incluyen la llave \texttt{authkey}.\\
+  Hostnames, nombres de VM, VMID y dominio \texttt{eicl.internal} & Todo el documento. & Nombres internos del laboratorio, sin resolución pública.\\
+  DNS públicos 1.1.1.1 y 8.8.8.8, \texttt{debian.org} y su IP, URL de descarga de la ISO & Texto, EVID-013, EVID-039, EVID-050 y EVID-062. & Servicios públicos.\\
+  Familias de versión (Proxmox VE 9.x, ESXi 8.0, Debian 13) y compatibilidad de VM «ESXi 8.0 U2» & Texto y EVID-057 a EVID-060. & Nivel permitido por D-022; la compatibilidad de VM es un nivel de hardware virtual, no la versión del host.\\
+  Modelo, CPU, RAM y disco de los nodos & Inventario y capturas. & Inventario técnico de un modelo comercial; no identifica unidades concretas.\\
+  Prompt \texttt{/home/mobaxterm} & EVID-001 a EVID-003. & Ruta genérica de MobaXterm; no contiene el usuario de Windows.\\
+  Direcciones IPv6 reservadas de \texttt{/etc/hosts} (\texttt{::1}, \texttt{fe00::}, \texttt{ff02::}) & EVID-008, EVID-020 a EVID-024. & Valores estándar de Debian, iguales en cualquier instalación.\\
   \bottomrule
 \end{longtable}
 }
