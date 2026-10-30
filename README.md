@@ -57,7 +57,7 @@ Detalle completo en [`docs/architecture.md`](docs/architecture.md) (topología l
 | 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | Completado |
 | 01 | [LAB-001 – Infraestructura física y red base](labs/LAB-001/) | Completado |
 | 02 | [LAB-002 – Proxmox y VMware](labs/LAB-002/) | Completado |
-| 03 | LAB-003 – Servicios esenciales | Pendiente |
+| 03 | [LAB-003 – Servicios esenciales](labs/LAB-003) | Pendiente |
 | 04 | LAB-004 – Segmentación avanzada y troubleshooting | Pendiente |
 | 05 | LAB-005 – Centro de monitoreo | Pendiente |
 | 06 | LAB-006 – Logs y SOC básico | Pendiente |
