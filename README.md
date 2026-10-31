@@ -81,7 +81,7 @@ Fallas reales del laboratorio, documentadas como en un área de soporte: síntom
 
 | ID | Fecha | Síntoma | Causa raíz | Resolución | Estado |
 |---|---|---|---|---|---|
-| [INC-002](incidentes/INC-002-corte-electrico-general.md) | 29/10/2026 | `pve-lab-03` apagado tras un corte eléctrico; ~26 h sin servicio | Corte eléctrico general; el nodo no tiene encendido automático al volver la energía | Pendiente (encendido manual hecho) | 🔄 En curso |
+| [INC-002](incidentes/INC-002-corte-electrico-general.md) | 29/10/2026 | `pve-lab-03` apagado tras un corte eléctrico; ~26 h sin servicio | Corte eléctrico general; el nodo no tiene encendido automático al volver la energía | Pendiente (encendido manual hecho) | ✅ Resuelto |
 | [INC-001](incidentes/INC-001-nodo-sin-enlace-fisico.md) | 27/10/2026 | Nodo Proxmox sin respuesta (`Destination Host Unreachable`) | Conector RJ45 mal insertado (capa 1) | 17 min | ✅ Resuelto |
 
 Registro completo, método y plantilla en [`incidentes/`](incidentes/).
