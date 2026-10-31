@@ -26,7 +26,7 @@ Versión anterior de la memoria (componentes A a D): [lab-002-v1.0](https://gith
 
 **D — VMware ESXi.** Versión gratuita instalada en el mismo hardware, con su tarjeta de red reconocida de forma nativa. Se detectó y corrigió un reloj adelantado seis horas (lección en [`validacion.md`](../../docs/validacion.md)).
 
-**G — Cuarto nodo.** Un cuarto OptiPlex, con la mitad de RAM que los demás, se integra como tercer Proxmox para que el clúster tenga quórum propio sin un QDevice externo (D-031). Ocupa `GE0/0/6` del switch principal, contiguo a los otros nodos; el acceso de gestión que estaba en ese puerto pasa a `GE0/0/9` (D-030), un puerto SFP que todavía no tiene módulo instalado. Antes de crear el clúster se alinearon las versiones de los tres Proxmox y se corrigieron dos errores en `/etc/hosts`, uno de ellos con un ping que respondía desde el equipo equivocado.
+**G — Cuarto nodo.** Un cuarto OptiPlex, con la mitad de RAM que los demás, se integra como tercer Proxmox para que el clúster tenga quórum propio sin un QDevice externo (D-031). Ocupa `GE0/0/6` del switch principal, contiguo a los otros nodos; el acceso de gestión que estaba en ese puerto pasó a `GE0/0/9` (D-030), un puerto SFP sin módulo, y en LAB-003 se movió a `GE0/0/7` (D-048). Antes de crear el clúster se alinearon las versiones de los tres Proxmox y se corrigieron dos errores en `/etc/hosts`, uno de ellos con un ping que respondía desde el equipo equivocado.
 
 **E — Clúster de tres nodos.** Clúster `pve-lab-clr` (D-037) con transporte `knet` y autenticación segura sobre la VLAN de gestión: tres nodos, tres votos y quórum de 2. Con un nodo apagado el clúster siguió operando con 2 de 3 votos, y al encenderlo el nodo se reincorporó solo en unos dos minutos.
 
@@ -36,9 +36,9 @@ Versión anterior de la memoria (componentes A a D): [lab-002-v1.0](https://gith
 
 | Nodo | Hostname | Plataforma | IP de gestión | Función |
 |---|---|---|---|---|
-| SRV-01 | `pve-lab-01` | Proxmox VE 9.x | 10.10.10.11 | Nodo 1 de `pve-lab-clr`; aloja `deb-lab-01` |
+| SRV-01 | `pve-lab-01` | Proxmox VE 9.x | 10.10.10.11 | Nodo 1 de `pve-lab-clr`; alojó `deb-lab-01` |
 | SRV-02 | `pve-lab-02` | Proxmox VE 9.x | 10.10.10.12 | Nodo 2 de `pve-lab-clr` |
-| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 | 10.10.10.13 | Plataforma VMware; aloja `deb-lab-02` |
+| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 | 10.10.10.13 | Plataforma VMware; alojó `deb-lab-02`. Desde LAB-003 está dedicado al NAS (D-045) |
 | SRV-04 | `pve-lab-03` | Proxmox VE 9.x | 10.10.10.14 | Nodo 3 de `pve-lab-clr` (8 GB de RAM) |
 
 ## Máquinas virtuales de prueba
@@ -48,7 +48,7 @@ Versión anterior de la memoria (componentes A a D): [lab-002-v1.0](https://gith
 | `deb-lab-01` | Proxmox (`pve-lab-01`, VMID 100) | 2 vCPU (tipo por defecto, D-040) · 2 GiB · 16 GiB | VirtIO en `vmbr0`, etiqueta 20 | DHCP en la VLAN 20, internet y DNS; sin acceso a gestión ni a la red doméstica |
 | `deb-lab-02` | ESXi (`esx-lab-01`) | 2 vCPU · 2 GB · 16 GB *thin* | VMXNET 3 en el *port group* `VLAN20-SRV` | Igual que `deb-lab-01` |
 
-Las dos VM usan Debian 13 (netinst, solo servidor SSH) con su agente de invitado (D-039).
+Las dos VM usan Debian 13 (netinst, solo servidor SSH) con su agente de invitado (D-039). Cumplida su función, se retiran en LAB-003 (D-043): `deb-lab-02` se eliminó el 30/10 y `deb-lab-01` se elimina después.
 
 Hardware, puertos y decisiones en [`docs/architecture.md`](../../docs/architecture.md), [`docs/port-mapping.md`](../../docs/port-mapping.md) y [`docs/decisiones.md`](../../docs/decisiones.md). Pruebas en [`docs/validacion.md`](../../docs/validacion.md).
 

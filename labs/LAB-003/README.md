@@ -1,68 +1,60 @@
 # LAB-003 — Servicios esenciales
 
-**Estado:** pendiente · **Inicio:** por definir
+**Estado:** en curso · **Inicio:** 30/10/2026
 
-Construir los servicios de infraestructura que usarán los demás laboratorios: un host de servicios con contenedores, DNS interno para el dominio `eicl.internal`, hora unificada, inventario de direccionamiento (IPAM), almacenamiento en red (NAS) y el primer respaldo funcional del clúster.
+Construir los servicios de infraestructura que usarán los demás laboratorios: almacenamiento en red (NAS), un host de servicios, DNS interno para el dominio `eicl.internal`, hora unificada, inventario de direccionamiento (IPAM) y el primer respaldo funcional. Antes de empezar se validó toda la infraestructura contra lo documentado.
 
 ## Componentes
 
 | Componente | Equipo / alcance | Estado | Memoria técnica |
 |---|---|---|---|
-| A | NAS: dos SSD externos de 2 TB en espejo sobre `pve-lab-03` | ⏳ Pendiente | — |
-| B | Host de servicios `svc-lab-01`: VM Debian con Docker | ⏳ Pendiente | — |
-| C | DNS interno y filtrado (AdGuard Home) para `eicl.internal` | ⏳ Pendiente | — |
-| D | Hora y DHCP: clientes NTP y entrega del DNS interno por VLAN | ⏳ Pendiente | — |
-| E | Inventario IPAM con NetBox | ⏳ Pendiente | — |
-| F | Respaldos básicos: máquinas virtuales y configuración de los equipos de red | ⏳ Pendiente | — |
-| G | Validación y entregables | ⏳ Pendiente | — |
+| A | Validación integral de switches, firewall y nodos; reasignación de puertos del switch principal | ✅ Completado | Pendiente |
+| B | NAS `nas-lab-01`: OpenMediaVault en `esx-lab-01` con dos discos USB de 2 TB | ✅ Completado | Pendiente |
+| C | Máquinas virtuales: retiro de las VM de prueba de LAB-002 y VM RHEL 10 en `pve-lab-03` | ⏳ Pendiente | — |
+| D | DNS interno y filtrado (AdGuard Home) para `eicl.internal` | ⏳ Pendiente | — |
+| E | Hora y DHCP: clientes NTP y entrega del DNS interno por VLAN | ⏳ Pendiente | — |
+| F | Inventario IPAM con NetBox | ⏳ Pendiente | — |
+| G | Respaldos básicos: máquinas virtuales y configuración de los equipos de red en el NAS | ⏳ Pendiente | — |
+| H | Validación y entregables | ⏳ Pendiente | — |
 
-El orden de las letras es el orden de implementación: el NAS va primero porque es el destino de los respaldos, y el DNS se apoya en el host de servicios.
+El orden de las letras es el orden de implementación. Este plan sustituye al publicado el 29/10, que preveía el NAS en `pve-lab-03` y un host Debian con Docker: el NAS pasó al ESXi (D-045) y el host de servicios será una VM RHEL 10 (D-044).
 
-## Qué se va a implementar
+## Lo más relevante de cada componente
 
-**A — NAS.** Los dos SSD externos se conectan al tercer nodo del clúster, que sigue siendo nodo del clúster (no se revierte D-031). Con ellos se crea un pool ZFS en espejo, con unos 1.8 TiB útiles y tolerancia a la falla de un disco, y la caché de ZFS se limita por la RAM de 8 GB del nodo. Un contenedor LXC sin privilegios (`nas-lab-01`, VLAN de servidores) comparte una carpeta por SMB 3, sin acceso de invitado, y el mismo pool queda registrado en Proxmox como almacenamiento de respaldos. Antes de crear el pool, los discos pasan una prueba de estrés por USB; si fallan, se evalúa una VM con OpenMediaVault como alternativa.
+**A — Validación integral.** Se revisó la configuración real del switch principal, el switch de acceso, el firewall, los tres Proxmox y el ESXi contra lo documentado, y coincide. La revisión descubrió un corte eléctrico que había reiniciado todo el laboratorio y dejado un nodo apagado un día ([INC-002](../../incidentes/INC-002-corte-electrico-general.md)): se reconstruyó con el tiempo de actividad del switch y los contadores de BPDU, porque la hora de los registros no era confiable. También se corrigió el acceso de gestión del switch principal: `GE0/0/9` no tenía módulo SFP ni equipo, así que el acceso pasó a `GE0/0/7`, que da gestión en capa 2 aunque falle el firewall; `GE0/0/8` queda reservado para el monitoreo (D-048).
 
-**B — Host de servicios.** Una VM Debian 13 con Docker y Docker Compose en la VLAN de servidores, con IP fija. Aloja los servicios en contenedores (DNS y NetBox) y queda en un nodo de 16 GB de RAM. Los archivos de Compose se guardan en el NAS y su versión saneada se publica en el repositorio.
+**B — NAS.** El ESXi se dedica a una VM con OpenMediaVault (`nas-lab-01`, 10.10.20.20) que recibe dos discos USB de 2 TB por *passthrough*. Sin RAID, porque los discos son SMR y van por USB: un disco principal y uno de copia con Rsync diario que no borra en el destino lo borrado en el origen. Comparte por SMB con permisos por carpeta, se administra por HTTPS y desde la PC solo es accesible por una política específica del firewall (D-045, D-047). Arranca solo con el ESXi y se apaga de forma ordenada, una regla que ahora aplica a toda VM de servicio (D-049).
 
-**C — DNS interno.** AdGuard Home resuelve la zona `eicl.internal` (firewall, switches, nodos, VM y servicios), reenvía el resto a resolvedores públicos y filtra dominios de publicidad y rastreo. Cada VLAN que lo use necesita su política en el firewall, limitada al puerto 53. La VLAN de gestión ya alcanza la de servidores (política 3).
+## Plan de servicios
 
-**D — Hora y DHCP.** La cadena de hora actual (firewall como servidor NTP interno) se extiende a los servicios nuevos y se comprueba en cada equipo. El DHCP del firewall pasa a entregar el DNS interno en cada VLAN, y los nodos Proxmox lo usan para todo lo que no sea el propio clúster.
+| Servicio | Host | Plataforma | Nodo | VLAN | IP | Estado |
+|---|---|---|---|---|---|---|
+| NAS (SMB, copia diaria) | `nas-lab-01` | VM OpenMediaVault 8 | `esx-lab-01` | 20 | 10.10.20.20 | ✅ Operativo |
+| Host de servicios | Por definir | VM RHEL 10 (CPU `x86-64-v3`) | `pve-lab-03` | 20 | Rango .10–.19 | ⏳ Pendiente |
+| DNS interno y filtrado | AdGuard Home | Contenedor en el host de servicios | `pve-lab-03` | 20 | Rango .10–.19 | ⏳ Pendiente |
+| Inventario IPAM | NetBox | Contenedores en el host de servicios | `pve-lab-03` | 20 | Rango .10–.19 | ⏳ Pendiente |
 
-**E — Inventario IPAM.** NetBox registra el inventario real del laboratorio: sitio y rack, equipos y sus puertos, VLAN, prefijos, IP asignadas y máquinas virtuales. A partir de este laboratorio, toda IP nueva se asigna primero en NetBox.
-
-**F — Respaldos básicos.** Trabajos programados de `vzdump` para respaldar las VM y los contenedores en el NAS, con retención definida. Los respaldos de configuración del firewall y de los switches, que hoy se hacen a mano, también se guardan en el NAS. La prueba que cierra el componente es restaurar una VM con otro identificador y comprobar que arranca. Una copia fuera del laboratorio (regla 3-2-1) queda para LAB-008.
-
-**G — Validación y entregables.** Pruebas de punta a punta de cada servicio, positivas y negativas: resolución desde cada VLAN, acceso al NAS solo desde orígenes autorizados, falla simulada de un disco, restauración de un respaldo y reinicio de los nodos sin pérdida de servicio. Se actualizan `docs/` (servicios, direccionamiento, decisiones y validaciones).
-
-## Plan de servicios (propuesto)
-
-| Servicio | Host | Plataforma | Nodo | VLAN | IP propuesta |
-|---|---|---|---|---|---|
-| NAS (ZFS en espejo + SMB) | `nas-lab-01` | Contenedor LXC Debian 13 | `pve-lab-03` | 20 | 10.10.20.20 |
-| Host de servicios | `svc-lab-01` | VM Debian 13 + Docker | `pve-lab-02` | 20 | 10.10.20.10 |
-| DNS interno y filtrado | AdGuard Home | Contenedor Docker | `svc-lab-01` | 20 | 10.10.20.10 |
-| Inventario IPAM | NetBox | Contenedores Docker | `svc-lab-01` | 20 | 10.10.20.10 |
-
-Las IP siguen la convención por /24 (rango de servidores .10–.49) y quedan fuera del DHCP. Los servicios van en la VLAN de servidores porque la de gestión no lleva máquinas virtuales ni contenedores (D-038). Los nombres siguen la convención `TIPO-LAB-NN`.
+Las IP de servicio son fijas, fuera del DHCP; el rango 10.10.20.10–.19 queda reservado para los servicios base (D-045). Los servicios van en la VLAN de servidores porque la de gestión no lleva máquinas virtuales (D-038).
 
 ## Criterio de cierre
 
 - Todos los equipos y servicios del laboratorio se resuelven por nombre en `eicl.internal`, desde cada VLAN autorizada.
-- El NAS está en espejo y saludable, y se comprobó la falla y la recuperación de un disco.
+- El NAS funciona con su copia diaria comprobada, y una restauración desde el disco de copia está probada.
 - Hay al menos un respaldo programado de VM en el NAS y una restauración comprobada.
 - NetBox refleja el inventario y el direccionamiento reales.
-- El clúster mantiene el quórum durante todo el laboratorio y después de reiniciar el nodo del NAS.
+- El clúster mantiene el quórum durante todo el laboratorio.
 - Cada acceso nuevo entre VLAN tiene su política específica en el firewall, con registro.
 
-## Dependencias y decisiones por tomar
+## Decisiones por tomar
 
-- **Antes de empezar:** revisión integral de la infraestructura (configuración de puertos y VLAN, y acceso de gestión del switch principal).
-- **Por confirmar:** modelo, puente USB y versión de USB de los SSD; puertos USB libres de `pve-lab-03`; RAM disponible de cada nodo.
-- **Por decidir:** si `/etc/hosts` de los nodos Proxmox conserva los tres nodos como respaldo del DNS (recomendado, para que el clúster no dependa de una VM); si el DNS va en Docker o en un contenedor LXC propio; si el NAS se comparte con la PC de administración (requiere una política solo para SMB); cómo respaldan en el NAS los nodos que no tienen los discos (NFS desde el host o Proxmox Backup Server en LAB-008).
+- Podman o Docker CE para los contenedores en RHEL.
+- IP del DNS interno dentro de 10.10.20.10–.19.
+- Si `/etc/hosts` de los nodos Proxmox conserva los tres nodos como respaldo del DNS (recomendado, para que el clúster no dependa de una VM).
+- Cómo respaldan los nodos Proxmox en el NAS (carpeta compartida por SMB o NFS).
 
 ## Fuera de alcance
 
-Copia de respaldos fuera del laboratorio, VLAN 60 de respaldos y Proxmox Backup Server (LAB-008) · monitoreo de los servicios (LAB-005) · publicación de cualquier servicio hacia internet (LAB-007) · alta disponibilidad de los servicios (LAB-012).
+Copia de respaldos fuera del laboratorio, VLAN 60 de respaldos y UPS (LAB-008) · monitoreo de los servicios con Zabbix en una Raspberry Pi (LAB-005) · publicación de cualquier servicio hacia internet (LAB-007) · alta disponibilidad de los servicios (LAB-012).
 
 ## Incidentes
 
@@ -73,5 +65,5 @@ Copia de respaldos fuera del laboratorio, VLAN 60 de respaldos y Proxmox Backup 
 ## Carpetas
 
 ```
-README.md   este documento; las carpetas de cada componente se crean con su memoria técnica
+README.md   este documento; la memoria técnica de A y B se agrega cuando se publique
 ```

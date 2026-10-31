@@ -47,6 +47,7 @@ PATTERNS=(
   "Llave privada|||-----BEGIN [A-Z ]*PRIVATE KEY-----"
   "Número de serie completo de FortiGate|||\bFG(?![0-9A-Z]*XXXXXX)[0-9A-Z]{12,16}\b"
   "UUID (objetos o políticas)|||\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b"
+  "UUID de datastore VMFS (termina con la MAC del host)|||\b[0-9a-fA-F]{8}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b"
   "PSK, secreto o comunidad SNMP en configuración|||\bset\s+(psksecret|secret|passwd|password|community)\s+(?!(ENC\s+)?[<\[]REDACTADO)\S+|\bsnmp-agent\s+community\s+(?!(cipher\s+)?[<\[]REDACTADO)\S+"
   "Ruta personal de Windows|||[A-Za-z]:\\\\Users\\\\[^\\\\\s]+"
   "Ruta personal de Linux/macOS|||(/home|/Users)/[a-z_][a-z0-9_.-]+/"

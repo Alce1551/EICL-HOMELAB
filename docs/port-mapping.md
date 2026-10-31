@@ -1,6 +1,6 @@
 # Mapa de puertos
 
-**Laboratorio:** LAB-001 · **Versión:** 1.5 · **Fecha:** 28/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.6 · **Fecha:** 31/10/2026
 
 ## FGT-LAB-01 — FortiGate 50E
 
@@ -20,9 +20,9 @@
 | GE0/0/4 | `esx-lab-01` (SRV-03, ESXi) · `SRV-03-ESXI` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028) | Activo |
 | GE0/0/5 | Uplink a SW-LAB-02 puerto 1 | trunk 10, 20, 50 · PVID 999, sin la 999 permitida (D-042) · `stp root-protection` | Activo |
 | GE0/0/6 | `pve-lab-03` (SRV-04, Proxmox) · `SRV-04-PROXMOX` | trunk · PVID 10 · VLAN 10–50 · sin VLAN 1 · edge (D-028, D-030) | Activo |
-| GE0/0/7 | Pruebas SRV | access 20 · edge | Activo |
-| GE0/0/8 | Clientes LAB | access 50 · edge | Activo |
-| GE0/0/9 | Acceso MGMT (laptop o equipo de administración) · `ACCESO-MGMT-VLAN10` · puerto SFP | access 10 · edge (D-030) | Configurado · **sin módulo SFP**, sin enlace |
+| GE0/0/7 | Acceso MGMT de emergencia (laptop) · `ACCESO-MGMT-VLAN10` | access 10 · edge (D-048) | Activo, sin equipo fijo |
+| GE0/0/8 | Reserva para monitoreo (LAB-005) · `RESERVA-MON-VLAN30` | access 30 · edge (D-048) | Apagado hasta conectar el equipo de monitoreo |
+| GE0/0/9 (SFP) | Sin uso · `SIN-USO` | access 999 (D-048) | Apagado, sin módulo SFP |
 | GE0/0/10–12 (SFP) | Sin uso | access 999 | Apagados |
 
 Protecciones globales: STP raíz primaria (prioridad 0), `stp bpdu-protection` en puertos edge, PoE apagado en todos los puertos (D-009). Gestión solo por SSH en Vlanif10 (10.10.10.2), limitada por ACL.
@@ -32,8 +32,8 @@ Protecciones globales: STP raíz primaria (prioridad 0), `stp bpdu-protection` e
 | Puerto | Uso | Modo / VLAN | Estado |
 |---|---|---|---|
 | 1 | Uplink a SW-LAB-01 GE0/0/5 | V10, V20, V50 tagged · PVID 999 | Activo |
-| 2 | Acceso MGMT | V10 untagged · PVID 10 | Activo |
-| 3 | Pruebas SRV | V20 untagged · PVID 20 | Activo |
+| 2 | Acceso MGMT secundario (el principal es GE0/0/7 del switch principal, D-048) | V10 untagged · PVID 10 | Activo |
+| 3 | Pruebas SRV (único puerto de pruebas en VLAN 20, D-048) | V20 untagged · PVID 20 | Activo |
 | 4–5 | Clientes LAB | V50 untagged · PVID 50 | Activos |
 | 6 | Sin uso (único miembro posible de VLAN 1, D-017) | V999 untagged · PVID 999 | Deshabilitado |
 | 7 | Banco de clientes: TL-SG108 no administrable (D-026) | V50 untagged · PVID 50 | Activo |
@@ -54,10 +54,11 @@ Cada nodo tiene una sola NIC conectada a su trunk del switch principal (D-028). 
 
 Ninguna VM usa la VLAN 10; en ESXi, `VM Network` (VLAN 0) no se usa para VM (D-038, D-041). Los *port groups* de las VLAN 30, 40 y 50 se crean cuando haya una VM que los necesite.
 
-| VM | Hipervisor | Interfaz | Conectada a |
-|---|---|---|---|
-| `deb-lab-01` | `pve-lab-01` | `net0` VirtIO (`ens18` en la VM) | `vmbr0`, etiqueta 20 |
-| `deb-lab-02` | `esx-lab-01` | Adaptador VMXNET 3 (`ens192` en la VM) | *Port group* `VLAN20-SRV` |
+| VM | Hipervisor | Interfaz | Conectada a | Estado |
+|---|---|---|---|---|
+| `nas-lab-01` | `esx-lab-01` | Adaptador VMXNET 3 | *Port group* `VLAN20-SRV` · 10.10.20.20 fija | Activa (LAB-003, D-045). Además recibe los dos discos USB por *passthrough* |
+| `deb-lab-01` | `pve-lab-01` | `net0` VirtIO | `vmbr0`, etiqueta 20 | Detenida; se elimina en LAB-003 (D-043) |
+| `deb-lab-02` | `esx-lab-01` | Adaptador VMXNET 3 | *Port group* `VLAN20-SRV` | Eliminada el 30/10 (D-043) |
 
 ## Enlaces entre equipos
 
@@ -72,7 +73,7 @@ Ninguna VM usa la VLAN 10; en ESXi, `VM Network` (VLAN 0) no se usa para VM (D-0
 | SW-LAB-01 GE0/0/4 | esx-lab-01 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
 | SW-LAB-01 GE0/0/6 | pve-lab-03 | Trunk 802.1Q · VLAN 10 sin etiqueta · VLAN 20–50 etiquetadas | Activo |
 
-SRV-04 ocupa `GE0/0/6`, contiguo a los demás nodos; el acceso de gestión que estaba ahí pasa a `GE0/0/9`, que estaba sin uso (D-030). `GE0/0/9` es un puerto SFP y no tiene módulo instalado, así que hoy el switch principal no tiene un puerto de acceso de gestión operativo; la VLAN 10 se alcanza desde la PC de administración a través del firewall y desde el puerto 2 del switch de acceso. El acceso definitivo queda por decidir. El puerto 2 del switch de acceso sigue siendo un segundo acceso a la VLAN 10. Si hicieran falta más puertos en el switch principal, quedan tres SFP sin uso (GE0/0/10–12).
+SRV-04 ocupa `GE0/0/6`, contiguo a los demás nodos (D-030). El acceso de gestión pasó primero a `GE0/0/9`, pero ese puerto SFP no tiene módulo y nunca tuvo un equipo conectado; desde el 30/10 está en `GE0/0/7` (D-048). Ese puerto no tiene un equipo fijo: es el acceso de emergencia con laptop, que llega en capa 2 al switch y a los hipervisores aunque falle el firewall (la red OOB solo llega al firewall). La PC de administración está en la red doméstica y entra por el firewall. Las pruebas en VLAN 20 y 50 quedan en el switch de acceso (puertos 3, 4, 5 y 7), y `GE0/0/8` se reserva apagado para el equipo de monitoreo de LAB-005. El puerto 2 del switch de acceso sigue siendo un segundo acceso a la VLAN 10. Si hicieran falta más puertos en el switch principal, quedan tres SFP sin uso (GE0/0/10–12).
 
 El TL-SG108 se conecta al switch de acceso con un solo cable. Todo lo que se conecta a él queda en la VLAN 50 y pasa por el firewall como cualquier otro cliente; ante un bucle protegen el Loop Prevention del switch de acceso y `stp root-protection` en GE0/0/5.
 

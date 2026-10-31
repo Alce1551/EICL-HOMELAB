@@ -2,7 +2,7 @@
 
 > Laboratorio personal construido con equipo empresarial real, documentado como un proyecto de infraestructura profesional: diseño, implementación, validación con evidencias y control de cambios.
 
-**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-000 a LAB-002 completados; siguiente: LAB-003) · **Inicio:** octubre 2026
+**Autor:** Carlos Eduardo Abundis Lira · **Estado:** en curso (LAB-003; LAB-000 a LAB-002 completados) · **Inicio:** octubre 2026
 
 *English summary: a hands-on enterprise homelab (FortiGate firewall, Huawei and TP-Link Omada switches, a three-node Proxmox VE cluster and VMware ESXi) documented end to end — design decisions, VLAN segmentation, firewall policies, test evidence and sanitized configurations. Documentation is in Spanish.*
 
@@ -17,6 +17,7 @@
 | **Switching (Huawei S5735)** | Trunks 802.1Q con VLAN nativa sin uso, STP con raíz definida y protección BPDU/root, SSH con ACL, SFTP para respaldos, puertos sin uso apagados |
 | **Switching de acceso (Omada ES208G)** | Integración de un switch *easy managed* sin STP ni ACL, compensando sus limitaciones desde el firewall y el switch principal |
 | **Virtualización (Proxmox VE y VMware ESXi)** | Clúster Proxmox de tres nodos con quórum propio, probado con un nodo apagado; un ESXi independiente; redes virtuales por VLAN (bridges *VLAN aware* y *port groups*) sobre trunks 802.1Q; una VM Linux por plataforma que sale a internet y respeta la segmentación del firewall |
+| **Almacenamiento en red (NAS)** | OpenMediaVault en una VM del ESXi con dos discos USB por *passthrough*, carpetas SMB con permisos, copia diaria entre discos y acceso desde la PC limitado por una política específica del firewall |
 | **Validación** | Pruebas de punta a punta por VLAN (DHCP, gateway, internet, aislamiento entre segmentos), repetidas desde máquinas virtuales, con resultado esperado y obtenido |
 | **Atención de incidentes** | [Registro de fallas reales](incidentes/) con diagnóstico por capas, causa raíz, validación, prevención y tiempo de resolución |
 | **Documentación** | Memorias técnicas en LaTeX, procedimiento de implementación, registro de decisiones (D-001…), riesgos aceptados, incidentes y lecciones aprendidas |
@@ -33,7 +34,7 @@ flowchart LR
     FGT -->|trunk 802.1Q<br/>VLAN 10-50| SW1[SW-LAB-01<br/>Huawei S5735]
     SW1 -->|trunk 802.1Q<br/>VLAN 10/20/50| SW2[SW-LAB-02<br/>Omada ES208G]
     SW2 -->|VLAN 50| BAN[Banco de clientes<br/>switch no administrable]
-    SW1 -->|trunks 802.1Q| SRV[Clúster Proxmox VE pve-lab-clr<br/>pve-lab-01 · pve-lab-02 · pve-lab-03<br/>esx-lab-01 · VMware ESXi]
+    SW1 -->|trunks 802.1Q| SRV[Clúster Proxmox VE pve-lab-clr<br/>pve-lab-01 · pve-lab-02 · pve-lab-03<br/>esx-lab-01 · VMware ESXi · NAS]
     FGT -.->|OOB lan1-lan4| OOB[Red de emergencia<br/>10.10.254.0/24]
 ```
 
@@ -57,7 +58,7 @@ Detalle completo en [`docs/architecture.md`](docs/architecture.md) (topología l
 | 00 | [LAB-000 – Preparación, inventario y línea base](labs/LAB-000/) | Completado |
 | 01 | [LAB-001 – Infraestructura física y red base](labs/LAB-001/) | Completado |
 | 02 | [LAB-002 – Proxmox y VMware](labs/LAB-002/) | Completado |
-| 03 | [LAB-003 – Servicios esenciales](labs/LAB-003) | Pendiente |
+| 03 | [LAB-003 – Servicios esenciales](labs/LAB-003/) | **En curso** — validación integral y NAS completados |
 | 04 | LAB-004 – Segmentación avanzada y troubleshooting | Pendiente |
 | 05 | LAB-005 – Centro de monitoreo | Pendiente |
 | 06 | LAB-006 – Logs y SOC básico | Pendiente |

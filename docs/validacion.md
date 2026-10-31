@@ -37,7 +37,7 @@ Completado (25/10/2026 – 28/10/2026). Pruebas de la red de los nodos, de la in
 | V8 | El clúster Proxmox mantiene quórum con un nodo apagado | ✅ Aprobada | `pvecm status` con `pve-lab-03` apagado: 2 nodos, 2 de 3 votos, quórum 2, *Quorate: Yes*. Al encenderlo, el nodo se reincorporó solo en unos dos minutos y volvieron los 3 votos |
 | V9 | El puerto del cuarto nodo queda en trunk como los demás | ✅ Aprobada | `display this` en `GE0/0/6`: trunk, PVID 10, VLAN 10 20 30 40 50, sin VLAN 1, edge; configuración guardada |
 | V10 | `pve-lab-03` alcanza a los demás nodos por la VLAN 10 | ✅ Aprobada | `ping` a `pve-lab-01` correcto, después de resolver [INC-001](../incidentes/INC-001-nodo-sin-enlace-fisico.md) |
-| V11 | El acceso de gestión reubicado en `GE0/0/9` funciona en la VLAN 10 | ⏳ Pendiente (corregida el 28/10) | La configuración es correcta: `display vlan` muestra `GE0/0/9` sin etiqueta en la VLAN 10 y `GE0/0/6` sin etiqueta en la 10 y etiquetado en la 20–50. Pero `GE0/0/9` es un puerto SFP **sin módulo instalado** (`display interface`: *transceiver is absent*, sin enlace desde el arranque), así que el «up/up» registrado antes era incorrecto. Mientras se decide el acceso de gestión del switch principal, la VLAN 10 sigue disponible desde la PC de administración (a través del firewall) y desde el puerto 2 del switch de acceso |
+| V11 | El acceso de gestión del switch principal funciona en la VLAN 10 | ✅ Aprobada (31/10, reubicado en `GE0/0/7`) | Corrección: `GE0/0/9` es un puerto SFP sin módulo y nunca tuvo un equipo conectado, así que el «up/up» registrado el 28/10 era incorrecto. En LAB-003 el acceso pasó a `GE0/0/7` (D-048): una laptop conectada ahí recibe IP de la VLAN 10 por DHCP, abre la web de `pve-lab-01` sin pasar por el firewall y el puerto queda up/up. `GE0/0/9` quedó sin uso |
 | V12 | Los tres Proxmox tienen la misma versión, la hora sincronizada y resolución por nombre correcta antes de formar el clúster | ✅ Aprobada | `pveversion` y `uname -r` iguales en los tres nodos; `chronyc sources` con `^* 10.10.10.1`; `getent hosts` devuelve .11, .12 y .14 para los seis nombres (corto y FQDN) y `ping` por nombre 3/3 |
 | V13 | Los tres nodos forman un clúster con quórum propio | ✅ Aprobada | `pvecm status` y `pvecm nodes` en `pve-lab-03`: clúster `pve-lab-clr`, transporte `knet`, autenticación segura, 3 nodos, 3 votos, quórum 2, *Quorate* |
 | V14 | Los bridges con VLAN no afectan la gestión ni el clúster | ✅ Aprobada | En los tres nodos: `bridge vlan show` con la VLAN 1 sin etiqueta (la VLAN 10 del switch) y las VLAN 20–50 en `nic0`; después del cambio, ping al gateway correcto y clúster con 3 votos |
@@ -55,3 +55,21 @@ Un ping por nombre que responde no prueba que se llegó al equipo correcto. En u
 ### Lección aprendida (red virtual)
 
 Si el switch entrega la VLAN de gestión sin etiqueta, esa VLAN no se puede usar etiquetada dentro de las VM: en Proxmox una VM con etiqueta 10 no recibiría las respuestas, y en ESXi el *port group* `VM Network` (VLAN 0) la deja en la VLAN 10 sin que se note. Por eso los bridges solo permiten las VLAN 20 a 50 y cada VLAN de ESXi tiene su propio *port group* (D-038, D-041).
+
+## LAB-003
+
+En curso. Pruebas de la validación integral de la infraestructura y del NAS; los servicios se agregan al avanzar.
+
+| ID | Prueba | Resultado | Cómo se comprobó |
+|---|---|---|---|
+| V1 | La configuración en ejecución de los equipos coincide con lo documentado | ✅ Aprobada | Revisión de switch principal, switch de acceso, firewall, nodos Proxmox y ESXi contra `docs/`; `compare configuration` en el switch principal: lo guardado es igual a lo que corre |
+| V2 | El clúster conserva sus tres nodos y el quórum después del corte eléctrico del 29/10 | ✅ Aprobada | `pvecm status`: tres nodos, tres votos, *Quorate* |
+| V3 | El acceso de emergencia en `GE0/0/7` da gestión en capa 2 | ✅ Aprobada | Laptop en `GE0/0/7`: IP de la VLAN 10 por DHCP y web de `pve-lab-01` sin pasar por el firewall |
+| V4 | SSH al switch principal desde la laptop en `GE0/0/7` | ⏳ Pendiente | La conexión llega y la ACL la deja pasar, pero la contraseña es rechazada. Red, ACL y usuario correctos; causa probable: la distribución del teclado de la laptop |
+| V5 | El NAS es accesible desde la PC de administración solo por lo que permite la política 6 | ✅ Aprobada | Web por HTTPS y carpetas por SMB desde la PC; la política registra el tráfico |
+| V6 | La copia del disco principal al de copia funciona | ✅ Aprobada (ejecución manual) | Rsync ejecutado a mano con los archivos copiados al disco de copia; la primera corrida programada queda por comprobar |
+| V7 | El NAS queda configurado para arrancar solo con el ESXi y apagarse de forma ordenada | ✅ Aprobada | Arranque automático en primer lugar con acción de apagado *Shut down*; el ESXi reconoce el agente de la VM (muestra su nombre de host) |
+
+### Lección aprendida (validación integral)
+
+Después de un corte eléctrico, la hora de los registros del switch no es confiable: el switch no conserva el reloj y arranca con una hora equivocada hasta que NTP la corrige. Los contadores de BPDU de STP, que se envían cada 2 segundos por puerto, sirvieron para reconstruir cuánto tiempo llevaba arriba cada enlace y descubrir un nodo que había pasado un día apagado ([INC-002](../incidentes/INC-002-corte-electrico-general.md)).

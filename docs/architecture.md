@@ -1,6 +1,6 @@
 # Arquitectura
 
-**Laboratorio:** LAB-001 · **Versión:** 1.6 · **Fecha:** 28/10/2026
+**Laboratorio:** LAB-001 · **Versión:** 1.7 · **Fecha:** 31/10/2026
 
 ## Objetivo
 
@@ -20,12 +20,14 @@ flowchart TB
         SW1[SW-LAB-01 · switch principal<br/>STP raíz · trunks 802.1Q]
         SW2[SW-LAB-02 · switch de acceso]
     end
-    subgraph Computo[Cómputo - LAB-002]
-        NOD[pve-lab-01, pve-lab-02 y pve-lab-03<br/>clúster Proxmox VE pve-lab-clr<br/>esx-lab-01 · VMware ESXi]
+    subgraph Computo[Cómputo y almacenamiento - LAB-002 y LAB-003]
+        NOD[pve-lab-01, pve-lab-02 y pve-lab-03<br/>clúster Proxmox VE pve-lab-clr]
+        NAS[esx-lab-01 · VMware ESXi<br/>NAS nas-lab-01]
     end
     ARC --> FGT
     FGT --> SW1 --> SW2
     SW1 -->|trunks 802.1Q| NOD
+    SW1 -->|trunk 802.1Q| NAS
 ```
 
 ## Topología lógica
@@ -79,9 +81,9 @@ Cuatro Dell OptiPlex 5070 Micro con Intel Core i5-9500T (6 núcleos), SSD de uno
 
 | Nodo | Hostname | Plataforma | Puerto en SW-LAB-01 | IP de gestión | Estado |
 |---|---|---|---|---|---|
-| SRV-01 | `pve-lab-01` | Proxmox VE 9.x · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 | En el clúster; aloja `deb-lab-01` |
+| SRV-01 | `pve-lab-01` | Proxmox VE 9.x · nodo 1 del clúster | GE0/0/2 | 10.10.10.11 | En el clúster |
 | SRV-02 | `pve-lab-02` | Proxmox VE 9.x · nodo 2 del clúster | GE0/0/3 | 10.10.10.12 | En el clúster |
-| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 (versión gratuita) | GE0/0/4 | 10.10.10.13 | Operativo; aloja `deb-lab-02` |
+| SRV-03 | `esx-lab-01` | VMware ESXi 8.0 (versión gratuita) | GE0/0/4 | 10.10.10.13 | Dedicado al NAS `nas-lab-01` (D-045) |
 | SRV-04 | `pve-lab-03` | Proxmox VE 9.x · nodo 3 del clúster | GE0/0/6 | 10.10.10.14 | En el clúster |
 
 - Los puertos de los nodos son **trunk**: la VLAN 10 va sin etiqueta para la gestión del hipervisor y las VLAN 20 a 50 van etiquetadas para las máquinas virtuales (D-028). Así el ruteo y el filtrado entre máquinas virtuales de distintas VLAN siguen pasando por el firewall.
@@ -90,7 +92,8 @@ Cuatro Dell OptiPlex 5070 Micro con Intel Core i5-9500T (6 núcleos), SSD de uno
 
 - Los nodos se conectan al **switch principal**, no al de acceso: ahí hay STP, ACL de administración y trunks gestionables (D-025).
 - **Clúster Proxmox de tres nodos `pve-lab-clr` (D-031, D-037).** Con tres votos propios el clúster mantiene quórum (2 de 3) si cae cualquier nodo, sin depender de un QDevice externo; se comprobó apagando un nodo (V8 de LAB-002). Así se resuelve el tercer voto que exigía el diseño de dos nodos (D-027).
-- **Monitoreo desde fuera del clúster:** el ESXi queda libre para alojar una máquina virtual con Zabbix que vigile el clúster Proxmox (LAB-005).
+- **Monitoreo desde fuera de los nodos:** Zabbix irá en una Raspberry Pi dedicada en la VLAN 30 (LAB-005), conectada al puerto reservado `GE0/0/8`, para vigilar los cuatro nodos sin depender de ninguno (D-046). El ESXi queda dedicado al NAS (D-045).
+- **Arranque automático:** toda máquina virtual de servicio arranca sola con su host y lleva el agente del hipervisor, para que un corte eléctrico no la deje apagada (D-049).
 - El tráfico del clúster (corosync, transporte `knet` con autenticación segura) viaja por la VLAN 10, con la IP de gestión de cada nodo como enlace; en LAB-012 se agrega un segundo enlace en la VLAN 70.
 - La alta disponibilidad de máquinas virtuales requiere almacenamiento compartido o replicación entre los nodos: hoy cada nodo solo tiene su disco local. `pve-lab-03` tiene la mitad de RAM que los demás, así que no puede recibir todas las máquinas virtuales de otro nodo en una falla.
 
@@ -102,8 +105,8 @@ Las máquinas virtuales se conectan a las mismas VLAN que llegan etiquetadas por
 flowchart LR
     SW1[SW-LAB-01<br/>trunk PVID 10<br/>VLAN 20-50 etiquetadas] --> BR[Proxmox · vmbr0<br/>VLAN aware 20-50]
     SW1 --> VS[ESXi · vSwitch0<br/>un port group por VLAN]
-    BR -->|etiqueta 20| VM1[deb-lab-01<br/>10.10.20.0/24 por DHCP]
-    VS -->|port group VLAN20-SRV| VM2[deb-lab-02<br/>10.10.20.0/24 por DHCP]
+    BR -->|etiqueta 20| VM1[VM de servicio en Proxmox<br/>VLAN 20]
+    VS -->|port group VLAN20-SRV| VM2[nas-lab-01<br/>10.10.20.20]
 ```
 
 | Plataforma | Conmutador virtual | VLAN para VM | Gestión del hipervisor |
@@ -112,8 +115,22 @@ flowchart LR
 | VMware ESXi | `vSwitch0` con un *port group* por VLAN: `VLAN20-SRV` con VLAN ID 20 (D-041) | La VM se conecta al *port group* de su VLAN | `Management Network` sin etiqueta |
 
 - **Ninguna VM usa la VLAN 10.** El switch la entrega sin etiqueta, así que solo sirve para la gestión y el clúster; `VM Network` de ESXi (VLAN 0) tampoco se usa, porque caería en ella (D-038, D-041).
-- Las VM de prueba (D-039) comprueban la segmentación desde la capa virtual: salen a internet, pero no alcanzan la gestión de los hipervisores, el switch ni la red doméstica (V7, V15 y V16 de LAB-002).
-- Las VM de Proxmox usan el tipo de CPU por defecto para no impedir una migración futura entre nodos (D-040).
+- Las VM de prueba de LAB-002 (D-039) comprobaron la segmentación desde la capa virtual: salen a internet, pero no alcanzan la gestión de los hipervisores, el switch ni la red doméstica (V7, V15 y V16 de LAB-002). Se retiran en LAB-003 (D-043).
+- Las VM de Proxmox usan el tipo de CPU por defecto para no impedir una migración futura entre nodos (D-040). Excepción: la VM RHEL 10 usa `x86-64-v3`, que ese sistema exige; los cuatro nodos tienen el mismo CPU, así que la migración sigue siendo posible (D-044).
+
+## Almacenamiento en red (NAS)
+
+`esx-lab-01` se dedica a una VM con OpenMediaVault 8, `nas-lab-01` (10.10.20.20, VLAN 20), que comparte carpetas por SMB a la red del laboratorio (D-045).
+
+| Elemento | Diseño |
+|---|---|
+| Discos | Dos discos USB externos de 2 TB conectados al ESXi y entregados a la VM por *passthrough* |
+| Organización | Sin RAID: un disco principal (carpeta `datos`, lectura y escritura) y un disco de copia (`copia-datos`, solo lectura). Los discos son SMR y van por USB, así que un espejo no es buena idea |
+| Copia | Rsync diario de madrugada del disco principal al de copia, sin borrar en el destino lo que se borró en el origen: protege contra la falla de un disco y contra borrados por error |
+| Acceso | SMB 3 con usuario propio, sin acceso de invitado; administración web por HTTPS. Desde la PC de administración, solo por la política 6 del firewall (HTTPS y SMB) |
+| Arranque | Arranca primero con el ESXi y se apaga de forma ordenada con él (D-049) |
+
+Riesgo aceptado: si cae `esx-lab-01`, cae el NAS. La copia no protege contra la pérdida del host o del rack; la copia fuera del laboratorio queda para LAB-008.
 
 ## Principios de diseño
 
@@ -133,6 +150,7 @@ flowchart LR
 | 3 | Administración interna | MGMT → equipos y SRV | Permitido |
 | 4 | Administración remota | PC de administración → MGMT (HTTPS, SSH, web de Proxmox) | Permitido, sin NAT |
 | 5 | Web del switch de acceso | PC de administración → SW-LAB-02 (HTTP) | Permitido, con registro |
+| 6 | Acceso al NAS | PC de administración → `nas-lab-01` (HTTPS y SMB) | Permitido, sin NAT, con registro (D-047) |
 | — | Regla implícita | Todo lo demás | Deny |
 
 ## Limitaciones conocidas y plan
@@ -148,5 +166,7 @@ flowchart LR
 | Cableado CCA (aluminio recubierto de cobre), no apto para PoE | Aceptado con PoE apagado (D-009, D-032); reemplazo por cobre sólido si aparecen errores en los contadores (LAB-005) o se necesita PoE |
 | Memoria desigual en el clúster: `pve-lab-03` con 8 GB frente a 16 GB de los demás | LAB-012 (grupos y prioridades de alta disponibilidad según la RAM de cada nodo) |
 | Sin almacenamiento compartido: una migración entre nodos copia los discos locales y la alta disponibilidad queda limitada | LAB-012 (replicación o almacenamiento compartido, según los discos disponibles) |
-| ESXi en versión gratuita: sin vCenter, vMotion ni alta disponibilidad | Aceptado: el ESXi es un nodo independiente para comparar plataformas y alojar el monitoreo (LAB-005) |
+| ESXi en versión gratuita: sin vCenter, vMotion ni alta disponibilidad | Aceptado: el ESXi es un nodo independiente, dedicado al NAS (D-045) |
+| NAS en un solo host, con discos USB SMR y sin RAID | Aceptado (D-045): copia diaria al segundo disco; copia fuera del laboratorio en LAB-008 |
+| Sin UPS: un corte eléctrico reinicia todo el laboratorio | Mitigado con arranque automático de nodos y VM (D-049); UPS a evaluar en LAB-008 |
 | Los nodos se resuelven por `/etc/hosts`, sin DNS interno | LAB-003 (DNS interno) |
