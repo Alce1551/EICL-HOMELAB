@@ -76,7 +76,7 @@ Fallas reales del laboratorio, documentadas como en un área de soporte: síntom
 
 | Indicador | Valor |
 |---|---|
-| Incidentes registrados | 2 (1 resuelto, 1 en curso) |
+| Incidentes registrados | 2 (2 resueltos) |
 | Tiempo medio de resolución | 17 min (incidentes resueltos) |
 
 | ID | Fecha | Síntoma | Causa raíz | Resolución | Estado |
