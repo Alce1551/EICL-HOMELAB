@@ -12,7 +12,7 @@
 | **Origen de la prueba** | Consola de SW-LAB-01: `display version`, `display stp`, `display interface`, `compare configuration` |
 | **Categoría** | Capa 1 — alimentación eléctrica |
 | **Severidad** | Alta: el corte afectó a todos los equipos y dejó un nodo del clúster fuera de servicio |
-| **Estado** | 🔄 En curso |
+| **Estado** | ✅ Completado |
 
 ## Síntoma
 
@@ -54,9 +54,9 @@ Mientras faltó `pve-lab-03`, el clúster `pve-lab-clr` debió operar con 2 de 3
 | Troncales y puertos de los nodos arriba y sin errores (`display interface brief`) | ✅ `GE0/0/1` a `GE0/0/6` up, 0 errores |
 | Hora del switch corregida (`display ntp-service status`) | ✅ Sincronizado, estrato 3 |
 | STP restablecido con el switch como raíz (`display stp`) | ✅ Raíz primaria, protección BPDU activa |
-| Clúster con tres nodos y quórum (`pvecm status`) | ⏳ Pendiente: validación de los nodos |
-| *AC Recovery* en **Power On** en `pve-lab-03` (BIOS) | ⏳ Pendiente |
-| Arranque automático de `pve-lab-03` al desconectar y reconectar su alimentación | ⏳ Pendiente |
+| Clúster con tres nodos y quórum (`pvecm status`) | ✅ Quórum verificado, tres nodos funcionales |
+| *AC Recovery* en **Power On** en `pve-lab-03` (BIOS) | ✅ AC recovery configurado en Power On directamente en BIOS |
+| Arranque automático de `pve-lab-03` al desconectar y reconectar su alimentación | ✅ Configurado correctamente desde BIOS |
 
 ## Lecciones aprendidas y prevención
 
