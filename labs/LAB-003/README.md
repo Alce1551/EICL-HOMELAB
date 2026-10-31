@@ -64,6 +64,12 @@ Las IP siguen la convención por /24 (rango de servidores .10–.49) y quedan fu
 
 Copia de respaldos fuera del laboratorio, VLAN 60 de respaldos y Proxmox Backup Server (LAB-008) · monitoreo de los servicios (LAB-005) · publicación de cualquier servicio hacia internet (LAB-007) · alta disponibilidad de los servicios (LAB-012).
 
+## Incidentes
+
+| ID | Resumen | Estado |
+|---|---|---|
+| [INC-002](../../incidentes/INC-002-corte-electrico-general.md) | Corte eléctrico general; `pve-lab-03` no arranca solo al volver la energía (falta *AC Recovery* en la BIOS) | 🔄 En curso |
+
 ## Carpetas
 
 ```

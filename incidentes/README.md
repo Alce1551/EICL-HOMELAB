@@ -7,16 +7,17 @@ Fallas reales ocurridas durante la construcción y operación del laboratorio, d
 | ID | Fecha | Equipo afectado | Capa | Síntoma | Tiempo de resolución | Estado |
 |---|---|---|---|---|---|---|
 | [INC-001](INC-001-nodo-sin-enlace-fisico.md) | 27/10/2026 | `pve-lab-01` · SW-LAB-01 `GE0/0/2` | 1 · Físico | `Destination Host Unreachable` entre nodos Proxmox | 17 min | ✅ Resuelto |
+| [INC-002](INC-002-corte-electrico-general.md) | 29/10/2026 | Todo el laboratorio · `pve-lab-03` | 1 · Eléctrico | Corte eléctrico general; `pve-lab-03` no arranca solo al volver la energía | Pendiente (~26 h sin servicio del nodo) | 🔄 En curso |
 
 ## Resumen
 
 | Indicador | Valor |
 |---|---|
-| Incidentes registrados | 1 |
+| Incidentes registrados | 2 |
 | Resueltos | 1 |
-| Abiertos | 0 |
-| Tiempo medio de resolución | 17 min |
-| Por capa | Capa 1: 1 |
+| Abiertos o en curso | 1 |
+| Tiempo medio de resolución | 17 min (solo incidentes resueltos) |
+| Por capa | Capa 1: 2 |
 
 ## Método
 
