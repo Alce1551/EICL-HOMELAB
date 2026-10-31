@@ -12,7 +12,7 @@
 | **Origen de la prueba** | Consola de SW-LAB-01: `display version`, `display stp`, `display interface`, `compare configuration` |
 | **Categoría** | Capa 1 — alimentación eléctrica |
 | **Severidad** | Alta: el corte afectó a todos los equipos y dejó un nodo del clúster fuera de servicio |
-| **Estado** | ✅ Completado |
+| **Estado** | ✅ Resuelto |
 
 ## Síntoma
 
